@@ -1,5 +1,5 @@
 import {
-  Okay, okay, fail,
+  Okay, fail,
   Tick, Move
 } from './type'
 

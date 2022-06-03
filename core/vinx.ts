@@ -1,7 +1,7 @@
 // valid-in-context
 
 import {
-  Okay, okay, fail,
+  Okay, fail,
   Tick, Tock, Cash, Stat
 } from './type'
 
