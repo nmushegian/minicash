@@ -1,5 +1,3 @@
-import rlp from 'rlp'
+import { Blob, Roll } from './coreword'
 
-type Blob = Buffer
-type Roll = Blob | Roll[]
 

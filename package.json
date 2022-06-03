@@ -2,9 +2,15 @@
   "name": "minicash",
   "version": "0.0.2",
   "type": "module",
+  "scripts": {
+      "setup": "git submodule update --init --recursive",
+      "build": "npx tsc",
+      "pretest": "npm run build",
+      "test": "node dist/test/test.js"
+  },
   "files": [
     "core/*.ts",
-    "test/*.ts",
+    "test/*.ts"
   ],
   "dependencies": {
     "rlp": "^3.0.0",
