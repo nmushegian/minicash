@@ -1,5 +1,5 @@
+import { Okay, fail } from './coreword'
 import {
-  Okay, fail,
   Tick, Move
 } from './type'
 

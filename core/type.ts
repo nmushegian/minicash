@@ -1,39 +1,40 @@
-
-import { Blob, Hash, Sign } from './coreword'
-
-export type Okay<T> = T | Err
-export type Err = [string, Err?] // trace
-
-export function fail(desc:string, prev?:Err) : Okay<any> {
-    return [desc, prev]
+import { Blob, Roll, Hash, Sign } from './coreword'
+export {
+  Bnum, Blob, Roll,
+  Hash, Cash, Bill,
+  Utxo, Sign, Move,
+  Tick, Tock, Tack,
+  Stat, Know,
+  Peer, Mail, Memo
 }
 
-export function toss(desc:string) {
-    throw new Error(desc)
-}
+type Tick = [Move[], Bill[]]  // max 7 of each
 
-export type Tick = [Move[], Bill[]]  // max 7 of each
-
-export type Move = [Utxo, Sign]
-export type Utxo = Blob33; // Hash ++ idx
+type Move = [Utxo, Sign]
+type Utxo = Blob33; // Hash ++ idx
 // Sign = Blob64
 
-export type Bill = [Hash, Cash]
-export type Cash = Blob7;  // max 2^53 - 1
+type Bill = [Hash, Cash]
+type Cash = Blob7;  // max 2^53 - 1
 // Hash = Blob32
 
 // [prev root time fuzz]
-export type Tock = Blob32[];
-export type Head = Hash   // tockhash
+type Tock = Blob32[];
 
 // implicit state
 // [work left mint]
-export type Stat = [Work, Cash, Cash]
-export type Work = Bnum   // cumulative work
+type Stat = [Bnum, Cash, Cash]
+type Know = 'PV' | 'DV' | 'PN' | 'DN'
 
-export type Tack = [Head, Neck, Toes]
-export type Neck = Hash[] // merkle nodes at depth 7
-export type Toes = Hash[] // ticks in multiples of 1024
+// [head neck toes]
+//   head: tockhash
+//   neck: merkle nodes at depth 7
+//   toes: tickhash in multiples of 1024
+type Tack = [Hash, Hash[], Hash[]]
+
+type Peer = string
+type Memo = string
+type Mail = [Peer, [Memo, Roll]]
 
 type Blob64 = Blob;
 type Blob33 = Blob;

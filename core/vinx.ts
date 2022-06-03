@@ -1,7 +1,6 @@
 // valid-in-context
-
+import { Okay, fail } from './coreword'
 import {
-  Okay, fail,
   Tick, Tock, Cash, Stat
 } from './type'
 
