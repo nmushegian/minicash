@@ -1,9 +1,12 @@
-import { Okay, fail } from './coreword'
-import {
-  Tick, Move
-} from './type'
+import { Okay, fail, Roll } from './coreword'
+import { Tick, Move } from './type'
 
-export function tickIsWellFormed(tick : Tick) : Okay<Tick> {
+export {
+    tickform,
+    moveform
+}
+
+function tickform(roll : Roll) : Okay<Tick> {
     // length 2
     // each a list, at least one not empty
     // max 7 each move / bill
@@ -12,7 +15,7 @@ export function tickIsWellFormed(tick : Tick) : Okay<Tick> {
     return fail('todo') // return tick if ok
 }
 
-export function moveIsWellFormed(move : Move) : Okay<Move> {
+function moveform(move : Move) : Okay<Move> {
     return fail('todo')
 }
 
