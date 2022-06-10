@@ -2,7 +2,7 @@ import {
   Blob, Roll,
   Hash, Sign,
   Pubk, Seck,
-} from './coreword'
+} from 'coreword'
 
 export {
   Bnum, Blob, Roll,
@@ -13,7 +13,6 @@ export {
   Peer, Mail
 }
 
-
 type Tick     = [Move[], Bill[]]  // max 7 of each
 type Move     = [Utxo, Sign]  // input  [Blob33, core.Sign]
 type Bill     = [Hash, Cash]  // output [core.Hash, Blob7]
@@ -23,7 +22,7 @@ type Cash     = Blob7;   // max 2^53 - 1
 
 type Tock = [
   Hash   // prev  previous tockhash
-, Hash   // root  merkle root
+, Hash   // root  merkle root, max 2^17 leafs
 , Blob32 // time  blob32 padded timestamp
 , Blob32 // fuzz  miner nonce
 ]

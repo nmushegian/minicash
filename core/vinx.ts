@@ -1,5 +1,6 @@
 // valid-in-context
-import { Okay, fail } from './coreword'
+
+import { Okay, fail } from 'coreword'
 import {
   Tick, Tock, Cash, Stat
 } from './type'

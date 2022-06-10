@@ -1,28 +1,23 @@
-import { Okay, fail, Roll } from './coreword'
-import { Tick, Move } from './type'
+import {
+  Okay, pass, fail,
+  Roll
+} from 'coreword'
+
+import { Tock } from './type'
 
 export {
-    tickform,
-    moveform
+  tock_form
 }
 
-function tickform(roll : Roll) : Okay<Tick> {
-    // length 2
-    // each a list, at least one not empty
-    // max 7 each move / bill
-    // each move is wellformed
-    // each bill is wellformed
-    return fail('todo') // return tick if ok
+function tock_form(x :Roll) :Okay<Tock> {
+  if (!Array.isArray(x))
+    return fail(x, `not an array`)
+  if (x.length !== 4)
+    return fail(x, `length is not 4`)
+  // item 0 is blob
+  // item 0 len 32
+  // ...
+  // item 3 len 32
+  return pass(x)
 }
-
-function moveform(move : Move) : Okay<Move> {
-    return fail('todo')
-}
-
-// etc ...
-
-// move = [rtxi sign]
-// bill = [hash cash]
-// tock = [prev root time fuzz]
-// tack = [head neck toes]
 

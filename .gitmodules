@@ -1,3 +1,0 @@
-[submodule "coreword"]
-	path = deps/coreword
-	url = https://github.com/nmushegian/coreword
