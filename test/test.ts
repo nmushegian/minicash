@@ -1,7 +1,7 @@
 import { test } from 'tapzero'
 import { okay, blob, hash } from 'coreword'
 import { Tock } from '../core/type.js'
-import { tock_form } from '../core/form.js'
+import { tock_form } from '../core/well.js'
 
 test('tock', _=>{
   test('tock_form', t=>{
