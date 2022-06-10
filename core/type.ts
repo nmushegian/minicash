@@ -9,7 +9,7 @@ export {
   Hash, Cash, Bill,
   Utxo, Sign, Move,
   Tick, Tock, Tack,
-  Stat, Know,
+  Work, Stat, Know,
   Peer, Mail
 }
 
@@ -27,8 +27,9 @@ type Tock = [
 , Blob32 // fuzz  miner nonce
 ]
 
+type Work = Bnum
 type Stat = [
-  Bnum   // work  cumulative work
+  Work   // work  cumulative work
 , Cash   // left  remaining subsidy
 , Cash   // mint  subsidy this block
 ]
@@ -57,4 +58,4 @@ type Blob65 = Blob;
 type Blob33 = Blob;
 type Blob32 = Blob;
 type Blob7  = Blob;
-type Bnum   = Blob; // unbounded, implicit state
+type Bnum   = BigInteger // not serialized
