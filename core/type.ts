@@ -6,20 +6,21 @@ import {
 
 export {
   Bnum, Blob, Roll,
-  Hash, Cash, Bill,
-  Utxo, Sign, Move,
+  Txin, Indx, Sign,
+  Cash,
   Tick, Tock, Tack,
   Work, Stat, Know,
   Tree, Desk,
-  Peer, Mail
+  Peer, Mail,
 }
 
 type Tick     = [Move[], Bill[]]  // max 7 of each
-type Move     = [Utxo, Sign]  // input  [Blob33, core.Sign]
-type Bill     = [Hash, Cash]  // output [core.Hash, Blob7]
+type Move     = [Txin, Indx, Sign]  // i: [core.Hash, Blob1, core.Sign]
+type Bill     = [Hash, Cash]        // o: [core.Hash, Blob7]
 
-type Utxo     = Blob33;  // Hash ++ idx
-type Cash     = Blob7;   // max 2^53 - 1
+type Txin     = Hash    // tickhash
+type Indx     = Blob1;  // max 6
+type Cash     = Blob7;  // max 2^53 - 1
 
 type Tock = [
   Hash   // prev  previous tockhash
@@ -35,8 +36,7 @@ type Stat = [
 , Cash   // mint  subsidy this block
 ]
 
-
-type Tree = (tosh:Hash) => [Stat,Know,Desk]
+type Tree = (tosh:Hash) => [Tock,Stat,Know?,Desk?]
 
 // utxo -> [[hash, cash], burn]
 type Desk = (Utxo) => [Bill, Bnum] // utxo, expiry
@@ -53,6 +53,14 @@ type Tack = [
 , Hash[] // toes  tickhash in multiples of 1024 (last tack in tock can be <1024)
 ]
 
+
+// tickhash -> tick
+type TickGlob = (tickhash:Hash) => (Tick)
+// tockhash,idx -> tickhash
+type TackGlob = (tockhash:Hash,idx:Number) => (Hash)
+// tockhash -> tock
+type TockGlob = (tockhash:Hash) => (Tock)
+
 type Peer = Blob  // opaque peer ID
 type Mail = [
   Peer,  // peer  from
@@ -65,4 +73,5 @@ type Blob65 = Blob;
 type Blob33 = Blob;
 type Blob32 = Blob;
 type Blob7  = Blob;
+type Blob1  = Blob;
 type Bnum   = BigInteger // not serialized

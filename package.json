@@ -13,7 +13,7 @@
     "test/*.ts"
   ],
   "dependencies": {
-    "coreword": "^0.0.9",
+    "coreword": "^0.0.10",
     "rlp": "^3.0.0",
     "typescript": "^4.7.2"
   },

@@ -1,15 +1,20 @@
 // engine
 
+import {
+  Okay, pass, fail
+} from 'coreword'
+
+import {
+  Mail
+} from './type'
 
 class Djin {
     best : any // best global desk from tree
-    tree : any // head -> desk            // one `desk` view per tock, functional map
+    tree : any // head -> [tock,stat,know?,desk?]
+
     //  stat  : [work left mint]
-    //  know  : PV | PN | DV | DN         // state of knowledge of block validity
-    //  bills : rtxi -> [hash cash burn]  // burn is expiry time
-    //    not necessary, but useful:
-    //  ticks : tickhash -> tockhash      // early dup check
-    //  tocks : tockhash -> height        // faster common ancestor
+    //  know  : PV | PN | DV | DN           // state of knowledge of block validity
+    //  desk  : (txin,indx) -> [[hash cash] burn]  // burn is expiry time
 
     glob = {
         ticks: {} // content-addressed
@@ -17,7 +22,17 @@ class Djin {
       , tacks: {} // almost-content-addressed, part of tockhash
     }
 
-    turn(mail:any) : any[] {
-        return []
+    //    not necessary, but useful:
+    //  ticks : tickhash -> tockhash      // early dup check
+    //  tocks : tockhash -> height        // faster common ancestor
+
+    turn(mail :Mail) :Okay<Mail> {
+        let [line, body] = mail
+	switch (line.slice(0,3)) {
+	  case 'ann': break;
+	  case 'req': break;
+	  case 'res': break;
+	  default: return fail(`unrecognized mail line: ${line}`)
+	}
     }
 }

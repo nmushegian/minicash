@@ -21,11 +21,12 @@ function tock_form(x :Roll) :Okay<Tock> {
 function tick_form(x :Roll) :Okay<Tick> {
 // tick_form
 //   2 lists of max len 7, not both empty
-//   list 0 is all [utxo,sign]
-//     utxo: blob len 33, last byte is 00-06
+//   list 0 is all [txin,indx,sign]
+//     txin: blob len 32,
+//     indx: blob len 1, num / max 6
 //     sign: blob len 32
 //   list 1 is all [hash,cash]
 //     hash: blob len 32
-//     cash: blob len 7, max 2^53-1
+//     cash: blob len 7, num / max 2^53-1
   return fail(`todo`)
 }
