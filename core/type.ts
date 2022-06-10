@@ -10,6 +10,7 @@ export {
   Utxo, Sign, Move,
   Tick, Tock, Tack,
   Work, Stat, Know,
+  Tree, Desk,
   Peer, Mail
 }
 
@@ -33,6 +34,12 @@ type Stat = [
 , Cash   // left  remaining subsidy
 , Cash   // mint  subsidy this block
 ]
+
+
+type Tree = (tosh:Hash) => [Stat,Know,Desk]
+
+// utxo -> [[hash, cash], burn]
+type Desk = (Utxo) => [Bill, Bnum] // utxo, expiry
 
 type Know
 = 'PV' // possibly-valid

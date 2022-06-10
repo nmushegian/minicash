@@ -23,3 +23,5 @@ test('tock', _=>{
     t.ok(!ok)
   })
 })
+
+import { vult_thin, vult_full } from './vult'
