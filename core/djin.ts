@@ -7,12 +7,13 @@ import {
     Mail
 } from './type.js'
 
-import { Glob, Tree } from './data.js'
+import { Rock, Tree } from './data.js'
 
 class Djin {
-    best :any // best global desk from tree
-    tree :Tree
-    glob :Glob
+    best :Mesh   // best definitely-valid tock (cumulative work)
+    race :Mesh[] // top K possibly-valid tocks (cumulative work)
+    rock :Rock   // content-addressed values
+    tree :Tree   // per-tock view of state
 
     turn(mail :Mail) :Okay<Mail> {
         let [line, body] = mail

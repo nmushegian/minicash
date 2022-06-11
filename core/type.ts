@@ -1,7 +1,7 @@
 import {
     Okay, okay, toss, pass, fail,
     Blob, blob,
-    Roll, roll,
+    Roll, roll, unroll,
     Hash, hash,
     Sign, sign,
     Pubk, scry
@@ -21,7 +21,8 @@ export type {
 
 export {
     okay, toss, pass, fail, need, aver,
-    blob, roll, isblob, islist, isroll,
+    blob, roll, unroll,
+    isblob, islist, isroll,
     mesh, mish,
     sign, scry
 }

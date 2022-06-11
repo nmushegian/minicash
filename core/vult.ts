@@ -16,7 +16,7 @@ import {
 } from './type.js'
 
 import {
-    Tree, Glob
+    Rock, Tree
 } from './data.js'
 
 export {
@@ -31,7 +31,7 @@ export {
 // !mutates tree:
 //   insert stat
 //   insert know = PV
-function vult_thin(glob :Glob, tree :Tree, tock:Tock) :Okay<Stat> {
+function vult_thin(rock :Rock, tree :Tree, tock:Tock) :Okay<Stat> {
   return fail(`todo`)
 }
 
@@ -44,6 +44,6 @@ function vult_thin(glob :Glob, tree :Tree, tock:Tock) :Okay<Stat> {
 // !mutates tree:
 //   insert desk snap
 //   update know
-function vult_full(glob :Glob, tree:Tree, tock:Tock, ticks :Tick[]) :Okay<boolean> {
+function vult_full(rock :Rock, tree:Tree, tock:Tock, ticks :Tick[]) :Okay<boolean> {
   return fail(`todo`)
 }
