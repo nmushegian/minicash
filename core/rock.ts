@@ -2,7 +2,7 @@
 
 import {
     Okay, pass, fail, toss,
-    Blob, blob, roll, unroll,
+    Blob, Roll, blob, roll, unroll,
     Tick, Mesh, mesh,
 } from './type.js'
 
@@ -12,6 +12,13 @@ export {
 
 class Rock {
     _db = {}
+
+    load(path:string) {}
+    save(path:string) {}
+
+    repr() :Roll {
+        return [] // sorted kv pairs for inspection
+    }
 
     // emptyblob-initialized
     _get(key :Blob) :Blob {

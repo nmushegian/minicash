@@ -19,15 +19,18 @@ export {
     Tree
 }
 
-
 class Tree {
+    rock :Rock
+    desk
+    _snapc
+    _snaps
     // tree grows on a rock, but we try not to think about that
-    rock = new Rock()
-    desk = immu.Map()
-
-    _snapc = 0
-    _snaps = {"": this.desk}
-
+    constructor(rock :Rock) {
+        this.rock = rock
+        this.desk = immu.Map()
+        this._snapc = 0
+        this._snaps = { "": this.desk }
+    }
 
     // ['thin', tockhash] -> [tock,stat]
     thin_get(tosh :Mesh) :Okay<[Tock,Stat]> { return fail(`todo`) }
