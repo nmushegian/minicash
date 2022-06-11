@@ -6,7 +6,7 @@
     "setup": "git submodule update --init --recursive",
     "build": "npx tsc",
     "pretest": "npm run build",
-    "test": "node --loader ts-node/esm test.ts"
+    "test": "node --loader ts-node/esm test/test.ts"
   },
   "dependencies": {
     "coreword": "^0.0.11",

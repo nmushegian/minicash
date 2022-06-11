@@ -3,7 +3,7 @@
 import {
     Okay, pass, fail,
     Tick, Tock, Cash, Work
-} from './type'
+} from './type.js'
 
 export {
   tick_vinx,

@@ -5,7 +5,7 @@ import {
     blob,
     Hash,
     Mail
-} from './type'
+} from './type.js'
 
 class Djin {
     best : any // best global desk from tree

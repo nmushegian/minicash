@@ -2,7 +2,7 @@ import {
     Okay, pass, fail,
     Roll,
     Tick, Tock
-} from './type'
+} from './type.js'
 
 export {
     tick_form,

@@ -14,7 +14,7 @@ import {
   Stat, Know,
   Tick, Tock,
   Tree, Desk,
-} from './type'
+} from './type.js'
 
 export {
   vult_thin,
