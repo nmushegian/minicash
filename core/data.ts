@@ -9,32 +9,32 @@ export {
 }
 
 interface Glob {
-    ticks: {
-	add(tick :Tick) :Hash,
-	get(tish :Hash) :Tick
-    },
-    tocks: {
-	add(tock :Tock) :Hash,
-	get(tosh :Hash) :Tock
-    },
-    tacks: {
-	add(tack :Tack) :[Hash, number]
-	get(tash :Hash, indx :number) :Hash
-    }
+    tick_add(tick :Tick) :Hash
+    tick_get(tish :Hash) :Tick
+    tock_add(tock :Tock) :Hash
+    tock_get(tosh :Hash) :Tock
+    tack_add(tack :Tack) :[Hash, number]
+    tack_get(tash :Hash, indx :number) :Hash
 }
 
 interface Tree {
-    // tockhash -> [tock,stat,know,snap?]
-    read(tosh :Hash) : [Tock,Stat,Know,Snap?];
-    // !warn,  [true, [_, 'DN']]  is a success result
-    //    which signifies a tock that is inserted and marked invalid
-    add_tock(tock :Tock) : Okay<[Stat,Know]>;
-    set_know(tosh :Hash, know:Know);
-    set_snap(tosh :Hash, know:Know);
+    // tockhash -> [tock,stat]
+    thin_get(tosh :Hash) :Okay<[Tock,Stat]>;
+    thin_add(tock :Tock);
+
+    // tockhash -> PV | DV | PN | DN
+    know_get(tosh :Hash) :Okay<Know>;
+    know_set(tosh :Hash, know :Know);
+
+    // tockhash -> snap
+    full_add(tock :Tock, snap :Snap);
+    full_get(tosh :Hash) :Okay<Snap>;
 }
 
 interface Desk {
-    edit( copy :Snap, save :Snap
-	  , editor :(({get,set}) => void) )
-    read( copy :Snap, key :Blob )
+    read(copy :Snap, key :Blob)
+    edit(copy :Snap, editor :((desk:{
+	get: (key :Blob) => Blob;
+	set: (key :Blob, val :Blob) => void;
+    }) => Snap))
 }
