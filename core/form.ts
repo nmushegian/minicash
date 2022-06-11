@@ -1,5 +1,5 @@
 import {
-    Okay, okay, toss, pass, fail,
+    Okay, okay, toss, pass, fail, need,
     Blob, Roll,
     Tick, Tock,
     Move, Bill
@@ -22,11 +22,11 @@ function isblob(x :any) : boolean {
 
 function tock_form(x :Roll) :Okay<Tock> {
     try {
-	if (!islist(x)) toss(`not an array`)
-	if (x.length !== 4) toss(`length is not 4`)
+        need(islist(x), `not a list`)
+	need(x.length == 4, `length is not 4`)
 	for (let item of x) {
-	    if (!isblob(item)) toss(`item is not a blob`)
-	    if ((item as Blob).length !== 32) toss(`item is not len 32`)
+	    need(isblob(item), `item is not a blob`)
+	    need((item as Blob).length == 20, `item is not len 20`)
 	}
 	return pass(x as Tock)
     } catch (e) {
@@ -36,16 +36,16 @@ function tock_form(x :Roll) :Okay<Tock> {
 
 function tick_form(x :Roll) :Okay<Tick> {
     try {
-	if (!islist(x))     toss (`not an array`)
-	if (x.length !== 2) toss(`not len 2`)
+	need(islist(x), `not an array`)
+	need(x.length == 2, `not len 2`)
 	let moves = (x[0] as Roll)
 	let bills = (x[1] as Roll)
-	if (!islist(moves)) toss(`moves is not a list`)
-	if (!islist(bills)) toss(`bills is not a list`)
-	if (moves.length == 0 && bills.length == 0)
-	  { toss(`moves and bills both empty`) }
-	if (moves.length > 7) toss(`more than 7 moves`)
-	if (bills.length > 7) toss(`more than 7 bills`)
+	need(islist(moves), `moves is not a list`)
+	need(islist(bills), `bills is not a list`)
+	need(moves.length == 0 && bills.length == 0,
+            `moves and bills both empty`)
+	need(moves.length <= 7, `more than 7 moves`)
+	need(bills.length <= 7, `more than 7 bills`)
 	for (let move of moves) {
 	    okay(move_form((move as Roll)))
 	}

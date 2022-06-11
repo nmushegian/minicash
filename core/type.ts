@@ -20,9 +20,13 @@ export type {
 }
 
 export {
-    okay, toss, pass, fail,
+    okay, toss, pass, fail, need,
     blob, roll,
     mash, sign, scry
+}
+
+function need(b :boolean, s :string) {
+    if (!b) toss(s)
 }
 
 type Mash = Blob20 // last 20 bytes of `hash`
