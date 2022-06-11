@@ -6,10 +6,21 @@ import {
 } from './type.js'
 
 export {
-    tick_form,
-    tock_form,
-    move_form,
-    bill_form
+    form_tick,
+    form_tock,
+    form_move,
+    form_bill
+}
+
+// precondition / panic assert
+// give lambda to defer eval when disabled
+let _aver = true //false;
+function aver(bf :((a?:any)=>boolean), s :string) {
+    if (_aver && !bf()) { console.log(`PANIC`); toss(s) }
+}
+
+function isroll(x :any) :boolean {
+    return islist(x) || isblob(x)
 }
 
 function islist(x :any) : boolean {
@@ -20,7 +31,8 @@ function isblob(x :any) : boolean {
     return Buffer.isBuffer(x)
 }
 
-function tock_form(x :Roll) :Okay<Tock> {
+function form_tock(x :Roll) :Okay<Tock> {
+    aver(_=>isroll(x), `form/tock/aver/isroll`)
     try {
         need(islist(x), `not a list`)
 	need(x.length == 4, `length is not 4`)
@@ -38,23 +50,23 @@ function tock_form(x :Roll) :Okay<Tock> {
     }
 }
 
-function tick_form(x :Roll) :Okay<Tick> {
+function form_tick(x :Roll) :Okay<Tick> {
     try {
-	need(islist(x), `not an array`)
-	need(x.length == 2, `not len 2`)
+	need(islist(x), `must be a list`)
+	need(x.length == 2, `must be len 2`)
 	let moves = (x[0] as Roll)
 	let bills = (x[1] as Roll)
 	need(islist(moves), `moves must be a list`)
 	need(islist(bills), `bills must be a list`)
 	need(moves.length > 0 || bills.length > 0,
-            `moves and bills both empty`)
+            `moves and bills must not both be empty`)
 	need(moves.length <= 7, `moves must have len <= 7`)
 	need(bills.length <= 7, `bills must have len <= 7`)
 	for (let move of moves) {
-	    okay(move_form((move as Roll)))
+	    okay(form_move((move as Roll)))
 	}
 	for (let bill of bills) {
-	    okay(bill_form((bill as Roll)))
+	    okay(form_bill((bill as Roll)))
 	}
 	return pass(x as Tick)
     } catch (e) {
@@ -62,7 +74,7 @@ function tick_form(x :Roll) :Okay<Tick> {
     }
 }
 
-function move_form(x :Roll) :Okay<Move> {
+function form_move(x :Roll) :Okay<Move> {
     try {
 	need(islist(x), `move must be a list`)
 	need(x.length == 3, `move must have len 3`)
@@ -79,13 +91,13 @@ function move_form(x :Roll) :Okay<Move> {
     }
 }
 
-function bill_form(x :Roll) :Okay<Bill> {
+function form_bill(x :Roll) :Okay<Bill> {
     try {
 	need(islist(x), `bill must be a list`)
 	need(x.length == 2, `bill must have len 2`)
 	let [addr, cash] = x
-	need(isblob(addr), `addr not a blob`)
-	need(isblob(cash), `cash not a blob`)
+	need(isblob(addr), `addr must be blob`)
+	need(isblob(cash), `cash must be blob`)
 	need((addr as Blob).length == 20, `addr must have len 20`)
 	need((cash as Blob).length ==  7, `cash must have len 7`)
 	return pass(x as Bill)

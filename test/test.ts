@@ -8,10 +8,10 @@ import * as formtest from './form.t.js'
 
 formtest
 
-import { bill_form } from '../core/form.js'
+import { form_bill } from '../core/form.js'
 
 let $ = {
-  bill_form    
+    form_bill
 }
 
 test('cases', t=>{

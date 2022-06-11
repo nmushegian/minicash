@@ -1,6 +1,6 @@
 {
   note "basic bill_form pass"
-  func bill_form
+  func form_bill
   args [ [ 00112233445566778899aabbccddeeff00112233 0000ff00000000 ] ]
   want [ true [ 00112233445566778899aabbccddeeff00112233 0000ff00000000 ] ]
 }
