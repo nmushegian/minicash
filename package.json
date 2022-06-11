@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "coreword": "^0.0.11",
+    "croc32": "^0.1.0",
     "jams.js": "^0.0.8",
     "typescript": "^4.7.2"
   },

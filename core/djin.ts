@@ -3,7 +3,7 @@
 import {
     Okay, pass, fail,
     blob,
-    Hash,
+    Mash,
     Mail
 } from './type.js'
 
@@ -85,7 +85,7 @@ class Djin {
 
     // attempt to vult
     // get some mail out for what you need to proceed
-    step(head :Hash) :Okay<Mail[]> {
+    step(head :Mash) :Okay<Mail[]> {
 	// vult_thin
 	// vult_full
 	return fail(`todo`)

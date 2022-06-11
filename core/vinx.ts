@@ -2,7 +2,8 @@
 
 import {
     Okay, pass, fail,
-    Tick, Tock, Cash, Work
+    Bnum,
+    Tick, Tock
 } from './type.js'
 
 export {
@@ -13,7 +14,7 @@ export {
 // context is set of ticks that contain bills being moved
 // do not worry about internal consistency of context at this step
 // returns total fees if ok
-function tick_vinx(conx : Tick[], tick : Tick) : Okay<Cash> {
+function tick_vinx(conx : Tick[], tick : Tick) : Okay<Bnum> {
     // conx all are well-formed
     // tick is well-formed
     // let fees = 0
@@ -32,7 +33,7 @@ function tick_vinx(conx : Tick[], tick : Tick) : Okay<Cash> {
 
 // context is previous tock
 // returns *marginal* work, the number you sum to get cumulative work
-function tock_vinx(prev : Tock, tock : Tock) : Okay<Work> {
+function tock_vinx(prev : Tock, tock : Tock) : Okay<Bnum> {
     // prev is well-formed
     // tock is well-formed
     // tock.prev = prev (this defines the context)

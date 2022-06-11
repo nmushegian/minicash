@@ -1,5 +1,5 @@
 import {
-    Okay, Blob, Hash,
+    Okay, Blob, Mash,
     Tick, Tock, Tack,
     Stat, Know, Snap,
     Bill, Bnum
@@ -10,26 +10,26 @@ export {
 }
 
 interface Glob {
-    tick_add(tick :Tick) :Hash
-    tick_get(tish :Hash) :Tick
-    tock_add(tock :Tock) :Hash
-    tock_get(tosh :Hash) :Tock
-    tack_add(tack :Tack) :[Hash, number]
-    tack_get(tash :Hash, indx :number) :Hash
+    tick_add(tick :Tick) :Mash
+    tick_get(tish :Mash) :Tick
+    tock_add(tock :Tock) :Mash
+    tock_get(tosh :Mash) :Tock
+    tack_add(tack :Tack) :[Mash, number]
+    tack_get(tash :Mash, indx :number) :Mash
 }
 
 interface Tree {
     // tockhash -> [tock,stat]
-    thin_get(tosh :Hash) :Okay<[Tock,Stat]>;
+    thin_get(tosh :Mash) :Okay<[Tock,Stat]>;
     thin_add(tock :Tock);
 
     // tockhash -> PV | DV | PN | DN
-    know_get(tosh :Hash) :Okay<Know>;
-    know_set(tosh :Hash, know :Know);
+    know_get(tosh :Mash) :Okay<Know>;
+    know_set(tosh :Mash, know :Know);
 
     // tockhash -> snap
     full_add(tock :Tock, snap :Snap);
-    full_get(tosh :Hash) :Okay<Snap>;
+    full_get(tosh :Mash) :Okay<Snap>;
 
     // snap -> utxo -> [[hash,cash],burn]
     page_read(copy :Snap, key :Blob) :Okay<[Bill,Bnum]>;

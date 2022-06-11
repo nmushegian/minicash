@@ -11,17 +11,23 @@ export type {
     Okay, Why,
     Bnum, Blob, Roll,
     Sign, Pubk,
-    Hash, Cash,
+    Mash, Cash,
     Tick, Tock, Tack,
     Move, Bill,
-    Work, Stat, Know, Snap,
+    Stat, Know,
+    Snap,
     Peer, Mail,
 }
 
 export {
     okay, pass, fail,
     blob, roll,
-    hash, sign, scry
+    mash, sign, scry
+}
+
+type Mash = Blob20 // last 20 bytes of `hash`
+function mash(x :Blob) :Mash {
+    return hash(x).slice(12, 32)
 }
 
 type Tick = [
@@ -29,32 +35,35 @@ type Tick = [
     Bill[]  // max 7 outputs
 ]
 type Move = [
-    Blob32, // utxo txin (input tick hash)
-    Blob1,  // utxo indx (0-6)
-    Blob32  // signature
+    Intx,  // utxo txin (input tick hash)
+    Indx,  // utxo indx (0-6)
+    Sign   // signature
 ]
+
+type Intx = Mash
+type Indx = Blob1
 
 type Bill = [
-    Blob32, // pkeyhash
-    Blob7   // minicash
+    Mash,  // pkeyhash
+    Cash   // minicash
 ]
+
+type Cash = Blob7
 
 type Tock = [
-    Blob32, // prev  previous tockhash
-    Blob32, // root  merkle root, max 2^17 leafs
-    Blob32, // time  blob32 padded timestamp
-    Blob32  // fuzz  miner nonce
+    Mash,   // prev  previous tockhash
+    Mash,   // root  merkle root, max 2^17 leafs
+    Blob20, // time  blob20 padded timestamp
+    Blob20  // fuzz  miner nonce
 ]
 
-type Work = Bnum  // implicit
-type Cash = Bnum  // implicit
 type Stat = [
-    Work,  // work  cumulative work
-    Cash,  // left  remaining subsidy  (initial: 2^53-1)
-    Cash,  // mint  subsidy this block
+    Bnum,  // work  cumulative work
+    Bnum,  // left  remaining subsidy  (initial: 2^53-1)
+    Bnum,  // mint  subsidy this block
 ]
 
-type Snap = Blob32 // pure map snapshot
+type Snap = Mash // pure map snapshot
 
 type Know
   = 'PV' // possibly-valid
@@ -63,9 +72,9 @@ type Know
   | 'DN' // definitely-not-valid
 
 type Tack = [
-    Hash   // head  tockhash this tack belongs to
-  , Hash[] // neck  merkle nodes at depth 7
-  , Hash[] // toes  tickhash in multiples of 1024 (last tack in tock can be <1024)
+    Mash   // head  tockhash this tack belongs to
+  , Mash[] // neck  merkle nodes at depth 7
+  , Mash[] // feet  tickhash in multiples of 1024 (last tack in tock can be <1024)
 ]
 
 type Peer = Blob  // opaque peer ID
@@ -77,6 +86,7 @@ type Mail = [
 ]
 
 type Blob32 = Blob;
+type Blob20 = Blob;
 type Blob7  = Blob;
 type Blob1  = Blob;
 type Bnum   = BigInteger // not serialized

@@ -59,7 +59,7 @@ function move_form(x :Roll) :Okay<Move> {
     if (!isblob(txin))  return fail(`txin not a blob`)
     if (!isblob(indx))  return fail(`indx not a blob`)
     if (!isblob(sign))  return fail(`sign not a blob`)
-    if ((txin as Blob).length !== 32) return fail(`txin wrong length`)
+    if ((txin as Blob).length !== 20) return fail(`txin wrong length`)
     if ((indx as Blob).length !==  1) return fail(`indx wrong length`)
     if ((sign as Blob).length !== 32) return fail(`sign wrong length`)
     return pass(x as Move)
@@ -71,7 +71,7 @@ function bill_form(x :Roll) :Okay<Bill> {
     let [addr, cash] = x
     if (!isblob(addr)) return fail(`addr not a blob`)
     if (!isblob(cash)) return fail(`cash not a blob`)
-    if ((addr as Blob).length !== 32) return fail(`addr wrong length`)
+    if ((addr as Blob).length !== 20) return fail(`addr wrong length`)
     if ((cash as Blob).length !== 7)  return fail(`cash wrong length`)
     return pass(x as Bill)
 }
