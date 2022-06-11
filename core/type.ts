@@ -14,7 +14,6 @@ export type {
     Hash, Cash,
     Tick, Tock, Tack,
     Move, Bill,
-    Txin, Indx,
     Work, Stat, Know, Snap,
     Peer, Mail,
 }
@@ -30,30 +29,28 @@ type Tick = [
     Bill[]  // max 7 outputs
 ]
 type Move = [
-    Txin,  // utxo txin (input tick hash)
-    Indx,  // utxo indx (0-6)
-    Sign   // signature
-]
-type Bill = [
-    Hash,  // pubkeyhash
-    Cash   // blob7
+    Blob32, // utxo txin (input tick hash)
+    Blob1,  // utxo indx (0-6)
+    Blob32  // signature
 ]
 
-type Txin = Hash  // input utxo txid
-type Indx = Blob1 // input utxo index 0-6
-type Cash = Blob7 // max 2^53 - 1
+type Bill = [
+    Blob32, // pkeyhash
+    Blob7   // minicash
+]
 
 type Tock = [
-    Hash,   // prev  previous tockhash
-    Hash,   // root  merkle root, max 2^17 leafs
+    Blob32, // prev  previous tockhash
+    Blob32, // root  merkle root, max 2^17 leafs
     Blob32, // time  blob32 padded timestamp
     Blob32  // fuzz  miner nonce
 ]
 
 type Work = Bnum  // implicit
+type Cash = Bnum  // implicit
 type Stat = [
     Work,  // work  cumulative work
-    Cash,  // left  remaining subsidy
+    Cash,  // left  remaining subsidy  (initial: 2^53-1)
     Cash,  // mint  subsidy this block
 ]
 
@@ -79,8 +76,6 @@ type Mail = [
     ]
 ]
 
-type Blob65 = Blob;
-type Blob33 = Blob;
 type Blob32 = Blob;
 type Blob7  = Blob;
 type Blob1  = Blob;

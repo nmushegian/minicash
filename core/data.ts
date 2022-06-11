@@ -1,11 +1,12 @@
 import {
     Okay, Blob, Hash,
     Tick, Tock, Tack,
-    Stat, Know, Snap
+    Stat, Know, Snap,
+    Bill, Bnum
 } from './type'
 
 export {
-    Glob, Tree, Desk
+    Glob, Tree
 }
 
 interface Glob {
@@ -29,12 +30,12 @@ interface Tree {
     // tockhash -> snap
     full_add(tock :Tock, snap :Snap);
     full_get(tosh :Hash) :Okay<Snap>;
-}
 
-interface Desk {
-    read(copy :Snap, key :Blob)
-    edit(copy :Snap, editor :((desk:{
+    // snap -> utxo -> [[hash,cash],burn]
+    page_read(copy :Snap, key :Blob) :Okay<[Bill,Bnum]>;
+    page_edit(copy :Snap, editor :((desk:{
 	get: (key :Blob) => Blob;
 	set: (key :Blob, val :Blob) => void;
     }) => Snap))
 }
+
