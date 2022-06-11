@@ -1,17 +1,28 @@
 import {
-  Blob, Roll,
-  Hash, Sign,
-  Pubk, Seck,
+    Okay, okay, pass, fail,
+    Blob, blob,
+    Roll, roll,
+    Hash, hash,
+    Sign, sign,
+    Pubk, scry
 } from 'coreword'
 
+export type {
+    Okay,
+    Bnum, Blob, Roll,
+    Sign, Pubk,
+    Hash, Cash,
+    Tick, Tock, Tack,
+    Txin, Indx,
+    Work, Stat, Know,
+    Tree, Desk,
+    Peer, Mail,
+}
+
 export {
-  Bnum, Blob, Roll,
-  Txin, Indx, Sign,
-  Cash,
-  Tick, Tock, Tack,
-  Work, Stat, Know,
-  Tree, Desk,
-  Peer, Mail,
+    okay, pass, fail,
+    blob, roll,
+    hash, sign, scry
 }
 
 type Tick     = [Move[], Bill[]]  // max 7 of each
@@ -53,7 +64,7 @@ type Tack = [
 , Hash[] // toes  tickhash in multiples of 1024 (last tack in tock can be <1024)
 ]
 
-
+3
 // tickhash -> tick
 type TickGlob = (tickhash:Hash) => (Tick)
 // tockhash,idx -> tickhash

@@ -1,10 +1,9 @@
 // valid-in-context
 
-import { Okay, pass, fail }
-from 'coreword'
-
-import { Tick, Tock, Cash, Work }
-from './type'
+import {
+    Okay, pass, fail,
+    Tick, Tock, Cash, Work
+} from './type'
 
 export {
   tick_vinx,

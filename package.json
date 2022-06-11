@@ -6,12 +6,8 @@
     "setup": "git submodule update --init --recursive",
     "build": "npx tsc",
     "pretest": "npm run build",
-    "test": "node dist/test/test.js"
+    "test": "node dist/test.js"
   },
-  "files": [
-    "core/*.ts",
-    "test/*.ts"
-  ],
   "dependencies": {
     "coreword": "^0.0.10",
     "rlp": "^3.0.0",

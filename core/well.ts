@@ -1,9 +1,8 @@
 import {
-  Okay, pass, fail,
-  Roll
-} from 'coreword'
-
-import { Tick, Tock } from './type'
+    Okay, pass, fail,
+    Roll,
+    Tick, Tock
+} from './type'
 
 export {
   tock_form
