@@ -11,7 +11,7 @@ export type {
     Okay,
     Bnum, Blob, Roll,
     Sign, Pubk,
-    Mash, Cash,
+    Mesh, Mish, Cash,
     Tick, Tock, Tack,
     Move, Bill,
     Stat, Know,
@@ -22,34 +22,22 @@ export type {
 export {
     okay, toss, pass, fail, need,
     blob, roll,
-    mash, sign, scry
+    mesh, mish,
+    sign, scry
 }
 
 function need(b :boolean, s :string) {
     if (!b) toss(s)
 }
 
-type Mash = Blob20 // last 20 bytes of `hash`
-function mash(x :Blob) :Mash {
+type Mesh = Blob24 // Medi hash
+type Mish = Blob20 // Mini hash
+type Mash = Mish // tmp
+function mish(x :Blob) :Mish {
     return hash(x).slice(12, 32)
 }
-
-// strip leading zeros
-function zcut(x :Blob) :Blob {
-    if (x.length == 0) return x;
-    if (x[0] == 0) return zcut(x.slice(1))
-    return x
-}
-
-// pad with zeros up to length k
-function zpad(x :Blob, k :number) :Blob {
-    if (x.length > k) throw new Error(`panic: zpad(x.length > k)`)
-    if (x.length < k) {
-	return Buffer.concat([
-	    blob('00'.repeat(k - x.length)),
-	    x
-	])
-    } else return x
+function mesh(x :Blob) :Mesh {
+    return hash(x).slice(8, 32)
 }
 
 type Tick = [
@@ -57,16 +45,15 @@ type Tick = [
     Bill[]  // max 7 outputs
 ]
 type Move = [
-    Intx,  // utxo txin (input tick hash)
-    Indx,  // utxo indx (0-6)
+    Mesh,  // utxo txin (input tick hash)
+    Byte,  // utxo indx (0-6)
     Sign   // signature
 ]
 
-type Intx = Mash
-type Indx = Blob1
+type Byte = Blob1
 
 type Bill = [
-    Mash,  // pkeyhash
+    Mish,  // pkeyhash
     Cash   // minicash
 ]
 
@@ -108,6 +95,7 @@ type Mail = [
 ]
 
 type Blob32 = Blob;
+type Blob24 = Blob;
 type Blob20 = Blob;
 type Blob7  = Blob;
 type Blob1  = Blob;
