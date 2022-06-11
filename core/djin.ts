@@ -7,7 +7,8 @@ import {
     Mail
 } from './type.js'
 
-import { Rock, Tree } from './data.js'
+import { Rock } from './rock.js'
+import { Tree } from './tree.js'
 
 class Djin {
     best :Mesh   // best definitely-valid tock (cumulative work)

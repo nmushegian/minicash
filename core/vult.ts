@@ -15,9 +15,8 @@ import {
     Tick, Tock,
 } from './type.js'
 
-import {
-    Rock, Tree
-} from './data.js'
+import { Rock } from './rock.js'
+import { Tree } from './tree.js'
 
 export {
   vult_thin,

@@ -1,14 +1,13 @@
+// content-addressed data, parallel read and write
+
 import {
-    Blob, blob, roll, unroll,
     Okay, pass, fail, toss,
-    Mesh, Mish, mesh, mish,
-    Tick, Tock, Tack,
-    Stat, Know, Snap,
-    Bill, Bnum
-} from './type'
+    Blob, blob, roll, unroll,
+    Tick, Mesh, mesh,
+} from './type.js'
 
 export {
-    Rock, Tree
+    Rock
 }
 
 class Rock {
@@ -61,32 +60,3 @@ class Rock {
 
     */
 }
-
-class Tree {
-    rock = new Rock()
-/*
-// ['thin', tockhash] -> [tock,stat]
-    thin_get(tosh :Mesh) :Okay<[Tock,Stat]>;
-    thin_add(tock :Tock);
-
-    // ['know', tockhash] -> PV | DV | PN | DN
-    know_get(tosh :Mesh) :Okay<Know>;
-    know_set(tosh :Mesh, know :Know);
-
-    // ['snap', tockhash] -> snap
-    full_add(tock :Tock, snap :Snap);
-    full_get(tosh :Mesh) :Okay<Snap>;
-
-    // snap -> utxo -> [[hash,cash],burn]
-    page_read(copy :Snap, key :Blob) :Okay<[Bill,Bnum]>;
-    page_edit(copy :Snap, editor :((desk:{
-	get: (key :Blob) => Blob;
-	set: (key :Blob, val :Blob) => void;
-    }) => Snap))
-    */
-    //  not necessary, but useful -- info *about this branch*
-    //  page_ticks : tickhash -> tockhash  // early dup check
-    //  page_tocks : tockhash -> height    // faster common ancestor
-
-}
-
