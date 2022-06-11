@@ -8,8 +8,6 @@ import {
 export {
     form_tick,
     form_tock,
-    form_move,
-    form_bill
 }
 
 // precondition / panic assert
@@ -32,7 +30,7 @@ function isblob(x :any) : boolean {
 }
 
 function form_tock(x :Roll) :Okay<Tock> {
-    aver(_=>isroll(x), `form/tock/aver/isroll`)
+    aver(_=>isroll(x), `must be a roll`)
     try {
         need(islist(x), `not a list`)
 	need(x.length == 4, `length is not 4`)
@@ -51,6 +49,7 @@ function form_tock(x :Roll) :Okay<Tock> {
 }
 
 function form_tick(x :Roll) :Okay<Tick> {
+    aver(_=>isroll(x), `must be a roll`)
     try {
 	need(islist(x), `must be a list`)
 	need(x.length == 2, `must be len 2`)
@@ -63,46 +62,29 @@ function form_tick(x :Roll) :Okay<Tick> {
 	need(moves.length <= 7, `moves must have len <= 7`)
 	need(bills.length <= 7, `bills must have len <= 7`)
 	for (let move of moves) {
-	    okay(form_move((move as Roll)))
+	    need(islist(move), `move must be a list`)
+	    move = (move as Blob[])
+	    need(move.length == 3, `move must have len 3`)
+	    let [txin, indx, sign] = move;
+	    need(isblob(txin), `txin must be a blob`)
+	    need(isblob(indx), `indx must be a blob`)
+	    need(isblob(sign), `sign must be a blob`)
+	    need((txin as Blob).length == 24, `txin must be len 24`)
+	    need((indx as Blob).length ==  1, `indx must be len 1`)
+	    need((sign as Blob).length == 32, `sign must be len 32, got ${sign.length}`)
 	}
 	for (let bill of bills) {
-	    okay(form_bill((bill as Roll)))
+	    need(islist(bill), `bill must be a list`)
+	    bill = (bill as Blob[])
+	    need(bill.length == 2, `bill must have len 2`)
+	    let [addr, cash] = bill
+	    need(isblob(addr), `addr must be blob`)
+	    need(isblob(cash), `cash must be blob`)
+	    need((addr as Blob).length == 20, `addr must have len 20`)
+	    need((cash as Blob).length ==  7, `cash must have len 7`)
 	}
 	return pass(x as Tick)
     } catch (e) {
 	return fail(e.message)
     }
-}
-
-function form_move(x :Roll) :Okay<Move> {
-    try {
-	need(islist(x), `move must be a list`)
-	need(x.length == 3, `move must have len 3`)
-	let [txin, indx, sign] = x;
-	need(isblob(txin), `txin must be a blob`)
-	need(isblob(indx), `indx must be a blob`)
-	need(isblob(sign), `sign must be a blob`)
-	need((txin as Blob).length == 24, `txin must be len 24`)
-	need((indx as Blob).length ==  1, `indx must be len 1`)
-	need((sign as Blob).length == 32, `sign must be len 32`)
-	return pass(x as Move)
-    } catch (e) {
-	return fail(e.message)
-    }
-}
-
-function form_bill(x :Roll) :Okay<Bill> {
-    try {
-	need(islist(x), `bill must be a list`)
-	need(x.length == 2, `bill must have len 2`)
-	let [addr, cash] = x
-	need(isblob(addr), `addr must be blob`)
-	need(isblob(cash), `cash must be blob`)
-	need((addr as Blob).length == 20, `addr must have len 20`)
-	need((cash as Blob).length ==  7, `cash must have len 7`)
-	return pass(x as Bill)
-    } catch (e) {
-	return fail(e.message)
-    }
-
 }

@@ -8,10 +8,11 @@ import * as formtest from './form.t.js'
 
 formtest
 
-import { form_bill } from '../core/form.js'
+import { form_tick, form_tock } from '../core/form.js'
 
 let $ = {
-    form_bill
+    form_tick,
+    form_tock
 }
 
 test('cases', t=>{
@@ -25,16 +26,18 @@ test('cases', t=>{
             t.ok(data.func, 'no test func')
             t.ok(data.args, 'no test args')
             t.ok(data.want, 'no test want')
-            t.equal(data.want.length, 2,
-                    'want length must be 2, must use result type')
-
+            t.ok(data.want.length == 2, 'want must be len 2, use result type')
 	    t.ok($[data.func], `no test func bound for ${data.func}`)
 	    let func = $[data.func]
 	    let args = rmap(data.args, blob)
-	    let want = [data.want[0], rmap(data.want[1], blob)];
-	    let [ok, val] = func(...args)
-	    // TODO specific errors
-	    t.deepEqual([ok.toString(), ok ? val : []], want)
+	    let [ok, val, errs] = func(...args)
+	    let want
+	    if (ok) {
+		want = [data.want[0], rmap(data.want[1], blob)];
+	    } else {
+		want = [data.want[0], errs]
+	    }
+	    t.deepEqual([ok.toString(), ok ? val : errs], want)
         })
     })
 })

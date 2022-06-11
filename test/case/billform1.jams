@@ -1,6 +1,0 @@
-{
-  note "basic bill_form fail, lockmash too long"
-  func form_bill
-  args [ [ 0011223bbf00112233445566778899aabbccddeeff0011223344 0000ff000000 ] ]
-  want [ false [] ]
-}
