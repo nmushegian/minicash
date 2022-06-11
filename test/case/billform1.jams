@@ -1,0 +1,6 @@
+{
+  note "basic bill_form fail"
+  func bill_form
+  args [ [ 0011223bbf00112233445566778899aabbccddeeff 0000ff000000 ] ]
+  want [ false [] ]
+}
