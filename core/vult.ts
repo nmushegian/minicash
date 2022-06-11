@@ -7,14 +7,17 @@
 //   it is represented with a pure map, we store snaps per tock in Tree
 
 import {
-  Okay, pass, fail
+    Okay, pass, fail
 } from 'coreword'
 
 import {
-  Stat, Know,
-  Tick, Tock,
-  Tree, Desk,
+    Stat, Know,
+    Tick, Tock,
 } from './type.js'
+
+import {
+    Tree
+} from './data.js'
 
 export {
   vult_thin,
@@ -32,10 +35,15 @@ function vult_thin(tree:Tree, tock:Tock) :Okay<Stat> {
   return fail(`todo`)
 }
 
-// !warn: returns [true, "DN"]  if "definitely invalid" -- NOT a fail
+// !warn returns [true, false] result when vult fails
+//    - this is still a successful state transition which
+//      still causes a mutation:  possibly_valid -> definitely_invalid
+//    - [false, err] result is returned when there is *not enough info*
+//      this should be a panic at engine level as it should only attempt
+//      this when it has all the ticks available
 // !mutates tree:
 //   insert desk snap
 //   update know
-function vult_full(tree:Tree, tock:Tock, ticks :Tick[]) :Okay<Know> {
+function vult_full(tree:Tree, tock:Tock, ticks :Tick[]) :Okay<boolean> {
   return fail(`todo`)
 }

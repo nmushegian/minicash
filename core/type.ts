@@ -15,8 +15,7 @@ export type {
     Tick, Tock, Tack,
     Move, Bill,
     Txin, Indx,
-    Work, Stat, Know,
-    Tree, Desk,
+    Work, Stat, Know, Snap,
     Peer, Mail,
 }
 
@@ -48,10 +47,7 @@ type Stat = [
 , Cash   // mint  subsidy this block
 ]
 
-type Tree = (tosh:Hash) => [Tock,Stat,Know?,Desk?]
-
-// utxo -> [[hash, cash], burn]
-type Desk = (Utxo) => [Bill, Bnum] // utxo, expiry
+type Snap = Blob32 // pure map snapshot
 
 type Know
 = 'PV' // possibly-valid
