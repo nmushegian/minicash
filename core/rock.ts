@@ -12,6 +12,7 @@ export {
 
 class Rock {
     _db = {}
+
     // emptyblob-initialized
     _get(key :Blob) :Blob {
         let hkey = key.toString('hex')
@@ -19,6 +20,7 @@ class Rock {
         if (hval) return blob(hval)
         else return blob('')
     }
+
     // insert-only
     _set(key :Blob, val :Blob) {
         let hkey = key.toString('hex')
@@ -45,10 +47,6 @@ class Rock {
     }
 
     /*
-
-    // tickhash -> tick
-    tick_add(tick :Tick) :Mesh
-    tick_get(tish :Mesh) :Tick
 
     // tockhash -> tock
     tock_add(tock :Tock) :Mesh

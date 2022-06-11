@@ -1,7 +1,7 @@
 // engine
 
 import {
-    Okay, pass, fail,
+    Okay, pass, fail, toss,
     blob,
     Mish, Mesh,
     Mail
@@ -19,7 +19,12 @@ class Djin {
     turn(mail :Mail) :Okay<Mail> {
         let [line, body] = mail
 
-        switch (line.toString()) {
+        try { switch (line.toString()) {
+            case 'ann/ticks': {
+                // relay if valid-in-context with > relay fee
+                toss(`todo`)
+            }
+
             case 'ask/tocks': {
                 let init = body
                 // grab tocks from glob.tocks
@@ -31,13 +36,13 @@ class Djin {
                 // grab tick IDs from glob.tacks
                 let feet = []
                 let neck = []
-                return fail(`todo`)// ['ans/tacks', neck, feet]
+                toss(`todo`)// ['ans/tacks', neck, feet]
             }
             case 'ask/ticks': {
                 let tickids = body
                 // grab ticks from glob.ticks
                 let ticks = []
-                return fail(`todo`)//['ans/ticks', ticks]
+                toss(`todo`)//['ans/ticks', ticks]
             }
 
             case 'ans/tocks': {
@@ -66,11 +71,12 @@ class Djin {
                 // for now, dumb sync will retry from ask/tocks
             }
 
-            default: {
-                return fail(`unrecognized mail line: ${line}`)
-            }
+            default: { toss(`unrecognized mail line: ${line}`) }
+
+        } } catch(e) {
+            return fail(e.message)
         }
-        return fail(`panic/unreachable`)
+        toss(`panic/unreachable`)
     }
 
     // attempt to vult
