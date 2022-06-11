@@ -30,12 +30,12 @@ function need(b :boolean, s :string) {
     if (!b) toss(s)
 }
 
-type Mesh = Blob24 // Medi hash
-type Mish = Blob20 // Mini hash
-type Mash = Mish // tmp
+
+// len 20
 function mish(x :Blob) :Mish {
     return hash(x).slice(12, 32)
 }
+// len 24
 function mesh(x :Blob) :Mesh {
     return hash(x).slice(8, 32)
 }
@@ -49,22 +49,25 @@ type Move = [
     Byte,  // utxo indx (0-6)
     Sign   // signature
 ]
-
-type Byte = Blob1
-
 type Bill = [
     Mish,  // pkeyhash
     Cash   // minicash
 ]
 
+type Mesh = Blob24 // Medi hash
+type Mish = Blob20 // Mini hash
 type Cash = Blob7
+type Byte = Blob1
+
 
 type Tock = [
-    Mash,   // prev  previous tockhash
-    Mash,   // root  merkle root, max 2^17 leafs
-    Blob20, // time  blob20 padded timestamp
-    Blob20  // fuzz  miner nonce
+    Mesh,  // prev  blob24 previous tockhash
+    Mesh,  // root  blob24 merkle root, max 2^17 leafs
+    Time,  // time  blob7  padded timestamp
+    Fuzz   // fuzz  blob7  miner nonce
 ]
+type Time = Blob7
+type Fuzz = Blob7
 
 type Stat = [
     Bnum,  // work  cumulative work
@@ -72,7 +75,7 @@ type Stat = [
     Bnum,  // mint  subsidy this block
 ]
 
-type Snap = Mash // pure map snapshot
+type Snap = Blob // pure map snapshot
 
 type Know
   = 'PV' // possibly-valid
@@ -81,9 +84,9 @@ type Know
   | 'DN' // definitely-not-valid
 
 type Tack = [
-    Mash   // head  tockhash this tack belongs to
-  , Mash[] // neck  merkle nodes at depth 7
-  , Mash[] // feet  tickhash in multiples of 1024 (last tack in tock can be <1024)
+    Mesh   // head  tockhash this tack belongs to
+  , Mesh[] // neck  merkle nodes at depth 7
+  , Mesh[] // feet  tickhash in multiples of 1024 (last tack in tock can be <1024)
 ]
 
 type Peer = Blob  // opaque peer ID
@@ -95,8 +98,9 @@ type Mail = [
 ]
 
 type Blob32 = Blob;
-type Blob24 = Blob;
 type Blob20 = Blob;
+type Blob24 = Blob;
+type Blob8  = Blob;
 type Blob7  = Blob;
 type Blob1  = Blob;
 type Bnum   = BigInteger // not serialized
