@@ -1,5 +1,5 @@
 import {
-    Okay, okay, pass, fail,
+    Okay, Why, okay, pass, fail,
     Blob, blob,
     Roll, roll,
     Hash, hash,
@@ -8,11 +8,12 @@ import {
 } from 'coreword'
 
 export type {
-    Okay,
+    Okay, Why,
     Bnum, Blob, Roll,
     Sign, Pubk,
     Hash, Cash,
     Tick, Tock, Tack,
+    Move, Bill,
     Txin, Indx,
     Work, Stat, Know,
     Tree, Desk,
