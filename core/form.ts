@@ -30,7 +30,7 @@ function tock_form(x :Roll) :Okay<Tock> {
 	}
 	return pass(x as Tock)
     } catch (e) {
-	return fail(e.reason)
+	return fail(e.message)
     }
 }
 
@@ -42,7 +42,7 @@ function tick_form(x :Roll) :Okay<Tick> {
 	let bills = (x[1] as Roll)
 	need(islist(moves), `moves is not a list`)
 	need(islist(bills), `bills is not a list`)
-	need(moves.length == 0 && bills.length == 0,
+	need(moves.length > 0 || bills.length > 0,
             `moves and bills both empty`)
 	need(moves.length <= 7, `more than 7 moves`)
 	need(bills.length <= 7, `more than 7 bills`)
@@ -54,7 +54,7 @@ function tick_form(x :Roll) :Okay<Tick> {
 	}
 	return pass(x as Tick)
     } catch (e) {
-	return fail(e.reason)
+	return fail(e.message)
     }
 }
 
@@ -65,7 +65,7 @@ function move_form(x :Roll) :Okay<Move> {
     if (!isblob(txin))  return fail(`txin not a blob`)
     if (!isblob(indx))  return fail(`indx not a blob`)
     if (!isblob(sign))  return fail(`sign not a blob`)
-    if ((txin as Blob).length !== 20) return fail(`txin wrong length`)
+    if ((txin as Blob).length !== 24) return fail(`txin wrong length`)
     if ((indx as Blob).length !==  1) return fail(`indx wrong length`)
     if ((sign as Blob).length !== 32) return fail(`sign wrong length`)
     return pass(x as Move)
