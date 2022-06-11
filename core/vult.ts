@@ -19,8 +19,8 @@ import { Rock } from './rock.js'
 import { Tree } from './tree.js'
 
 export {
-  vult_thin,
-  vult_full
+    vult_thin,
+    vult_full
 }
 
 // only `desk` is represented as immutable set, one snap at each tock
@@ -31,7 +31,7 @@ export {
 //   insert stat
 //   insert know = PV
 function vult_thin(rock :Rock, tree :Tree, tock:Tock) :Okay<Stat> {
-  return fail(`todo`)
+    return fail(`todo`)
 }
 
 // !warn returns [true, false, _] result when vult fails
@@ -44,5 +44,5 @@ function vult_thin(rock :Rock, tree :Tree, tock:Tock) :Okay<Stat> {
 //   insert desk snap
 //   update know
 function vult_full(rock :Rock, tree:Tree, tock:Tock, ticks :Tick[]) :Okay<boolean> {
-  return fail(`todo`)
+    return fail(`todo`)
 }

@@ -29,8 +29,8 @@ class Tree {
     // snap -> utxo -> [[hash,cash],burn]
     page_read(copy :Snap, key :Blob) :Okay<[Bill,Bnum]>;
     page_edit(copy :Snap, editor :((desk:{
-	get: (key :Blob) => Blob;
-	set: (key :Blob, val :Blob) => void;
+    get: (key :Blob) => Blob;
+    set: (key :Blob, val :Blob) => void;
     }) => Snap))
     */
     //  not necessary, but useful -- info *about this branch*
