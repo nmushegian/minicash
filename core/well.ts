@@ -5,7 +5,8 @@ import {
 } from './type'
 
 export {
-  tock_form
+    tick_form,
+    tock_form
 }
 
 function tock_form(x :Roll) :Okay<Tock> {

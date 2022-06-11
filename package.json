@@ -6,15 +6,15 @@
     "setup": "git submodule update --init --recursive",
     "build": "npx tsc",
     "pretest": "npm run build",
-    "test": "node dist/test.js"
+    "test": "node --loader ts-node/esm test.ts"
   },
   "dependencies": {
-    "coreword": "^0.0.10",
-    "rlp": "^3.0.0",
+    "coreword": "^0.0.11",
     "typescript": "^4.7.2"
   },
   "devDependencies": {
     "@types/node": "^17.0.38",
-    "tapzero": "^0.6.1"
+    "tapzero": "^0.6.1",
+    "ts-node": "^10.8.1"
   }
 }
