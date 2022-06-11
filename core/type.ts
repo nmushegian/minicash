@@ -1,5 +1,5 @@
 import {
-    Okay, Why, okay, pass, fail,
+    Okay, okay, toss, pass, fail,
     Blob, blob,
     Roll, roll,
     Hash, hash,
@@ -8,7 +8,7 @@ import {
 } from 'coreword'
 
 export type {
-    Okay, Why,
+    Okay,
     Bnum, Blob, Roll,
     Sign, Pubk,
     Mash, Cash,
@@ -20,7 +20,7 @@ export type {
 }
 
 export {
-    okay, pass, fail,
+    okay, toss, pass, fail,
     blob, roll,
     mash, sign, scry
 }
@@ -28,6 +28,24 @@ export {
 type Mash = Blob20 // last 20 bytes of `hash`
 function mash(x :Blob) :Mash {
     return hash(x).slice(12, 32)
+}
+
+// strip leading zeros
+function zcut(x :Blob) :Blob {
+    if (x.length == 0) return x;
+    if (x[0] == 0) return zcut(x.slice(1))
+    return x
+}
+
+// pad with zeros up to length k
+function zpad(x :Blob, k :number) :Blob {
+    if (x.length > k) throw new Error(`panic: zpad(x.length > k)`)
+    if (x.length < k) {
+	return Buffer.concat([
+	    blob('00'.repeat(k - x.length)),
+	    x
+	])
+    } else return x
 }
 
 type Tick = [

@@ -1,6 +1,6 @@
 import { test } from 'tapzero'
 
-import { Okay, Why, okay, blob } from '../core/type.js'
+import { Okay, okay, blob } from '../core/type.js'
 import { tick_form } from '../core/form.js'
 
 test('tick_form', t=>{
@@ -16,7 +16,7 @@ test('tick_form', t=>{
 })
 
 test('not both empty', t=>{
-    let [ok, why] = tick_form([ [], [] ])
-    t.ok(!ok, why)
+    let [ok, val, errs] = tick_form([ [], [] ])
+    t.ok(!ok, errs)
 })
 

@@ -1,5 +1,5 @@
 import {
-    Okay, Why, pass, fail,
+    Okay, okay, toss, pass, fail,
     Blob, Roll,
     Tick, Tock,
     Move, Bill
@@ -20,36 +20,42 @@ function isblob(x :any) : boolean {
     return Buffer.isBuffer(x)
 }
 
-function tock_form(x :Roll) : Okay<Tock> {
-    if (!islist(x)) return fail(`not an array`)
-    if (x.length !== 4) return fail(`length is not 4`)
-    for (let item of x) {
-	if (!isblob(item)) return fail(`item is not a blob`)
-	if ((item as Blob).length !== 32) return fail(`item is not len 32`)
+function tock_form(x :Roll) :Okay<Tock> {
+    try {
+	if (!islist(x)) toss(`not an array`)
+	if (x.length !== 4) toss(`length is not 4`)
+	for (let item of x) {
+	    if (!isblob(item)) toss(`item is not a blob`)
+	    if ((item as Blob).length !== 32) toss(`item is not len 32`)
+	}
+	return pass(x as Tock)
+    } catch (e) {
+	return fail(e.reason)
     }
-    return pass(x as Tock)
 }
 
 function tick_form(x :Roll) :Okay<Tick> {
-    if (!islist(x))     return fail(`not an array`)
-    if (x.length !== 2) return fail(`not len 2`)
-    let moves = (x[0] as Roll)
-    let bills = (x[1] as Roll)
-    if (!islist(moves))  return fail(`moves is not a list`)
-    if (!islist(bills))  return fail(`bills is not a list`)
-    if (moves.length == 0 && bills.length == 0)
-	return fail(`moves and bills both empty`)
-    if (moves.length > 7) return fail(`more than 7 moves`)
-    if (bills.length > 7) return fail(`more than 7 bills`)
-    for (let move of moves) {
-	let [ok, why] = move_form((move as Roll))
-	if (!ok) return fail(`malformed move`, (why as Why))
+    try {
+	if (!islist(x))     toss (`not an array`)
+	if (x.length !== 2) toss(`not len 2`)
+	let moves = (x[0] as Roll)
+	let bills = (x[1] as Roll)
+	if (!islist(moves)) toss(`moves is not a list`)
+	if (!islist(bills)) toss(`bills is not a list`)
+	if (moves.length == 0 && bills.length == 0)
+	  { toss(`moves and bills both empty`) }
+	if (moves.length > 7) toss(`more than 7 moves`)
+	if (bills.length > 7) toss(`more than 7 bills`)
+	for (let move of moves) {
+	    okay(move_form((move as Roll)))
+	}
+	for (let bill of bills) {
+	    okay(bill_form((bill as Roll)))
+	}
+	return pass(x as Tick)
+    } catch (e) {
+	return fail(e.reason)
     }
-    for (let bill of bills) {
-	let [ok, why] = bill_form((bill as Roll))
-	if (!ok) return fail(`malformed bill`, (why as Why))
-    }
-    return pass(x as Tick)
 }
 
 function move_form(x :Roll) :Okay<Move> {
