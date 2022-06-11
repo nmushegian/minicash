@@ -7,23 +7,12 @@ import {
     Mail
 } from './type.js'
 
+import { Glob, Tree } from './data.js'
+
 class Djin {
-    best : any // best global desk from tree
-    tree : any // head -> [tock,stat,know?,desk?]
-
-    //  stat  : [work left mint]
-    //  know  : PV | PN | DV | DN           // state of knowledge of block validity
-    //  desk  : (txin,indx) -> [[hash cash] burn]  // burn is expiry time
-
-    glob = {
-        ticks: {} // content-addressed
-      , tocks: {} // content-addressed
-      , tacks: {} // almost-content-addressed, part of tockhash
-    }
-
-    //    not necessary, but useful:
-    //  ticks : tickhash -> tockhash      // early dup check
-    //  tocks : tockhash -> height        // faster common ancestor
+    best :any // best global desk from tree
+    tree :Tree
+    glob :Glob
 
     turn(mail :Mail) :Okay<Mail> {
         let [line, body] = mail

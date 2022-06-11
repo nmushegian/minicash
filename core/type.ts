@@ -20,8 +20,8 @@ export type {
 }
 
 export {
-    okay, toss, pass, fail, need,
-    blob, roll,
+    okay, toss, pass, fail, need, aver,
+    blob, roll, isblob, islist, isroll,
     mesh, mish,
     sign, scry
 }
@@ -30,6 +30,24 @@ function need(b :boolean, s :string) {
     if (!b) toss(s)
 }
 
+// precondition / panic assert
+// give lambda to defer eval when disabled
+let _aver = true //false;
+function aver(bf :((a?:any)=>boolean), s :string) {
+    if (_aver && !bf()) { console.log(`PANIC`); toss(s) }
+}
+
+function isroll(x :any) :boolean {
+    return islist(x) || isblob(x)
+}
+
+function islist(x :any) : boolean {
+    return Array.isArray(x)
+}
+
+function isblob(x :any) : boolean {
+    return Buffer.isBuffer(x)
+}
 
 // len 20
 function mish(x :Blob) :Mish {
@@ -75,7 +93,7 @@ type Stat = [
     Bnum,  // mint  subsidy this block
 ]
 
-type Snap = Blob // pure map snapshot
+type Snap = Blob // pure map snapshot internal representation
 
 type Know
   = 'PV' // possibly-valid
@@ -83,10 +101,12 @@ type Know
   | 'PN' // possibly-not-valid
   | 'DN' // definitely-not-valid
 
+// tick can be in more than one (candidate) tack
+// tack can be in more than one (candidate) tock
 type Tack = [
-    Mesh   // head  tockhash this tack belongs to
-  , Mesh[] // neck  merkle nodes at depth 7
-  , Mesh[] // feet  tickhash in multiples of 1024 (last tack in tock can be <1024)
+    Mesh[]   // heads  tockhashes these tacks belong to
+  , Mesh[][] // necks  merkle nodes at depth 7
+  , Mesh[][] // feets  tickhash in chunks of 1024 (last tack in tock can be less)
 ]
 
 type Peer = Blob  // opaque peer ID

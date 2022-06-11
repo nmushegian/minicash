@@ -11,12 +11,17 @@ export {
 }
 
 interface Glob {
+    // tickhash -> tick
     tick_add(tick :Tick) :Mish
     tick_get(tish :Mish) :Tick
+
+    // tockhash -> tock
     tock_add(tock :Tock) :Mesh
     tock_get(tosh :Mesh) :Tock
+
+    // [tockhash,idx] -> tickhash
     tack_add(tack :Tack) :[Mesh, number]
-    tack_get(tash :Mesh, indx :number) :Mesh
+    tack_get(tosh :Mesh, indx :number) :Mesh
 }
 
 interface Tree {
@@ -34,9 +39,14 @@ interface Tree {
 
     // snap -> utxo -> [[hash,cash],burn]
     page_read(copy :Snap, key :Blob) :Okay<[Bill,Bnum]>;
-    page_edit(copy :Snap, editor :((desk:{
+    page_edit(copy :Snap, editor :((page:{
 	get: (key :Blob) => Blob;
 	set: (key :Blob, val :Blob) => void;
     }) => Snap))
+    
+    //  not necessary, but useful -- info *about this branch*
+    //  page_ticks : tickhash -> tockhash  // early dup check
+    //  page_tocks : tockhash -> height    // faster common ancestor
+
 }
 

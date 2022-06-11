@@ -1,6 +1,6 @@
 import {
-    Okay, okay, toss, pass, fail, need,
-    Blob, Roll,
+    Okay, okay, toss, pass, fail, need, aver,
+    Blob, Roll, islist, isblob, isroll,
     Tick, Tock,
     Move, Bill
 } from './type.js'
@@ -10,24 +10,6 @@ export {
     form_tock,
 }
 
-// precondition / panic assert
-// give lambda to defer eval when disabled
-let _aver = true //false;
-function aver(bf :((a?:any)=>boolean), s :string) {
-    if (_aver && !bf()) { console.log(`PANIC`); toss(s) }
-}
-
-function isroll(x :any) :boolean {
-    return islist(x) || isblob(x)
-}
-
-function islist(x :any) : boolean {
-    return Array.isArray(x)
-}
-
-function isblob(x :any) : boolean {
-    return Buffer.isBuffer(x)
-}
 
 function form_tock(x :Roll) :Okay<Tock> {
     aver(_=>isroll(x), `must be a roll`)

@@ -16,7 +16,7 @@ import {
 } from './type.js'
 
 import {
-    Tree
+    Tree, Glob
 } from './data.js'
 
 export {
@@ -31,19 +31,19 @@ export {
 // !mutates tree:
 //   insert stat
 //   insert know = PV
-function vult_thin(tree:Tree, tock:Tock) :Okay<Stat> {
+function vult_thin(glob :Glob, tree :Tree, tock:Tock) :Okay<Stat> {
   return fail(`todo`)
 }
 
-// !warn returns [true, false] result when vult fails
+// !warn returns [true, false, _] result when vult fails
 //    - this is still a successful state transition which
 //      still causes a mutation:  possibly_valid -> definitely_invalid
-//    - [false, err] result is returned when there is *not enough info*
+//    - [false, _, err] result is returned when there is *not enough info*
 //      this should be a panic at engine level as it should only attempt
 //      this when it has all the ticks available
 // !mutates tree:
 //   insert desk snap
 //   update know
-function vult_full(tree:Tree, tock:Tock, ticks :Tick[]) :Okay<boolean> {
+function vult_full(glob :Glob, tree:Tree, tock:Tock, ticks :Tick[]) :Okay<boolean> {
   return fail(`todo`)
 }
