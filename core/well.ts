@@ -2,7 +2,7 @@ import {
     Okay, Why, pass, fail,
     Blob, Roll,
     Tick, Tock,
-    Move
+    Move, Bill
 } from './type.js'
 
 export {
@@ -21,8 +21,11 @@ function isblob(x :any) : boolean {
 function tock_form(x :Roll) : Okay<Tock> {
     if (!islist(x)) return fail(`not an array`)
     if (x.length !== 4) return fail(`length is not 4`)
-    // all 4 items are blob len 32
-    return fail(`todo`)
+    for (let item of x) {
+	if (!isblob(item)) return fail(`item is not a blob`)
+	if ((item as Blob).length !== 32) return fail(`item is not len 32`)
+    }
+    return pass(x as Tock)
 }
 
 function tick_form(x :Roll) :Okay<Tick> {
@@ -68,4 +71,5 @@ function bill_form(x :Roll) :Okay<Bill> {
     if (!isblob(cash)) return fail(`cash not a blob`)
     if ((addr as Blob).length !== 32) return fail(`addr wrong length`)
     if ((cash as Blob).length !== 7)  return fail(`cash wrong length`)
+    return pass(x as Bill)
 }
