@@ -66,14 +66,11 @@ function move_form(x :Roll) :Okay<Move> {
 }
 
 function bill_form(x :Roll) :Okay<Bill> {
-    console.log(x)
     if (!islist(x))     return fail(`not a list`)
     if (x.length !== 2) return fail(`not len 2`)
     let [addr, cash] = x
-    console.log(addr,cash)
     if (!isblob(addr)) return fail(`addr not a blob`)
     if (!isblob(cash)) return fail(`cash not a blob`)
-    console.log('here')
     if ((addr as Blob).length !== 32) return fail(`addr wrong length`)
     if ((cash as Blob).length !== 7)  return fail(`cash wrong length`)
     return pass(x as Bill)
