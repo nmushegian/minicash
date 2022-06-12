@@ -4,7 +4,7 @@ import * as immu from 'immutable'
 
 import {
     Okay, pass, fail,
-    Blob, blob,
+    Blob, blob, b2h, h2b,
     Tock,
     Mesh,
     Bnum,
@@ -47,8 +47,8 @@ class Tree {
 
     // ['page', snap] -> ( utxo -> [[hash,cash],burn] )
     page_read(copy :Snap, key :Blob) :Okay<[Bill,Bnum]> {
-        let snap = this._snaps[copy.toString('hex')]
-        return pass([[], blob('')])
+        let snap = this._snaps[b2h(copy)]
+        return pass([[], h2b(snap)])
     }
     page_edit(copy :Snap, editor :((desk:{
         get: (key :Blob) => Blob;

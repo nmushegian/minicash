@@ -2,6 +2,7 @@ import {
     Okay, okay, toss, pass, fail,
     Blob, blob,
     Roll, roll, unroll, rmap,
+    Hexs,
     Hash, hash,
     Sign, sign,
     Pubk, scry
@@ -23,6 +24,7 @@ export {
     okay, toss, pass, fail, need, aver,
     blob, roll, unroll, rmap,
     isblob, islist, isroll,
+    b2h, h2b,
     mesh, mish,
     sign, scry
 }
@@ -36,6 +38,14 @@ function need(b :boolean, s :string) {
 let _aver = true //false;
 function aver(bf :((a?:any)=>boolean), s :string) {
     if (_aver && !bf()) { console.log(`PANIC`); toss(s) }
+}
+
+function b2h(blob : Blob) :Hexs {
+    return blob.toString('hex')
+}
+
+function h2b(hexs :Hexs) :Blob {
+    return Buffer.from(hexs, 'hex')
 }
 
 function isroll(x :any) :boolean {

@@ -2,6 +2,7 @@
 
 import {
     Okay, pass, fail, toss,
+    b2h, h2b,
     blob, roll,
     Mish, Mesh, mesh,
     Mail
@@ -24,10 +25,10 @@ class Djin {
 
         let tickzero = [[],[]]     // degenerate transaction
         let tockzero = [
-            blob('00'.repeat(24)), // seed0
+            h2b('00'.repeat(24)), // seed0
             mesh(roll(tickzero)),  // merkle root
-            blob('00'.repeat(7)),  // timestamp
-            blob('00'.repeat(7))   // seed1
+            h2b('00'.repeat(7)),  // timestamp
+            h2b('00'.repeat(7))   // seed1
         ]
         //this.rock.tick_add(tickzero)
         //this.rock.tock_add(tockzero)

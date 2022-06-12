@@ -3,7 +3,7 @@
 import {
     Okay, pass, fail, toss,
     Blob, Roll, blob, roll, unroll,
-    Tick, Mesh, mesh,
+    Tick, Mesh, mesh, b2h, h2b
 } from './word.js'
 
 export {
@@ -22,16 +22,16 @@ class Rock {
 
     // emptyblob-initialized
     _get(key :Blob) :Blob {
-        let hkey = key.toString('hex')
+        let hkey = b2h(key)
         let hval = this._db[hkey]
-        if (hval) return blob(hval)
+        if (hval) return h2b(hval)
         else return blob('')
     }
 
     // insert-only
     _set(key :Blob, val :Blob) {
-        let hkey = key.toString('hex')
-        let hval = val.toString('hex')
+        let hkey = b2h(key)
+        let hval = b2h(val)
         let pval = this._db[hkey]
         if (pval != hval) {
             toss(`panic: changing value of insert-only data`)
