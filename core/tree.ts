@@ -1,4 +1,4 @@
-// pure kvdb, parallel read / non-blocking write (mutable handles)
+// pure kvdb (later, parallel read / non-blocking write (mutable handles))
 
 import * as immu from 'immutable'
 
@@ -25,6 +25,7 @@ class Tree {
     desk
     _snapc
     _snaps
+
     // tree grows on a rock, but we try not to think about that
     constructor(rock :Rock) {
         this.rock = rock
@@ -34,24 +35,27 @@ class Tree {
     }
 
     // ['thin', tockhash] -> stat
-    thin_add(tosh :Mesh, stat :Stat) {}
-    thin_get(tosh :Mesh) :Okay<Stat> { return fail(`todo`) }
+    view_thin(tosh :Mesh) :Okay<Stat> { return fail(`todo`) }
+    grow_thin(tosh :Mesh, stat :Stat) { return fail(`todo`) }
 
     // ['know', tockhash] -> PV | DV | PN | DN
-    know_add(tosh :Mesh, know :Know) {}
-    know_get(tosh :Mesh) :Okay<Know> { return fail(`todo`) }
+    view_know(tosh :Mesh) :Okay<Know> { return fail(`todo`) }
+    grow_know(tosh :Mesh, know :Know) { return fail(`todo`) }
 
-    // ['full', tockhash, tackhash] -> snap
-    // ['full', tockhash, 'ff..ff'] -> snap
-    full_add(tosh :Mesh, step :Mesh, snap :Snap) {}
-    full_get(tosh :Mesh, step :Mesh) :Okay<Snap> { return fail(`todo`) }
+    // ['part', tockhash, tackhash] -> snap
+    view_part(tosh :Mesh, tash :Mesh) :Okay<Snap> { return fail(`todo`) }
+    grow_part(tosh :Mesh, tash :Mesh, snap :Snap) { return fail(`todo`) }
 
-    // ['page', snap] -> ( utxo -> [[hash,cash],burn] )
-    page_read(copy :Snap, key :Blob) :Okay<[Bill,Bnum]> {
+    // ['full', tockhash] -> snap
+    view_full(tosh :Mesh) :Okay<Snap> { return fail(`todo`) }
+    grow_full(tosh :Mesh, snap :Snap) { return fail(`todo`) }
+
+    // ['page', snap] -> utxo -> [[hash,cash],burn]
+    view_page(copy :Snap, key :Blob) :Okay<[Bill,Bnum]> {
         let snap = this._snaps[b2h(copy)]
         return pass([[], h2b(snap)])
     }
-    page_edit(copy :Snap, edit :((desk:{
+    grow_page(copy :Snap, edit :((desk:{
         get: (key :Blob) => Blob;
         set: (key :Blob, val :Blob) => void;
     }) => void)) :Okay<Snap> {
