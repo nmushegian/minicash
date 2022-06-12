@@ -1,6 +1,7 @@
 
 import {
     Mail,
+    Mesh,
     okay,
 } from './word.js'
 
@@ -31,20 +32,36 @@ class Dmon {
         for await (let spin of this.sync()) {}
     }
 
+    async *step() {
+        // let in = tasks[task++ % tasks.length].dequeue()
+        // let outs = djin.step(in)
+        // tasks.enqueue(outs)
+    }
+
+    // inbound mail to start cycle
+    task(init) {
+        // tasks[task++] = init
+    }
+
     async *sync() {
         // basic sync algorithm
         // makes progress incrementally by retrying repeatedly
         //
-        // blocks for one djin.step(head) at a time, you should
-        // split compute time equally among top K candidates
+        // blocks for one djin.step(head) at a time
         //
-        // plug.send([ask/tocks])
-        // for each lead
-        //   for each head
-        //     let outs = djin.step(head)
-        //     plug.send(outs)
+        // for each peer
+        //   plug.send([ask/tocks], lead =>
+        //     for each lead
+        //       start sync task
+        //   kill all prior sync tasks
         //
-        // (djin logic)
+        //
+        // (sync task)
+        //  for each head
+        //  let outs = djin.step(head)
+        //  plug.send(outs)
+        //
+        // (djin.step effective cycle via sync task)
         //  for given head
         //    ask for tock
         //      ask for tacks
