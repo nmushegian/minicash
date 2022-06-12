@@ -20,13 +20,15 @@ class Dmon {
         this.djin = new Djin(rock)
         this.plug = new Plug(port || 17777)
     }
-    async init() {
+    async init() {}
+    async play() {
         this.plug.when((mail,back) => {
             // mail = form_roll(mail)
             let outs = okay(this.djin.turn(mail))
             back(outs)
         })
-        // this.djin.step() as much as possible using existing rockDB
+        this.plug.play()
+        for await (let spin of this.sync()) {}
     }
 
     async *sync() {
@@ -54,9 +56,5 @@ class Dmon {
         //          if tock is best, update best
     }
 
-    async play() {
-        this.plug.play()
-        for await (let go of this.sync()) {}
-    }
 }
 
