@@ -11,6 +11,7 @@ export {
 }
 
 class Rock {
+    // tmp: hexs -> hexs
     _db = {}
 
     load(path:string) {}
@@ -30,13 +31,14 @@ class Rock {
 
     // insert-only
     _set(key :Blob, val :Blob) {
+        if (val.length == 0) toss(`panic, cannot insert empty blob`)
         let hkey = b2h(key)
         let hval = b2h(val)
         let pval = this._db[hkey]
-        if (pval != hval) {
-            toss(`panic: changing value of insert-only data`)
-        } else {
+        if (!pval) {
             this._db[hkey] = hval
+        } else {
+            if (pval !== hval) toss(`panic, modifying insert-only value`)
         }
     }
 
@@ -48,8 +50,7 @@ class Rock {
     }
     tick_get(tish :Mesh) :Okay<Tick> {
         let val = this._get(tish)
-        if (val.length)
-            return pass(unroll(val))
+        if (val.length) return pass(unroll(val))
         else return fail(`no such tick`)
     }
 

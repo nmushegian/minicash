@@ -5,10 +5,10 @@ import { readdirSync, readFileSync } from 'fs'
 import { need, rmap, blob } from '../core/word.js'
 
 import * as formtest from './well.t.js'
+import * as rocktest from './rock.t.js'
 
 formtest
-
-
+rocktest
 
 import {
     form_tick,

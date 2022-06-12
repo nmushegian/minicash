@@ -5,7 +5,7 @@ import * as immu from 'immutable'
 import {
     Okay, pass, fail,
     Blob, blob, b2h, h2b,
-    Tock,
+    Tock, Tack,
     Mesh,
     Bnum,
     Bill,
@@ -33,29 +33,30 @@ class Tree {
         this._snaps = { "": this.desk }
     }
 
-    // ['thin', tockhash] -> [tock,stat]
-    thin_get(tosh :Mesh) :Okay<[Tock,Stat]> { return fail(`todo`) }
-    thin_add(tock :Tock) {}
+    // ['thin', tockhash] -> stat
+    thin_add(tosh :Mesh, stat :Stat) {}
+    thin_get(tosh :Mesh) :Okay<Stat> { return fail(`todo`) }
 
     // ['know', tockhash] -> PV | DV | PN | DN
+    know_add(tosh :Mesh, know :Know) {}
     know_get(tosh :Mesh) :Okay<Know> { return fail(`todo`) }
-    know_set(tosh :Mesh, know :Know) {}
 
-    // ['snap', tockhash] -> snap
-    full_add(tock :Tock, snap :Snap) {}
-    full_get(tosh :Mesh) :Okay<Snap> { return fail(`todo`) }
+    // ['full', tockhash, tackhash] -> snap
+    // ['full', tockhash, 'ff..ff'] -> snap
+    full_add(tosh :Mesh, step :Mesh, snap :Snap) {}
+    full_get(tosh :Mesh, step :Mesh) :Okay<Snap> { return fail(`todo`) }
 
     // ['page', snap] -> ( utxo -> [[hash,cash],burn] )
     page_read(copy :Snap, key :Blob) :Okay<[Bill,Bnum]> {
         let snap = this._snaps[b2h(copy)]
         return pass([[], h2b(snap)])
     }
-    page_edit(copy :Snap, editor :((desk:{
+    page_edit(copy :Snap, edit :((desk:{
         get: (key :Blob) => Blob;
         set: (key :Blob, val :Blob) => void;
-    })=>void)) :Okay<Snap> {
+    }) => void)) :Okay<Snap> {
         let mut = this.desk //.mutableCopy
-        editor({
+        edit({
             get: (k :Blob) :Blob => {
                 return (mut.get(k) as Blob)
             },
