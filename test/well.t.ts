@@ -1,7 +1,7 @@
 import { test } from 'tapzero'
 
 import { Okay, okay, blob } from '../core/word.js'
-import { form_tick } from '../core/form.js'
+import { form_tick } from '../core/well.js'
 
 test('tick_form', t=>{
     let blob32 = blob('32'.repeat(32))

@@ -2,14 +2,18 @@ import { test } from 'tapzero'
 import { jams } from 'jams.js'
 import { readdirSync, readFileSync } from 'fs'
 
-import { rmap, blob } from 'coreword'
+import { need, rmap, blob } from '../core/word.js'
 
-import * as formtest from './form.t.js'
+import * as formtest from './well.t.js'
 
 formtest
 
-import { need } from '../core/word.js'
-import { form_tick, form_tock } from '../core/form.js'
+
+
+import {
+    form_tick,
+    form_tock
+} from '../core/well.js'
 
 let $ = {
     form_tick,
