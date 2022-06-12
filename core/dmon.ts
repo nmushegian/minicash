@@ -7,29 +7,24 @@ import {
 import { Rock } from './rock.js'
 import { Djin } from './djin.js'
 
-class Plug {
-    constructor(peerdir?:string) {}
-    when(what:((mail:Mail)=>void)) {}
-    async send(mail:Mail) {}
-    async play() {}
-}
+import { Plug } from './plug.js'
 
 class Dmon {
     djin :Djin // can access .rock, .tree
     plug :Plug
-    constructor(datapath?:string, peerpath?:string) {
+    constructor(datapath?:string, port?:number) {
         let rock = new Rock()
         if (datapath) {
             rock.load(datapath)
         }
         this.djin = new Djin(rock)
-        this.plug = new Plug(peerpath)
+        this.plug = new Plug(port || 17777)
     }
     async init() {
-        this.plug.when(mail => {
+        this.plug.when((mail,back) => {
             // mail = form_roll(mail)
             let outs = okay(this.djin.turn(mail))
-            this.plug.send(outs)
+            back(outs)
         })
         // this.djin.step() as much as possible using existing rockDB
     }
