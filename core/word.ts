@@ -115,9 +115,9 @@ type Know
 // tick can be in more than one (candidate) tack
 // tack can be in more than one (candidate) tock
 type Tack = [
-    Mesh[]   // heads  tockhashes these tacks belong to
-  , Mesh[][] // necks  merkle nodes at depth 7
-  , Mesh[][] // feets  tickhash in chunks of 1024 (last tack in tock can be less)
+    Mesh   // head  tockhash these tacks belongs to
+  , Mesh[] // neck  merkle nodes at depth 7 (empty if <1024 ticks in tock)
+  , Mesh[] // feet  tickhash in chunks of 1024 (last tack in tock can be less)
 ]
 
 type Peer = Blob  // opaque peer ID

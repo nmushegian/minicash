@@ -68,25 +68,23 @@ class Djin {
                 // ...
                 // tock_form
                 // tock_vinx
-                // add rock.tock
-                // try vult_thin
-                // try vult_full
-                // emit ask/tacks
-                // emit ask/ticks
+                // rock.tock_add
+                // outs = this.step(tock)
+                // send outs
             }
             case 'res/tacks': {
                 // ...
                 // tack_form
                 // tack_vinx
-                // add rock.tack
-                // try vult_full
-                // emit ask/ticks
+                // rock.tack_add
+                // outs = this.step(tack.head)
+                // send outs
             }
             case 'res/ticks': {
                 // ...
                 // tick_form
                 // tick_vinx
-                // add rock.tick
+                // rock.tick_add
                 // later, do something smarter to know what to retry
                 // for now, dumb sync will retry from ask/tocks
             }
