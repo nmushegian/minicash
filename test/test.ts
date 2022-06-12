@@ -8,7 +8,7 @@ import * as formtest from './form.t.js'
 
 formtest
 
-import { need } from '../core/type.js'
+import { need } from '../core/word.js'
 import { form_tick, form_tock } from '../core/form.js'
 
 let $ = {

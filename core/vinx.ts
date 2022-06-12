@@ -4,7 +4,7 @@ import {
     Okay, pass, fail,
     Bnum,
     Tick, Tock
-} from './type.js'
+} from './word.js'
 
 export {
     vinx_tock,

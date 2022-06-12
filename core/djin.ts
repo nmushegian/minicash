@@ -5,7 +5,7 @@ import {
     blob, roll,
     Mish, Mesh, mesh,
     Mail
-} from './type.js'
+} from './word.js'
 
 import { Rock } from './rock.js'
 import { Tree } from './tree.js'

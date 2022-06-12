@@ -10,7 +10,8 @@ import {
     Bnum,
     Bill,
     Stat, Snap, Know,
-} from './type.js'
+} from './word.js'
+
 import {
     Rock
 } from './rock.js'

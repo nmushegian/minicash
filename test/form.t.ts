@@ -1,6 +1,6 @@
 import { test } from 'tapzero'
 
-import { Okay, okay, blob } from '../core/type.js'
+import { Okay, okay, blob } from '../core/word.js'
 import { form_tick } from '../core/form.js'
 
 test('tick_form', t=>{

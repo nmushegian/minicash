@@ -4,7 +4,7 @@ import {
     Okay, pass, fail, toss,
     Blob, Roll, blob, roll, unroll,
     Tick, Mesh, mesh,
-} from './type.js'
+} from './word.js'
 
 export {
     Rock

@@ -2,7 +2,7 @@
 import {
     Mail,
     okay,
-} from './type.js'
+} from './word.js'
 
 import { Rock } from './rock.js'
 import { Djin } from './djin.js'

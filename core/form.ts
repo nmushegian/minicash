@@ -3,7 +3,7 @@ import {
     Blob, Roll, islist, isblob, isroll,
     Tick, Tock,
     Move, Bill
-} from './type.js'
+} from './word.js'
 
 export {
     form_tick,

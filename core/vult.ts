@@ -7,13 +7,10 @@
 //   it is represented with a pure map, we store snaps per tock in Tree
 
 import {
-    Okay, pass, fail
-} from 'coreword'
-
-import {
+    Okay, pass, fail,
     Stat, Know,
     Tick, Tock,
-} from './type.js'
+} from './word.js'
 
 import { Rock } from './rock.js'
 import { Tree } from './tree.js'
