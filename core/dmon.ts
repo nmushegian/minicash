@@ -34,8 +34,10 @@ class Dmon {
 
     async *step() {
         // let in = tasks[task++ % tasks.length].dequeue()
-        // let outs = djin.step(in)
-        // tasks.enqueue(outs)
+        // let outs       = djin.step(in)   // makes progress, or sends request
+        // let [ok, next] = djin.step(outs) // same msg if requested, next if available
+        // if (!ok) plug.emit(next)
+        // tasks.enqueue(next)
     }
 
     // inbound mail to start cycle
