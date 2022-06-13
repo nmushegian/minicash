@@ -25,54 +25,36 @@ class Dmon {
     }
     async init() {}
     async play() {
+        this.serv()
+        for await (let loop of this.sync()) {}
+    }
+
+    // handle requests
+    serv() {
         this.plug.when((mail,back) => {
             // mail = form_roll(mail)
             // respond to requests immediately
-            // this will be read-only turn
+            // this will be read-only turn, except ann/* does rock.etch
             let outs = okay(this.djin.turn(mail))
             back(outs)
-            // TODO factor these into spin
-            // don't respond to responses, just send ack/end
-            // enqueue them for djin to turn async
-            // this.iq.send(mail)
-            // back([ack])
         })
-        this.plug.play()
-        ;(async ()=> {
-            for await (let loop of this.sync()) {}
-        })()
-        for await (let $_$ of this.djin.spin({}, {})) {}
     }
 
-    async *tisk() {
-        //   primitive time-share based on cumulative pow of leads
-        //   yield after every call, return after some number of event loops
-        // let task = this._tasks[ ... ]
-        // await task()
-        // yield
-        // after k, return
-    }
-
-    _task(f) {
-        // this._tasks[...] = f
-    }
-
+    // core basic sync algorithm
+    // incrementally makes progress, yield as much as possible
     async *sync() {
-        let _tasks = this._tasks
-        this._tasks = {}
-        let mail = [blob(''), [blob(''), blob('')]] as Mail
-        this.plug.emit(mail, back => {
-            let [line, lead] = back
-            this._task(async ()=>{
-                // deq next mail from oq
-                // if we have the data, enq it and yield
-                // if not, request it and yield (enq in callback)
-            })
-        })
-        // kill all prior tasks
-        // _tasks.each(kill)
-        // do one cycle of tasks
-        for await (let loop of this.tisk()) {}
+        // clear self-messages first
+        // don't spam requests while we can make progress
+        // for await (let outs of this.djin.spin(ins)) {
+        //    let refl = this.djin.spin(outs)
+        //    await this.ins.enq(refl)
+        // }
+
+        // incrementally make progress
+        // get leads | turn | ask tocks
+        // get tocks | turn | ask tacks
+        // get tacks | turn | ask ticks
+        // get ticks // retry tocks next loop
     }
 
 }

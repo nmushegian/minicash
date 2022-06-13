@@ -106,9 +106,10 @@ class Djin {
         return fail(`todo`)
     }
 
-    async *spin(iq, oq) {
-        // let mail = await iq.deq()
-        // let outs = this.turn(mail)
-        // outs.map(o => oq.enq(o))
+    async *spin(mails:Mail[]) {
+        mails.forEach(mail => {
+            let outs = this.turn(mail)
+            yield outs
+        })
     }
 }

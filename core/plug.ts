@@ -30,8 +30,8 @@ class Plug {
     }
     async emit(mail:Mail, back:((mail:Mail)=>void)) {
         // for each connection, send it
+        // can also take K random, rotate, etc
     }
-    async play() {}
 
     // todo link/drop cleanup etc
     link(peer :Peer, sock:any) {
