@@ -23,7 +23,13 @@ function vinx_tick(conx : Tick[], tick : Tick) : Okay<Bnum> {
     //   let intx = find(x | mesh(x) == txin)
     //   let bill = intx[indx]
     //   let [inhash, incash] = bill
-    //   checksig(tick, i, bill)
+    //   checksig(tick, i, inhash) for i in len(inputs):
+    //     let [ins, outs] = tick
+    //     let [intx, indx, sign] = ins[i]
+    //     let mask = [ [intx,indx,""], outs ]
+    //     let pubk = scry(mask, sign)
+    //     let acct = chop(mash(pubk))
+    //     need acct == inhash
     //   fees += incash
     // for each (i,bill) in tick.bills
     //   fees -= outcash
