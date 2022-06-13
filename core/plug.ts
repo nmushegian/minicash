@@ -28,7 +28,7 @@ class Plug {
             })
         })
     }
-    async emit(mail:Mail) {
+    async emit(mail:Mail, back:((mail:Mail)=>void)) {
         // for each connection, send it
     }
     async play() {}

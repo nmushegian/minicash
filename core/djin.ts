@@ -100,9 +100,15 @@ class Djin {
 
     // attempt to vult
     // get some mail out for what you need to proceed
-    step(head :Mash) :Okay<Mail[]> {
+    _temt(head :Mash) :Okay<Mail[]> {
         // vult_thin
         // vult_full
         return fail(`todo`)
+    }
+
+    async *spin(iq, oq) {
+        // let mail = await iq.deq()
+        // let outs = this.turn(mail)
+        // outs.map(o => oq.enq(o))
     }
 }

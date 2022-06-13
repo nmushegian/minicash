@@ -2,6 +2,7 @@
 import {
     Mail,
     okay,
+    blob,
 } from './word.js'
 
 import { Rock } from './rock.js'
@@ -12,6 +13,8 @@ import { Plug } from './plug.js'
 class Dmon {
     djin :Djin // can access .rock, .tree
     plug :Plug
+    _tasks
+    _taskc
     constructor(datapath?:string, port?:number) {
         let rock = new Rock()
         if (datapath) {
@@ -24,54 +27,52 @@ class Dmon {
     async play() {
         this.plug.when((mail,back) => {
             // mail = form_roll(mail)
+            // respond to requests immediately
+            // this will be read-only turn
             let outs = okay(this.djin.turn(mail))
             back(outs)
+            // TODO factor these into spin
+            // don't respond to responses, just send ack/end
+            // enqueue them for djin to turn async
+            // this.iq.send(mail)
+            // back([ack])
         })
         this.plug.play()
-        for await (let spin of this.sync()) {}
+        ;(async ()=> {
+            for await (let loop of this.sync()) {}
+        })()
+        for await (let $_$ of this.djin.spin({}, {})) {}
     }
 
-    async *step() {
-        // let in = tasks[task++ % tasks.length].dequeue()
-        // let outs       = djin.step(in)   // makes progress, or sends request
-        // let [ok, next] = djin.step(outs) // same msg if requested, next if available
-        // if (!ok) plug.emit(next)
-        // tasks.enqueue(next)
+    async *tisk() {
+        //   primitive time-share based on cumulative pow of leads
+        //   yield after every call, return after some number of event loops
+        // let task = this._tasks[ ... ]
+        // await task()
+        // yield
+        // after k, return
     }
 
-    // inbound mail to start cycle
-    task(init) {
-        // tasks[task++] = init
+    _task(f) {
+        // this._tasks[...] = f
     }
 
     async *sync() {
-        // basic sync algorithm
-        // makes progress incrementally by retrying repeatedly
-        //
-        // blocks for one djin.step(head) at a time
-        //
-        // for each peer
-        //   plug.send([ask/tocks], lead =>
-        //     for each lead
-        //       start sync task
-        //   kill all prior sync tasks
-        //
-        //
-        // (sync task)
-        //  for each head
-        //  let outs = djin.step(head)
-        //  plug.send(outs)
-        //
-        // (djin.step effective cycle via sync task)
-        //  for given head
-        //    ask for tock
-        //      ask for tacks
-        //      | for each tack
-        //      |   ask for ticks
-        //      if all tacks present
-        //        if all ticks present
-        //          apply all ticks
-        //          if tock is best, update best
+        let _tasks = this._tasks
+        this._tasks = {}
+        let mail = [blob(''), [blob(''), blob('')]] as Mail
+        this.plug.emit(mail, back => {
+            let [line, lead] = back
+            this._task(async ()=>{
+                // deq next mail from oq
+                // if we have the data, enq it and yield
+                // if not, request it and yield (enq in callback)
+            })
+        })
+        // kill all prior tasks
+        // _tasks.each(kill)
+        // do one cycle of tasks
+        for await (let loop of this.tisk()) {}
     }
 
 }
