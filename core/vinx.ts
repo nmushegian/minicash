@@ -20,7 +20,7 @@ function vinx_tick(conx : Tick[], tick : Tick) : Okay<Bnum> {
     // let fees = 0
     // for each (i,move) in tick.moves
     //   let txin, indx, sign = move
-    //   let intx = find(x | mesh(x) == txin)
+    //   let intx = find(x | mash(x) == txin)
     //   let bill = intx[indx]
     //   let [inhash, incash] = bill
     //   checksig(tick, i, inhash) for i in len(inputs):
@@ -28,8 +28,8 @@ function vinx_tick(conx : Tick[], tick : Tick) : Okay<Bnum> {
     //     let [intx, indx, sign] = ins[i]
     //     let mask = [ [intx,indx,""], outs ]
     //     let pubk = scry(mask, sign)
-    //     let acct = chop(mash(pubk))
-    //     need acct == inhash
+    //     let lock = mosh(pubk)
+    //     need lock == inhash
     //   fees += incash
     // for each (i,bill) in tick.bills
     //   fees -= outcash

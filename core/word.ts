@@ -12,7 +12,7 @@ export type {
     Okay,
     Bnum, Blob, Roll,
     Sign, Pubk,
-    Mesh, Lock, Cash,
+    Mash, Lock, Cash,
     Tick, Tock, Tack,
     Move, Bill,
     Stat, Know,
@@ -25,7 +25,7 @@ export {
     blob, roll, unroll, rmap,
     isblob, islist, isroll,
     b2h, h2b,
-    mesh, mish,
+    mash, mosh,
     sign, scry
 }
 
@@ -70,10 +70,10 @@ function chop(x :Blob, k :number) :Blob {
     return x.slice(x.length - k, x.length)
 }
 
-function mish(x :Blob) :Lock {
+function mosh(x :Blob) :Lock {
     return chop(hash(x), 20)
 }
-function mesh(x :Blob) :Mesh {
+function mash(x :Blob) :Mash {
     return chop(hash(x), 24)
 }
 
@@ -92,20 +92,20 @@ function _merk(x :Blob[]) :Hash {
     return _merk(x)
 }
 
-function merk(x :Mesh[]) {
+function merk(x :Mash[]) {
     aver(_=>{
         need(islist(x), `merk arg must be a list`)
         need(x.length > 0, `merk arg must have len > 0`)
         need(x.length <= 1024, `merk arg must have len <= 1024`)
         x.every(y => {
             need(isblob(y), `merk arg item is not a blob`)
-            need(y.length == 24, `merk arg item is not a mesh`)
+            need(y.length == 24, `merk arg item is not a mash`)
         })
         return true
     }, `merk preconditions`)
     let ms = x
     if (x.length == 1) {
-        return mesh(x[0])
+        return mash(x[0])
     } else {
         return _merk(x)
     }
@@ -116,7 +116,7 @@ type Tick = [
     Bill[]  // max 7 outputs
 ]
 type Move = [
-    Mesh,  // utxo txin (input tick hash)
+    Mash,  // utxo txin (input tick hash)
     Byte,  // utxo indx (0-6)
     Sign   // signature
 ]
@@ -125,15 +125,15 @@ type Bill = [
     Cash   // minicash
 ]
 
-type Mesh = Blob24 // Medi hash
+type Mash = Blob24 // Medi hash
 type Lock = Blob20 // "address" (pubkeyhash)
 type Cash = Blob7
 type Byte = Blob1
 
 
 type Tock = [
-    Mesh,  // prev  blob24 previous tockhash
-    Mesh,  // root  blob24 merkle root, max 2^17 leafs
+    Mash,  // prev  blob24 previous tockhash
+    Mash,  // root  blob24 merkle root, max 2^17 leafs
     Time,  // time  blob7  padded timestamp
     Fuzz   // fuzz  blob7  miner nonce
 ]
@@ -157,9 +157,9 @@ type Know
 // tick can be in more than one (candidate) tack
 // tack can be in more than one (candidate) tock
 type Tack = [
-    Mesh   // head  tockhash these tacks belongs to
-  , Mesh[] // neck  merkle nodes at depth 7 (empty if <1024 ticks in tock)
-  , Mesh[] // feet  tickhash in chunks of 1024 (last tack in tock can be less)
+    Mash   // head  tockhash these tacks belongs to
+  , Mash[] // neck  merkle nodes at depth 7 (empty if <1024 ticks in tock)
+  , Mash[] // feet  tickhash in chunks of 1024 (last tack in tock can be less)
 ]
 
 type Peer = Blob  // opaque peer ID

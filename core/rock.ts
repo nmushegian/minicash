@@ -3,7 +3,7 @@
 import {
     Okay, okay, pass, fail, toss,
     Blob, Roll, blob, roll, unroll,
-    Tick, Tock, Mesh, mesh, b2h, h2b
+    Tick, Tock, Mash, mash, b2h, h2b
 } from './word.js'
 
 export {
@@ -43,25 +43,25 @@ class Rock {
         }
     }
 
-    etch_tick(tick :Tick) :Mesh {
+    etch_tick(tick :Tick) :Mash {
         let val = roll(tick)
-        let key = mesh(val)
+        let key = mash(val)
         this._set(key, val)
         return key
     }
-    read_tick(tish :Mesh) :Okay<Tick> {
+    read_tick(tish :Mash) :Okay<Tick> {
         let val = this._get(tish)
         if (val.length) return pass(unroll(val))
         else return fail(`no such tick`)
     }
 
-    etch_tock(tock :Tock) :Mesh {
+    etch_tock(tock :Tock) :Mash {
         let val = roll(tock)
-        let key = mesh(val)
+        let key = mash(val)
         this._set(key, val)
         return key
     }
-    read_tock(tosh :Mesh) :Okay<Tock> {
+    read_tock(tosh :Mash) :Okay<Tock> {
         let val = this._get(tosh)
         if (val.length) return pass(unroll(val))
         else return fail(`no such tock in rock: ${tosh}`)
@@ -69,8 +69,8 @@ class Rock {
 
     /*
     // [tockhash,idx] -> tickhash
-    tack_etch(tack :Tack, indx :number) :Mesh
-    tack_read(tosh :Mesh, indx :number) :Mesh
+    tack_etch(tack :Tack, indx :number) :Mash
+    tack_read(tosh :Mash, indx :number) :Mash
 
     */
 }

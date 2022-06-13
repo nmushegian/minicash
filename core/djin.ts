@@ -5,7 +5,7 @@ import {
     Okay, pass, fail, toss,
     b2h, h2b,
     blob, roll,
-    Mesh, mesh,
+    Mash, mash,
     Mail
 } from './word.js'
 
@@ -15,8 +15,8 @@ import { Tree } from './tree.js'
 export { Djin }
 
 class Djin {
-    best :Mesh   // best definitely-valid tock (cumulative work)
-    race :Mesh[] // top K possibly-valid tocks (cumulative work)
+    best :Mash   // best definitely-valid tock (cumulative work)
+    race :Mash[] // top K possibly-valid tocks (cumulative work)
     rock :Rock   // content-addressed values
     tree :Tree   // per-tock view of state
 
@@ -27,7 +27,7 @@ class Djin {
         let tickzero = [[],[]]     // degenerate transaction
         let tockzero = [
             h2b('00'.repeat(24)), // seed0
-            mesh(roll(tickzero)),  // merkle root
+            mash(roll(tickzero)),  // merkle root
             h2b('00'.repeat(7)),  // timestamp
             h2b('00'.repeat(7))   // seed1
         ]
@@ -100,7 +100,7 @@ class Djin {
 
     // attempt to vult
     // get some mail out for what you need to proceed
-    step(head :Mesh) :Okay<Mail[]> {
+    step(head :Mash) :Okay<Mail[]> {
         // vult_thin
         // vult_full
         return fail(`todo`)

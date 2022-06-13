@@ -1,7 +1,6 @@
 
 import {
     Mail,
-    Mesh,
     okay,
 } from './word.js'
 

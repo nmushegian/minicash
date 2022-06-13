@@ -6,7 +6,7 @@ import {
     Okay, pass, fail,
     Blob, blob, b2h, h2b,
     Tock, Tack,
-    Mesh,
+    Mash,
     Bnum,
     Bill,
     Stat, Snap, Know,
@@ -35,20 +35,20 @@ class Tree {
     }
 
     // ['thin', tockhash] -> stat
-    view_thin(tosh :Mesh) :Okay<Stat> { return fail(`todo`) }
-    grow_thin(tosh :Mesh, stat :Stat) { return fail(`todo`) }
+    view_thin(tosh :Mash) :Okay<Stat> { return fail(`todo`) }
+    grow_thin(tosh :Mash, stat :Stat) { return fail(`todo`) }
 
     // ['know', tockhash] -> PV | DV | PN | DN
-    view_know(tosh :Mesh) :Okay<Know> { return fail(`todo`) }
-    grow_know(tosh :Mesh, know :Know) { return fail(`todo`) }
+    view_know(tosh :Mash) :Okay<Know> { return fail(`todo`) }
+    grow_know(tosh :Mash, know :Know) { return fail(`todo`) }
 
     // ['part', tockhash, tackhash] -> snap
-    view_part(tosh :Mesh, tash :Mesh) :Okay<Snap> { return fail(`todo`) }
-    grow_part(tosh :Mesh, tash :Mesh, snap :Snap) { return fail(`todo`) }
+    view_part(tosh :Mash, tash :Mash) :Okay<Snap> { return fail(`todo`) }
+    grow_part(tosh :Mash, tash :Mash, snap :Snap) { return fail(`todo`) }
 
     // ['full', tockhash] -> snap
-    view_full(tosh :Mesh) :Okay<Snap> { return fail(`todo`) }
-    grow_full(tosh :Mesh, snap :Snap) { return fail(`todo`) }
+    view_full(tosh :Mash) :Okay<Snap> { return fail(`todo`) }
+    grow_full(tosh :Mash, snap :Snap) { return fail(`todo`) }
 
     // ['page', snap] -> utxo -> [[hash,cash],burn]
     view_page(copy :Snap, key :Blob) :Okay<[Bill,Bnum]> {
