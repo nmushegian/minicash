@@ -35,6 +35,8 @@ let $ = {
     form_tock
 }
 
+let show =o=> JSON.stringify(o, null, 2)
+
 test('cases', t=>{
     let dir = './test/case/well'
     let cases = readdirSync(dir)
@@ -52,9 +54,9 @@ test('cases', t=>{
             let args = rmap(data.args, blob)
             let [ok, val, errs] = func(...args)
             if (ok) {
-                t.ok(data.want[0] == "true")
+                t.ok(data.want[0] == "true", `must succeed`)
             } else {
-                t.ok(data.want[0] == "false")
+                t.ok(data.want[0] == "false", `must fail`)
             }
         })
     })
