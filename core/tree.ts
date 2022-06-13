@@ -20,6 +20,25 @@ export {
     Tree
 }
 
+// mutable handle
+class Leaf {
+    _mut
+    constructor(base) {
+        this._mut = base.asMutable()
+    }
+    get(k :Blob) :Blob {
+        let val = this._mut.get(k) as Blob
+        if (!val) return blob('')
+        else return val
+    }
+    set(k :Blob, v :Blob) {
+        this._mut.set(k, v)
+    }
+    seal() {
+        this._mut = this._mut.asImmutable()
+    }
+}
+
 class Tree {
     rock :Rock
     desk
@@ -60,16 +79,9 @@ class Tree {
         set: (key :Blob, val :Blob) => void;
     }) => void)) :Okay<Snap> {
         let prev = this._snaps[b2h(copy)]
-        let next = prev.withMutations(page => {
-            edit({
-                get: (k :Blob) :Blob => {
-                    return page.get(k) as Blob
-                },
-                set: (k :Blob, v :Blob) => {
-                    page.set(k, v)
-                }
-            })
-        })
+        let leaf = new Leaf(prev)
+        edit(leaf)
+        let next = leaf.seal()
         let snap = this._nextsnap()
         this._snaps[b2h(snap)] = next
         return pass(snap)

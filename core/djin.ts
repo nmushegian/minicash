@@ -36,7 +36,7 @@ class Djin {
         //vult_full(this.rock, this.tree, this.tockzero, [this.tickzero])
     }
 
-    turn(mail :Mail) :Okay<Mail> {
+    turn(mail :Mail) :Okay<Mail[]> {
         let [line, body] = mail
 
         try { switch (line.toString()) {
@@ -78,7 +78,7 @@ class Djin {
                 // tack_form
                 // tack_vinx
                 // rock.tack_add
-                // outs = this.step(tack.head)
+                // outs = this._temt(tack.head)
                 // send outs
             }
             case 'res/ticks': {
@@ -98,18 +98,11 @@ class Djin {
         toss(`panic/unreachable`)
     }
 
-    // attempt to vult
-    // get some mail out for what you need to proceed
-    _temt(head :Mash) :Okay<Mail[]> {
-        // vult_thin
-        // vult_full
-        return fail(`todo`)
-    }
-
-    async *spin(mails:Mail[]) {
-        mails.forEach(mail => {
+    async *spin(mails:Mail[]) :AsyncGenerator<Okay<Mail[]>, null, void> {
+        for (let mail of mails) {
             let outs = this.turn(mail)
             yield outs
-        })
+        }
+        return null
     }
 }

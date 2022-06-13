@@ -46,7 +46,7 @@ class Dmon {
         // clear self-messages first
         // don't spam requests while we can make progress
         // for await (let outs of this.djin.spin(ins)) {
-        //    let refl = this.djin.spin(outs)
+        //    let refl = await this.djin.spin(outs)
         //    await this.ins.enq(refl)
         // }
 
