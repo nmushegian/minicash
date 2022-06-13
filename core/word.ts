@@ -49,7 +49,12 @@ function h2b(hexs :Hexs) :Blob {
 }
 
 function isroll(x :any) :boolean {
-    return islist(x) || isblob(x)
+    if (isblob(x)) return true;
+    if (islist(x)) {
+        if (x.length == 0) return true;
+        if (x.filter(r=>isroll(r)).length > 0) return true;
+    }
+    return false
 }
 
 function islist(x :any) : boolean {

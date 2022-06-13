@@ -30,6 +30,27 @@ function form_tock(x :Roll) :Okay<Tock> {
     }
 }
 
+function form_tack(x :Roll) :Okay<Tick> {
+    aver(_=>isroll(x), `must be a roll`)
+    try {
+        need(islist(x), `must be a list`)
+        need(x.length == 3, `must be len 3`)
+        let tock = x[0] as Roll
+        let neck = x[1] as Roll
+        let feet = x[2] as Roll
+        need(okay(form_tock(tock)), `tack.tock is not well-formed`)
+        // neck is
+        // neck len 0-128
+        // neck has hashes
+        // feet is list
+        // feet has hashes
+        // feet merkelize to neck
+        // neck merkelize to root
+    } catch (e) {
+        return fail(e.message)
+    }
+}
+
 function form_tick(x :Roll) :Okay<Tick> {
     aver(_=>isroll(x), `must be a roll`)
     try {
