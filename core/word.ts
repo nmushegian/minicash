@@ -12,7 +12,7 @@ export type {
     Okay,
     Bnum, Blob, Roll,
     Sign, Pubk,
-    Mesh, Mish, Cash,
+    Mesh, Lock, Cash,
     Tick, Tock, Tack,
     Move, Bill,
     Stat, Know,
@@ -65,13 +65,16 @@ function isblob(x :any) : boolean {
     return Buffer.isBuffer(x)
 }
 
-// len 20
-function mish(x :Blob) :Mish {
-    return hash(x).slice(12, 32)
+function chop(x :Blob, k :number) :Blob {
+    need(x.length >= k, `chop: x.len must be <= k`)
+    return x.slice(x.length - k, x.length)
 }
-// len 24
+
+function mish(x :Blob) :Lock {
+    return chop(hash(x), 20)
+}
 function mesh(x :Blob) :Mesh {
-    return hash(x).slice(8, 32)
+    return chop(hash(x), 24)
 }
 
 function _merk(x :Blob[]) :Hash {
@@ -118,12 +121,12 @@ type Move = [
     Sign   // signature
 ]
 type Bill = [
-    Mish,  // pkeyhash
+    Lock,  // pkeyhash
     Cash   // minicash
 ]
 
 type Mesh = Blob24 // Medi hash
-type Mish = Blob20 // Mini hash
+type Lock = Blob20 // "address" (pubkeyhash)
 type Cash = Blob7
 type Byte = Blob1
 

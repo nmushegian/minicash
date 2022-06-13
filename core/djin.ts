@@ -1,10 +1,11 @@
+
 // engine
 
 import {
     Okay, pass, fail, toss,
     b2h, h2b,
     blob, roll,
-    Mish, Mesh, mesh,
+    Mesh, mesh,
     Mail
 } from './word.js'
 
