@@ -12,10 +12,11 @@ export {
 
 class Rock {
     // tmp: hexs -> hexs
-    _db = {}
+    _db
 
-    load(path:string) { toss(`todo`) }
-    save(path:string) { toss(`todo`) }
+    constructor(path:string) {
+        this._db = {}
+    }
 
     repr() :Roll {
         return [] // sorted kv pairs for inspection

@@ -100,8 +100,7 @@ class Djin {
 
     async *spin(mails:Mail[]) :AsyncGenerator<Okay<Mail[]>, null, void> {
         for (let mail of mails) {
-            let outs = this.turn(mail)
-            yield outs
+            yield this.turn(mail)
         }
         return null
     }

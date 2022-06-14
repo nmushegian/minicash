@@ -6,7 +6,7 @@ import {
 import { Rock } from '../core/rock.js'
 
 test('rock', t=>{
-    let rock = new Rock()
+    let rock = new Rock('')
     let empty = rock._get(h2b('ff'))
     t.ok(empty, 'must be emptyblob initialized')
     t.ok(isblob(empty), 'must be emptyblob initialized')
