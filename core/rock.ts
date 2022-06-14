@@ -14,26 +14,22 @@ export {
 // ['tock', tockhash]    -> tock
 // ['tack', tockhash, i] -> tack
 
-// ['thin', tockhash] -> stat
-// ['full', tockhash] -> snap
-// ['know', tockhash] -> PV | DV | PN | DN
+// ['thin', tockhash]    -> stat
+// ['full', tockhash]    -> snap
+// ['know', tockhash]    -> PV | DV | PN | DN
 
 // pure kvdb implemented by Tree
 // ['tree', snap] -> (utxo -> [[hash,cash],burn])
 
-// not necessary, but useful:
-// simple tree:
-//    height reverse index
-//      tockhash -> height
-//    spent reverse index
-//      ['used', utxo] -> (tickhash,tockhash)[]  // all forks
-//    next tock reverse index
-//      ['next', tockhash] -> tockhash[]
-// immu pages:
-//    early dup check (seen tx)
-//      ['conf', snap] -> tickhash -> tockhash
-//    fast common ancestor (tock in this branch)
-//      ['hist', snap] -> tockhash -> bool
+// not necessary, but useful tree reverse indices
+// height reverse index for sanity
+//    ['time', tockhash] -> time
+// spent by for stat node
+//    ['used', utxo]     -> (tickhash,tockhash)[]
+// next fork tree for smarter sync retry
+//    ['next', tockhash] -> tockhash[]
+// per-branch tock set for fast common ancestor
+//    ['hist', snap]     -> tockhash -> bool
 
 class Rock {
     _db
