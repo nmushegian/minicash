@@ -79,10 +79,9 @@ class Djin {
         }
     }
 
-    async *spin(mails:Memo[]) :AsyncGenerator<Okay<Memo[]>, null, void> {
-        for (let mail of mails) {
-            yield this.turn(mail)
+    async *spin(memos :Memo[]) {
+        for (let memo of memos) {
+            yield this.turn(memo)
         }
-        return null
     }
 }

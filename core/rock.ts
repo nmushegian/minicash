@@ -22,10 +22,8 @@ export {
 // pure kvdb implemented by Tree
 // ['tree', snap] -> (bill -> leaf)
 
-// not necessary, but useful tree reverse indices
+// not necessary, but useful tree reverse indices:
 
-// height reverse index for sanity
-//    ['time', tockhash] -> time
 // next fork tree for smarter sync loop, sorted set by work
 //    ['next', tockhash, work, tockhash]  ->  bool
 // per-branch tock set for fast common ancestor
