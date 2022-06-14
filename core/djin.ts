@@ -25,31 +25,30 @@ class Djin {
         // sync tree from rock
     }
 
+    read(memo :Memo) :Okay<Memo> {
+        let [line, body] = memo
+        try { switch (line.toString()) {
+            case 'ask/tocks': {
+                toss(`todo`)
+                return pass([Buffer.from('say/tocks'), []])
+            }
+            case 'ask/tacks': {
+                toss(`todo`)
+            }
+            case 'ask/ticks': {
+                toss(`todo`)
+            }
+            default: toss(`panic/unrecognized memo line ${line}`)
+        } } catch (e) {
+            return fail(e.reason)
+        }
+    }
+
     turn(memo :Memo) :Okay<Memo[]> {
         let [line, body] = memo
 
         try { switch (line.toString()) {
-
-            case 'ann/ticks': {
-                // vinx_tick
-                // rock.etch
-                toss(`todo`)
-            }
-
-            case 'ask/tocks': {
-                // query
-                toss(`todo`)
-            }
-            case 'ask/tacks': {
-                // query
-                toss(`todo`)
-            }
-            case 'ask/ticks': {
-                // query
-                toss(`todo`)
-            }
-
-            case 'res/tocks': {
+            case 'say/tocks': {
                 // ...
                 // tock_form
                 // tock_vinx
@@ -57,7 +56,7 @@ class Djin {
                 // outs << vult_thin
                 // send outs
             }
-            case 'res/tacks': {
+            case 'say/tacks': {
                 // ...
                 // tack_form
                 // tack_vinx
@@ -66,7 +65,7 @@ class Djin {
                 // outs << vult_full
                 // send outs
             }
-            case 'res/ticks': {
+            case 'say/ticks': {
                 // ...
                 // tick_form
                 // tick_vinx
@@ -74,13 +73,10 @@ class Djin {
                 // later, do something smarter to know what vult to retry
                 // for now, dumb sync will retry from ask/tocks
             }
-
             default: toss(`unrecognized mail line: ${line}`)
-
-        } /* switch */ } catch(e) {
+        } } catch(e) {
             return fail(e.message)
         }
-        toss(`panic/unreachable`)
     }
 
     async *spin(mails:Memo[]) :AsyncGenerator<Okay<Memo[]>, null, void> {

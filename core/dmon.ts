@@ -36,13 +36,14 @@ class Dmon {
             // assert line is ask/* or ann/*
 
             // djin will give:
-            //   ask/tocks -> res/tocks back
-            //   ask/tacks -> res/tacks back
-            //   ask/ticks -> res/ticks back
-            //   ann/ticks -> ann/ticks emit
+            //   ask/tocks -> say/tocks back
+            //   ask/tacks -> say/tacks back
+            //   ask/ticks -> say/ticks back
+            //   * -> end/why reason    back  // disconnect
 
-            let outs = okay(this.djin.turn(memo))
-            back(outs)
+            let out = okay(this.djin.read(memo))
+            back(out)
+
         })
     }
 
@@ -54,7 +55,7 @@ class Dmon {
             // one response from each peer
             this.plug.emit(memo('ask/tocks', init), memo => {
                 // one step can emit more than one request memo.
-                // send requesta and apply those responses, but only one layer.
+                // send requests and apply those responses, but only one layer.
                 // retry via sync loop rather than trying to follow
                 // branches in an intelligent way
                 let outs = okay(this.djin.turn(memo))
