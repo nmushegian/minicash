@@ -1,12 +1,12 @@
 
 import { WebSocketServer } from 'ws'
 import {
-    Mail, Memo
+    Blob, blob,
+    Mail, Memo, memo,
+    Peer
 } from './word.js'
 
 export { Plug }
-
-type Peer = string
 
 class Plug {
     socks
@@ -15,11 +15,11 @@ class Plug {
         this.socks = new WebSocketServer({ port });
         this.peers = {}
     }
-    when( what:( (mail:Mail,back:((mail:Mail)=>void) )=>void) )
+    when( what:( (memo:Memo,back:((memo:Memo)=>void) )=>void) )
     {
         this.socks.on('connection', sock => {
-            let peer = 'sock.url'
-            this.link(peer, sock)
+            let peer = Buffer.from('sock.url')
+            //this.link(peer, sock)
             sock.on(mail => {
                 let [_, memo] = mail // peer enforced in other transport types
                 what(memo, outs => {
@@ -27,7 +27,7 @@ class Plug {
                         sock.send(out)
                         let [oline, obody] = out as Memo;
                         if (oline.slice(0,3).equals(Buffer.from('end'))) {
-                            this.drop(peer)
+                            //this.drop(peer)
                         }
                     }
                 })
@@ -40,6 +40,7 @@ class Plug {
     }
 
     // todo link/drop cleanup etc
+    /*
     link(peer :Peer, sock:any) {
         this.peers[peer] = sock
     }
@@ -48,6 +49,7 @@ class Plug {
         delete this.peers[peer]
     }
     pals() :Peer[] {
-        return Object.keys(this.peers)
+        return Object.keys(this.peers).map(blob)
     }
+    */
 }

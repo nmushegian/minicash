@@ -1,8 +1,9 @@
 
 import {
-    Roll, Mail, Tock,
+    Roll, blob,
+    Memo, memo,
+    Tock,
     okay,
-    blob,
 } from './word.js'
 
 import { Rock } from './rock.js'
@@ -45,10 +46,6 @@ class Task {
         // if (bane)
         //   mark definitely-invalid all subsequent tocks in chain
     }
-}
-
-function memo(line :string, body :Roll) :Mail {
-    return [blob(''), [Buffer.from(line), body]]
 }
 
 class Dmon {

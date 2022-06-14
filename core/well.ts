@@ -10,7 +10,6 @@ export {
     form_tock,
 }
 
-
 function form_tock(x :Roll) :Okay<Tock> {
     aver(_=>isroll(x), `must be a roll`)
     try {
@@ -39,13 +38,15 @@ function form_tack(x :Roll) :Okay<Tick> {
         let neck = x[1] as Roll
         let feet = x[2] as Roll
         need(okay(form_tock(tock)), `tack.tock is not well-formed`)
-        // neck is
-        // neck len 0-128
-        // neck has hashes
-        // feet is list
-        // feet has hashes
-        // feet merkelize to neck
-        // neck merkelize to root
+        need(islist(neck), `neck must be a list`)
+        need(neck.length <= 2**7, `neck must have len <= 2^7`)
+        need(neck.every(isblob), `neck must be a list of blobs`)
+        need(neck.every(b=>b.length == 24), `neck must be list of hashes`)
+        need(islist(feet), `feet must be a list`)
+        need(feet.every(isblob), `feet must be a list of blobs`)
+        need(feet.every(b=>b.length == 24), `feet must be list of hashes`)
+        need(feet.length <= 2**17, `feet must have len <= 2^17`)
+        // merkle root checked in vinx_tack
     } catch (e) {
         return fail(e.message)
     }

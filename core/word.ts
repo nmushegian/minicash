@@ -26,7 +26,8 @@ export {
     isblob, islist, isroll,
     b2h, h2b,
     mash, mosh,
-    sign, scry
+    sign, scry,
+    memo
 }
 
 function need(b :boolean, s :string) {
@@ -159,9 +160,9 @@ type Know
 // tick can be in more than one (candidate) tack
 // tack can be in more than one (candidate) tock
 type Tack = [
-    Mash   // head  tockhash these tacks belongs to
+    Tock   // head  tock these ticks belong to
   , Mash[] // neck  merkle nodes at depth 7 (empty if <1024 ticks in tock)
-  , Mash[] // feet  tickhash in chunks of 1024 (last tack in tock can be less)
+  , Mash[] // feet  tickhashes
 ]
 
 type Peer = Blob  // opaque peer ID
@@ -174,6 +175,10 @@ type Memo = [
     Blob, // line  type
     Roll  // body  data
 ]
+
+function memo(line :string, body :Roll) :Mail {
+    return [blob(''), [Buffer.from(line), body]]
+}
 
 type Blob32 = Blob;
 type Blob20 = Blob;
