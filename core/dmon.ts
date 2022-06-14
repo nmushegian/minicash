@@ -44,22 +44,27 @@ class Dmon {
         })
     }
 
-    async *sync() {
-        setInterval(()=>{
+    sync(freq=5000) {
+        return setInterval(()=>{
             // get the best possibly-valid tocks from peers
             // to update our set of leads
             let init = h2b('') // todo tock zero
             this.plug.emit(memo('ask/tocks', init), mail => {
                 // assert response is what we expect
+                // form_tock, vinx_tock, rock.etch
                 // vult_thin (updates possibly-valid)
                 // for top K branches
                 //    if we need tacks,
-                //      plug.emit(memo('ask/tacks', () => {}))
+                //      plug.emit(memo('ask/tacks', () => {
+                //        form_tack, vinx_tack, rock.etch
+                //      }))
                 //    if we need ticks,
-                //      plug.emit(memo('ask/ticks', () => {}))
+                //      plug.emit(memo('ask/ticks', () => {
+                //        form_tick, vinx_tick, rock.etch
+                //      }))
                 //    try vult_full (maybe updates definitely-valid)
             })
-        }, 5000)
+        }, freq)
     }
 
 }
