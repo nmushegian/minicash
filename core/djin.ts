@@ -40,53 +40,49 @@ class Djin {
         let [line, body] = mail
 
         try { switch (line.toString()) {
+
             case 'ann/ticks': {
                 // relay if valid-in-context with > relay fee
+                // rock.etch(tick)
                 toss(`todo`)
             }
 
             case 'ask/tocks': {
-                let init = body
-                // grab tocks from rock.tocks
-                let tocks = []
-                return pass([blob('ans/tocks'), tocks])
+                // query
+                toss(`todo`)
             }
             case 'ask/tacks': {
-                let [tockid, tickidx] = body
-                // grab tick IDs from rock.tacks
-                let feet = []
-                let neck = []
-                toss(`todo`)// ['ans/tacks', neck, feet]
+                // query
+                toss(`todo`)
             }
             case 'ask/ticks': {
-                let tickids = body
-                // grab ticks from rock.ticks
-                let ticks = []
-                toss(`todo`)//['ans/ticks', ticks]
+                // query
+                toss(`todo`)
             }
 
             case 'res/tocks': {
                 // ...
                 // tock_form
                 // tock_vinx
-                // rock.tock_add
-                // outs = this.step(tock)
+                // rock.etch
+                // outs << vult_thin
                 // send outs
             }
             case 'res/tacks': {
                 // ...
                 // tack_form
                 // tack_vinx
-                // rock.tack_add
-                // outs = this._temt(tack.head)
+                // rock.etch
+                // outs << vult_part
+                // outs << vult_full
                 // send outs
             }
             case 'res/ticks': {
                 // ...
                 // tick_form
                 // tick_vinx
-                // rock.tick_add
-                // later, do something smarter to know what to retry
+                // rock.etch
+                // later, do something smarter to know what vult to retry
                 // for now, dumb sync will retry from ask/tocks
             }
 

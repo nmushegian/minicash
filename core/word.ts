@@ -16,7 +16,7 @@ export type {
     Tick, Tock, Tack,
     Move, Bill,
     Stat, Know,
-    Snap,
+    Snap, Fees,
     Peer, Mail,
 }
 
@@ -138,7 +138,9 @@ type Tock = [
     Fuzz   // fuzz  blob7  miner nonce
 ]
 type Time = Blob7
-type Fuzz = Blob7
+type Fuzz = Blob
+7
+type Fees = Bnum
 
 type Stat = [
     Bnum,  // work  cumulative work

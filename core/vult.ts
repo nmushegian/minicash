@@ -8,8 +8,8 @@
 
 import {
     Okay, pass, fail,
-    Stat, Know,
-    Tick, Tock,
+    Bnum, Stat, Know,
+    Tick, Tock, Tack,
 } from './word.js'
 
 import { Rock } from './rock.js'
@@ -28,6 +28,12 @@ export {
 //   insert stat
 //   insert know = PV
 function vult_thin(rock :Rock, tree :Tree, tock:Tock) :Okay<Stat> {
+    return fail(`todo`)
+}
+
+// applies a part of a block
+// returns net fees
+function vult_part(rock :Rock, tree :Tree, tack :Tack) :Okay<Bnum> {
     return fail(`todo`)
 }
 

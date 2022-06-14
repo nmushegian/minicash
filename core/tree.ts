@@ -9,7 +9,7 @@ import {
     Mash,
     Bnum,
     Bill,
-    Stat, Snap, Know,
+    Stat, Snap, Know, Fees,
 } from './word.js'
 
 import {
@@ -62,8 +62,8 @@ class Tree {
     read_know(tosh :Mash) :Okay<Know> { return fail(`todo`) }
     grow_know(tosh :Mash, know :Know) { return fail(`todo`) }
 
-    // ['part', tockhash, tackhash] -> snap
-    read_part(tosh :Mash, tash :Mash) :Okay<Snap> { return fail(`todo`) }
+    // ['part', tockhash, tackhash] -> [snap,fees]
+    read_part(tosh :Mash, tash :Mash) :Okay<[Snap,Fees]> { return fail(`todo`) }
     grow_part(tosh :Mash, tash :Mash, snap :Snap) { return fail(`todo`) }
 
     // ['full', tockhash] -> snap
