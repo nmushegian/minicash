@@ -12,18 +12,18 @@ test('rock', t=>{
     t.ok(isblob(empty), 'must be emptyblob initialized')
     t.equal(0, empty.length, 'must be emptyblob initialized')
 
-    rock.etch([h2b('ff')], h2b('ee'))
-    let out = rock.read([h2b('ff')])
+    rock.etch(h2b('ff'), h2b('ee'))
+    let out = rock.read(h2b('ff'))
     t.deepEqual(out, h2b('ee'))
 
     // can etch same value
-    rock.etch([h2b('ff')], h2b('ee'))
-    out = rock.read([h2b('ff')])
+    rock.etch(h2b('ff'), h2b('ee'))
+    out = rock.read(h2b('ff'))
     t.deepEqual(out, h2b('ee'))
 
     // can't modify it
     t.throws(()=>{
-        rock.etch([h2b('ff')], h2b('00'))
-    }, 'panic')
+        rock.etch(h2b('ff'), h2b('00'))
+    }, 'must not modify same key with new value')
 
 })

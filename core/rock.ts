@@ -53,24 +53,16 @@ class Rock {
     }
 
     // insert-only
-    // assumes a flat roll of blobs with fixed sizes
-    etch(rk :Roll, rv :Roll) :Roll {
-        aver(_=>islist(rk), `etch rollkey must be a list`)
-        aver(_=>rk.every(isblob), `etch rollkey must be flat list`)
-        let v = roll(rv)
-        let k = roll(rk)
-        let pv = this._db.get(k)
-        if (pv && !bleq(v, pv)) {
+    etch(k :Blob, v :Blob) {
+        let pv = this.read(k)
+        console.log(pv)
+        if (pv.length > 0 && !bleq(v, pv)) {
             toss(`panic: etch key with new value`)
         }
         this._set(k, v)
-        return rv
     }
 
-    read(rk :Roll) :Roll {
-        aver(_=>islist(rk), `read rollkey must be a list`)
-        aver(_=>rk.every(isblob), `read rollkey must be a flat list`)
-        let k = roll(rk)
+    read(k :Blob) :Blob {
         return this._get(k)
     }
 

@@ -5,11 +5,7 @@ import * as immu from 'immutable'
 import {
     Okay, pass, fail,
     Blob, b2h, h2b,
-    Tock, Tack,
-    Mash,
-    Bnum,
-    Bill,
-    Stat, Snap, Know, Fees,
+    Snap
 } from './word.js'
 
 import {
@@ -21,19 +17,19 @@ export {
 }
 
 // mutable handle
-class Leaf {
+class Twig {
     _mut
     constructor(prev) {
         this._mut = prev.asMutable()
     }
     get(k :Blob) :Blob {
-        let skey = k.toString('binary')
+        let skey = b2h(k)
         let val = this._mut.get(skey)
         if (val) return val
         else return h2b('')
     }
     set(k :Blob, v :Blob) {
-        let skey = k.toString('binary')
+        let skey = b2h(k)
         this._mut.set(skey, v)
     }
     seal() {
@@ -54,20 +50,21 @@ class Tree {
         this._snaps = { "": immu.Map() } // todo, make it in lmdb
     }
 
-    read_page(copy :Snap, key :Blob) :Okay<Blob> {
-        let page = this._snaps[b2h(copy)]
-        if (!page) return fail(`read_page: no such snap: ${copy}`)
+    read_twig(copy :Snap, key :Blob) :Okay<Blob> {
+        let snap = this._snaps[b2h(copy)]
+        if (!snap) return fail(`read_twig: no such snap: ${copy}`)
         else {
-            let leaf = new Leaf(page) // readonly
-            let val = leaf.get(key)
+            let twig = new Twig(snap) // todo, readonly
+            let val = twig.get(key)
             return pass(val)
         }
     }
-    grow_page(copy :Snap, edit :((Leaf) => void)) :Okay<Snap> {
+
+    grow_twig(copy :Snap, grow :((Twig) => void)) :Okay<Snap> {
         let prev = this._snaps[b2h(copy)]
-        let leaf = new Leaf(prev)
-        edit(leaf)
-        let next = leaf.seal()
+        let twig = new Twig(prev)
+        grow(twig)
+        let next = twig.seal()
         let snap = b2h(this._nextsnap())
         this._snaps[snap] = next
         return pass(h2b(snap))
