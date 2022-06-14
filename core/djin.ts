@@ -31,8 +31,8 @@ class Djin {
         try { switch (line.toString()) {
 
             case 'ann/ticks': {
-                // relay if valid-in-context with > relay fee
-                // rock.etch(tick)
+                // vinx_tick
+                // rock.etch
                 toss(`todo`)
             }
 

@@ -51,24 +51,16 @@ class Dmon {
             // get the best possibly-valid tocks from peers
             // to update our set of leads
             let init = h2b('') // todo tock zero
-            this.plug.emit(memo('ask/tocks', init), mail => {
-                // assert response is what we expect
-
-                // form_tock, vinx_tock, rock.etch
-                // vult_thin (updates possibly-valid)
-
-                // for top K branches,
-                //    //  maybe updates definitely-valid; requests what it needs next
-                //    wants = vult_full
-                //    plug.emit(wants, memo => {
-                //      if (tack) {
-                //        form_tack; vinx_tack; etch/grow
-                //      }
-                //      if (ticks) {
-                //        form_tick; vinx_tick;
-                //      }
-                //      // retry vult next cycle
-                //    })
+            // one response from each peer
+            this.plug.emit(memo('ask/tocks', init), (memo) => {
+                // one step can emit more than one request mail.
+                // send requesta and apply those responses, but only one layer.
+                // retry via sync loop rather than trying to follow
+                // branches in an intelligent way
+                let outs = okay(this.djin.turn(memo))
+                outs.forEach(out => this.plug.emit(out, next => {
+                     this.djin.turn(next)
+                }))
             })
         }, freq)
     }

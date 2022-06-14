@@ -62,3 +62,4 @@ function vinx_tock(prev :Tock, tock :Tock) :Okay<Bnum> {
     // return pass(work)
     return fail('todo')
 }
+
