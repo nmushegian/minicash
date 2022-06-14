@@ -2,7 +2,7 @@ import { test } from 'tapzero'
 
 import {
     okay,
-    h2b,
+    h2b, bleq,
     Snap
 } from '../core/word.js'
 
@@ -20,6 +20,6 @@ test('leaf keys', t=>{
     console.log('next', next)
     let val = okay(tree.read_page(next, h2b('ff')))
     console.log(val)
-    t.ok(val.equals(h2b('ff')), `must return same key as was set`)
+    t.ok(bleq(val, h2b('ff')), `must return same key as was set`)
 })
 

@@ -1,6 +1,6 @@
 import {
     Okay, okay, toss, pass, fail, need, aver,
-    Blob, isblob, h2b, b2h, chop,
+    Blob, bleq, blen, isblob, h2b, b2h, chop,
     Roll, islist, isroll, roll, unroll, rmap,
     Hexs,
     Hash, hash,
@@ -24,7 +24,7 @@ export type {
 export {
     okay, toss, pass, fail, need, aver,
     roll, unroll, rmap,
-    isblob, islist, isroll,
+    bleq, blen, isblob, islist, isroll,
     b2h, h2b,
     mash, mosh,
     sign, scry,
