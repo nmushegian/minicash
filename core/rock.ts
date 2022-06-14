@@ -10,26 +10,26 @@ export {
     Rock
 }
 
+// core data
+
 // ['tick', tickhash]    -> tick
 // ['tock', tockhash]    -> tock
 // ['tack', tockhash, i] -> tack
 
 // ['thin', tockhash]    -> stat
 // ['full', tockhash]    -> snap
-// ['know', tockhash]    -> PV | DV | PN | DN
 
 // pure kvdb implemented by Tree
-// ['tree', snap] -> (utxo -> [[hash,cash],burn])
+// ['tree', snap] -> (bill -> leaf)
 
 // not necessary, but useful tree reverse indices
+
 // height reverse index for sanity
 //    ['time', tockhash] -> time
-// spent by for stat node
-//    ['used', utxo]     -> (tickhash,tockhash)[]
-// next fork tree for smarter sync retry
-//    ['next', tockhash] -> tockhash[]
+// next fork tree for smarter sync loop, sorted set by work
+//    ['next', tockhash, work, tockhash]  ->  bool
 // per-branch tock set for fast common ancestor
-//    ['hist', snap]     -> tockhash -> bool
+//    ['hist', snap] -> (tockhash -> bool) // pure map
 
 class Rock {
     _db

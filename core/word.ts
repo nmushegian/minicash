@@ -90,11 +90,10 @@ type Bill = [
     Cash   // minicash
 ]
 
-type Mash = Blob24 // Medi hash
+type Mash = Blob24 // content hash
 type Lock = Blob20 // "address" (pubkeyhash)
-type Cash = Blob7
+type Cash = Blob7  // amount up to 2^53
 type Byte = Blob1
-
 
 type Tock = [
     Mash,  // prev  blob24 previous tockhash
@@ -102,9 +101,9 @@ type Tock = [
     Time,  // time  blob7  padded timestamp
     Fuzz   // fuzz  blob7  miner nonce
 ]
+
 type Time = Blob7
-type Fuzz = Blob
-7
+type Fuzz = Blob7
 type Fees = Bnum
 
 type Mode
@@ -113,11 +112,22 @@ type Mode
  | 'pool'
  | 'stat'
 
-type Stat = [
-    Bnum,  // work  cumulative work
-    Bnum,  // left  remaining subsidy  (initial: 2^53-1)
-    Bnum,  // mint  subsidy this block
+type Leaf = [
+    Lock, // address
+    Cash, // amount
+    Time, // expiry
+    Mash, // spent by tick
+    Mash  // spent in tock
 ]
+
+type Stat = [
+    Work,  // work  cumulative work
+    Cash,  // left  remaining subsidy  (initial: 2^53-1)
+    Cash,  // mint  subsidy this block
+    Know,  // know  state of knowledge about validity
+]
+
+type Work = Bnum
 
 type Snap = Blob // pure map snapshot internal representation
 
@@ -134,6 +144,7 @@ type Tack = [
 ]
 
 type Peer = Blob  // opaque peer ID
+
 type Mail = [
     Peer, // peer  from
     Memo  // memo  [line, body]  (type, data)
