@@ -53,15 +53,15 @@ class Dmon {
             // to update our set of leads
             let init = h2b('') // pick a 'finalized' block in our best chain
             // one response from each peer
-            this.plug.emit(memo('ask/tocks', init), lead => {
+            this.plug.emit(memo('ask/tocks', init), ([line, body]) => {
                 // one step can emit more than one request memo.
                 // send requests and apply those responses, but only one layer.
                 // retry via sync loop rather than trying to follow
                 // branches in an intelligent way
-                let head = lead[0] // follow lead until your last possibly-valid
-                let outs = okay(this.djin.turn(head))
-                outs.forEach(out => this.plug.emit(out, next => {
-                     this.djin.turn(next)
+                let next = body[0] as Memo // follow lead until your last possibly-valid
+                let outs = okay(this.djin.turn(next))
+                outs.forEach(out => this.plug.emit(out, then => {
+                     this.djin.turn(then)
                 }))
             })
         }, freq)
