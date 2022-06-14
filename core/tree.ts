@@ -54,19 +54,6 @@ class Tree {
         this._snaps = { "": immu.Map() } // todo, make it in lmdb
     }
 
-    // ['thin', tockhash] -> stat
-    read_thin(tosh :Mash) :Okay<Stat> { return fail(`todo`) }
-    grow_thin(tosh :Mash, stat :Stat) { return fail(`todo`) }
-
-    // ['know', tockhash] -> PV | DV | PN | DN
-    read_know(tosh :Mash) :Okay<Know> { return fail(`todo`) }
-    grow_know(tosh :Mash, know :Know) { return fail(`todo`) }
-
-    // ['full', tockhash] -> snap
-    read_full(tosh :Mash) :Okay<Snap> { return fail(`todo`) }
-    grow_full(tosh :Mash, snap :Snap) { return fail(`todo`) }
-
-    // ['page', snap] -> utxo -> [[hash,cash],burn]
     read_page(copy :Snap, key :Blob) :Okay<Blob> {
         let page = this._snaps[b2h(copy)]
         if (!page) return fail(`read_page: no such snap: ${copy}`)
@@ -92,19 +79,6 @@ class Tree {
         return hexblob
     }
 
-    // not necessary, but useful:
-    // simple tree:
-    //    height reverse index
-    //      tockhash -> height
-    //    spent reverse index
-    //      ['used', utxo] -> (tickhash,tockhash)[]  // all forks
-    //    next tock reverse index
-    //      ['next', tockhash] -> tockhash[]
-    // immu pages:
-    //    early dup check (seen tx)
-    //      ['conf', snap] -> tickhash -> tockhash
-    //    fast common ancestor (tock in this branch)
-    //      ['hist', snap] -> tockhash -> bool
 
 }
 

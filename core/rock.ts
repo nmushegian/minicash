@@ -1,4 +1,4 @@
-// content-addressed data (later, parallel read and write)
+// content-addressed data and other deterministic insert-only data
 
 import {
     Okay, okay, pass, fail, toss, aver,
@@ -9,6 +9,31 @@ import {
 export {
     Rock
 }
+
+// ['tick', tickhash]    -> tick
+// ['tock', tockhash]    -> tock
+// ['tack', tockhash, i] -> tack
+
+// ['thin', tockhash] -> stat
+// ['full', tockhash] -> snap
+// ['know', tockhash] -> PV | DV | PN | DN
+
+// pure kvdb implemented by Tree
+// ['tree', snap] -> (utxo -> [[hash,cash],burn])
+
+// not necessary, but useful:
+// simple tree:
+//    height reverse index
+//      tockhash -> height
+//    spent reverse index
+//      ['used', utxo] -> (tickhash,tockhash)[]  // all forks
+//    next tock reverse index
+//      ['next', tockhash] -> tockhash[]
+// immu pages:
+//    early dup check (seen tx)
+//      ['conf', snap] -> tickhash -> tockhash
+//    fast common ancestor (tock in this branch)
+//      ['hist', snap] -> tockhash -> bool
 
 class Rock {
     _db
