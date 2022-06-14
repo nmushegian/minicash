@@ -22,17 +22,7 @@ class Djin {
     constructor(rock :Rock) {
         this.rock = rock
         this.tree = new Tree(this.rock)
-
-        let tickzero = [[],[]]     // degenerate transaction
-        let tockzero = [
-            h2b('00'.repeat(24)), // seed0
-            mash(roll(tickzero)),  // merkle root
-            h2b('00'.repeat(7)),  // timestamp
-            h2b('00'.repeat(7))   // seed1
-        ]
-        //this.rock.tick_add(tickzero)
-        //this.rock.tock_add(tockzero)
-        //vult_full(this.rock, this.tree, this.tockzero, [this.tickzero])
+        // sync tree from rock
     }
 
     turn(memo :Memo) :Okay<Memo[]> {

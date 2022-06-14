@@ -17,11 +17,6 @@ class Rock {
         this._db = new Map()
     }
 
-    repr() :Roll {
-        toss(`todo`)
-        return [] // sorted kv pairs for inspection
-    }
-
     // emptyblob-initialized
     _get(key :Blob) :Blob {
         let skey = key.toString('binary')

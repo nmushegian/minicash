@@ -10,6 +10,7 @@ import {
     Okay, pass, fail,
     Bnum, Stat, Know,
     Tick, Tock, Tack,
+    Memo
 } from './word.js'
 
 import { Rock } from './rock.js'
@@ -20,26 +21,24 @@ export {
     vult_full
 }
 
-// only `desk` is represented as immutable set, one snap at each tock
+// only `page` (utxo set) is represented as immutable set, one snap at each tock
 // the rest are insert-only values, except `know` can have one-way
 // transition from possibly-* to definitly-*
 
 // !mutates tree:
 //   insert stat
 //   insert know = PV
-function vult_thin(rock :Rock, tree :Tree, tock:Tock) :Okay<Stat> {
+function vult_thin(rock :Rock, tree :Tree, tock:Tock) :Okay<Memo> {
     return fail(`todo`)
 }
 
-// !warn returns [true, false, _] result when vult fails
-//    - this is still a successful state transition which
-//      still causes a mutation:  possibly_valid -> definitely_invalid
-//    - [false, _, err] result is returned when there is *not enough info*
-//      this should be a panic at engine level as it should only attempt
-//      this when it has all the ticks available
+// !warn returns [true, false, _] result when vult fails in case:
+//      - missing info: returns needed mail
+//      - block invalidation: possibly_valid -> definitely_invalid
+//   - false result is an engine panic
 // !mutates tree:
 //   insert desk snap
 //   update know
-function vult_full(rock :Rock, tree:Tree, tock:Tock, ticks :Tick[]) :Okay<boolean> {
+function vult_full(rock :Rock, tree:Tree, tock:Tock, ticks :Tick[]) :Okay<Memo> {
     return fail(`todo`)
 }
