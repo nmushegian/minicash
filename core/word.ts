@@ -1,7 +1,7 @@
 import {
-    Okay, okay, toss, pass, fail,
-    Blob,
-    Roll, roll, unroll, rmap,
+    Okay, okay, toss, pass, fail, need, aver,
+    Blob, isblob, h2b, b2h, chop,
+    Roll, islist, isroll, roll, unroll, rmap,
     Hexs,
     Hash, hash,
     Sign, sign,
@@ -28,47 +28,6 @@ export {
     mash, mosh,
     sign, scry,
     memo
-}
-
-function need(b :boolean, s :string) {
-    if (!b) toss(s)
-}
-
-// precondition / panic assert
-// give lambda to defer eval when disabled
-let _aver = true //false;
-function aver(bf :((a?:any)=>boolean), s :string) {
-    if (_aver && !bf()) { console.log(`PANIC`); toss(s) }
-}
-
-function b2h(blob : Blob) :Hexs {
-    return blob.toString('hex')
-}
-
-function h2b(hexs :Hexs) :Blob {
-    return Buffer.from(hexs, 'hex')
-}
-
-function isroll(x :any) :boolean {
-    if (isblob(x)) return true;
-    if (islist(x)) {
-        if (x.length == 0) return true;
-        if (x.filter(r=>isroll(r)).length > 0) return true;
-    }
-    return false
-}
-
-function islist(x :any) : boolean {
-    return Array.isArray(x)
-}
-
-function isblob(x :any) : boolean {
-    return Buffer.isBuffer(x)
-}
-
-function chop(x :Blob, k :number) :Blob {
-    need(x.length >= k, `chop: x.len must be <= k`)
-    return x.slice(x.length - k, x.length)
 }
 
 function mosh(x :Blob) :Lock {
