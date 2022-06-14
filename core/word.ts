@@ -10,13 +10,13 @@ import {
 
 export type {
     Okay,
-    Bnum, Blob, Roll,
+    Bnum, Blob, Roll, Byte,
     Sign, Pubk,
     Mash, Lock, Cash,
     Tick, Tock, Tack,
     Move, Bill,
     Stat, Know,
-    Snap, Fees,
+    Snap, Fees, Work,
     Peer, Mail, Memo,
     Mode
 }
@@ -38,8 +38,8 @@ function mash(x :Blob) :Mash {
     return chop(hash(x), 24)
 }
 
-function memo(line :string, body :Roll) :Mail {
-    return [h2b(''), [Buffer.from(line), body]]
+function memo(line :string, body :Roll) :Memo {
+    return [Buffer.from(line), body]
 }
 
 function _merk(x :Blob[]) :Hash {

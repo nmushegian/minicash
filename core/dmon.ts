@@ -28,12 +28,12 @@ class Dmon {
 
     // handle requests
     serv() {
-        this.plug.when((mail,back) => {
+        this.plug.when((memo :Memo, back:((_:Memo)=>void)) => {
             // mail = form_roll(mail)
             // respond to requests immediately
             // this will be read-only turn, except ann/* does rock.etch
 
-            // assert mail is ask/* or ann/*
+            // assert line is ask/* or ann/*
 
             // djin will give:
             //   ask/tocks -> res/tocks back
@@ -41,7 +41,7 @@ class Dmon {
             //   ask/ticks -> res/ticks back
             //   ann/ticks -> ann/ticks emit
 
-            let outs = okay(this.djin.turn(mail))
+            let outs = okay(this.djin.turn(memo))
             back(outs)
         })
     }
@@ -52,8 +52,8 @@ class Dmon {
             // to update our set of leads
             let init = h2b('') // todo tock zero
             // one response from each peer
-            this.plug.emit(memo('ask/tocks', init), (memo) => {
-                // one step can emit more than one request mail.
+            this.plug.emit(memo('ask/tocks', init), memo => {
+                // one step can emit more than one request memo.
                 // send requesta and apply those responses, but only one layer.
                 // retry via sync loop rather than trying to follow
                 // branches in an intelligent way

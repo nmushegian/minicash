@@ -2,7 +2,7 @@
 
 import {
     Okay, pass, fail,
-    Bnum,
+    Cash, Byte, Work,
     Tick, Tock, Tack,
 } from './word.js'
 
@@ -14,7 +14,7 @@ export {
 // context is set of ticks that contain bills being moved
 // do not worry about internal consistency of context at this step
 // returns total fees if ok
-function vinx_tick(conx : Tick[], tick : Tick) : Okay<Bnum> {
+function vinx_tick(conx : Tick[], tick : Tick) : Okay<Cash> {
     // conx all are well-formed
     // tick is well-formed
     // let fees = 0
@@ -45,16 +45,16 @@ function vinx_tick(conx : Tick[], tick : Tick) : Okay<Bnum> {
 // Second, it is a crypto-heavy operation that makes sense to group conceptually
 // with the other crypto-related checks.
 // We include tock explicitly as a separate argument as guidance for other systems.
-// Returns which index the ticks in this tack begin at within this tock, determined
+// Returns which tack index this tack corresponds to in this tock
 // by examining which neck hash these ticks start at. (Ticks must start at index multiple
 // of 1024 and must be 'complete', ie, only the last chunk can be length <1024.
-function vinx_tack(tock :Tock, tack :Tack) :Okay<Bnum> {
+function vinx_tack(tock :Tock, tack :Tack) :Okay<Byte> {
     return fail(`todo`)
 }
 
 // context is previous tock
 // returns *marginal* work, the number you sum to get cumulative work
-function vinx_tock(prev :Tock, tock :Tock) :Okay<Bnum> {
+function vinx_tock(prev :Tock, tock :Tock) :Okay<Work> {
     // prev is well-formed
     // tock is well-formed
     // tock.prev = prev (this defines the context)

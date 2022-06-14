@@ -1,9 +1,8 @@
 // state transition
+// rock provides the base of content-addressed data that is available
 // we keep track of a tree of headers and thin state
-//   thin state is immutable except for `know`, which can invalidate a tock
-//   this immutable state tree is represented directly in our Tree
+//   this state tree is represented directly in our Rock
 // we also keep track of a full state of unspent UTXOs
-//   full state is immutable
 //   it is represented with a pure map, we store snaps per tock in Tree
 
 import {
@@ -24,11 +23,7 @@ export {
 // only `page` (utxo set) is represented as immutable set, one snap at each tock
 // the rest are insert-only values, except `know` can have one-way
 // transition from possibly-* to definitly-*
-
-// !mutates tree:
-//   insert stat
-//   insert know = PV
-function vult_thin(rock :Rock, tree :Tree, tock:Tock) :Okay<Memo> {
+function vult_thin(rock :Rock, tree :Tree, tock :Tock) :Okay<Memo> {
     return fail(`todo`)
 }
 
@@ -36,9 +31,6 @@ function vult_thin(rock :Rock, tree :Tree, tock:Tock) :Okay<Memo> {
 //      - missing info: returns needed mail
 //      - block invalidation: possibly_valid -> definitely_invalid
 //   - false result is an engine panic
-// !mutates tree:
-//   insert desk snap
-//   update know
-function vult_full(rock :Rock, tree:Tree, tock:Tock, ticks :Tick[]) :Okay<Memo> {
+function vult_full(rock :Rock, tree :Tree, tock :Tock) :Okay<Memo> {
     return fail(`todo`)
 }
