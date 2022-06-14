@@ -51,18 +51,22 @@ class Dmon {
             let init = h2b('') // todo tock zero
             this.plug.emit(memo('ask/tocks', init), mail => {
                 // assert response is what we expect
+
                 // form_tock, vinx_tock, rock.etch
                 // vult_thin (updates possibly-valid)
-                // for top K branches
-                //    if we need tacks,
-                //      plug.emit(memo('ask/tacks', () => {
-                //        form_tack, vinx_tack, rock.etch
-                //      }))
-                //    if we need ticks,
-                //      plug.emit(memo('ask/ticks', () => {
-                //        form_tick, vinx_tick, rock.etch
-                //      }))
-                //    try vult_full (maybe updates definitely-valid)
+
+                // for top K branches,
+                //    //  maybe updates definitely-valid; requests what it needs next
+                //    wants = vult_full
+                //    plug.emit(wants, memo => {
+                //      if (tack) {
+                //        form_tack; vinx_tack; etch/grow
+                //      }
+                //      if (ticks) {
+                //        form_tick; vinx_tick;
+                //      }
+                //      // retry vult next cycle
+                //    })
             })
         }, freq)
     }
