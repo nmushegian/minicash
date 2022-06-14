@@ -3,7 +3,7 @@
 import {
     Okay, pass, fail,
     Bnum,
-    Tick, Tock
+    Tick, Tock, Tack,
 } from './word.js'
 
 export {

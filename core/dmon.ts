@@ -13,8 +13,7 @@ import { Plug } from './plug.js'
 class Dmon {
     djin :Djin // can access .rock, .tree
     plug :Plug
-    _tasks
-    _taskc
+
     // data dir, wss port
     async init(path :string, port :number) {
         let  rock = new Rock(path)

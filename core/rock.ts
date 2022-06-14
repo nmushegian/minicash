@@ -1,9 +1,9 @@
 // content-addressed data (later, parallel read and write)
 
 import {
-    Okay, okay, pass, fail, toss,
-    Blob, Roll, blob, roll, unroll,
-    Tick, Tock, Mash, mash, b2h, h2b
+    Okay, okay, pass, fail, toss, aver,
+    Blob, Roll, blob, isblob, islist, roll, unroll,
+    Tick, Tack, Tock, Mash, mash, b2h, h2b
 } from './word.js'
 
 export {
@@ -15,7 +15,7 @@ class Rock {
     _db
 
     constructor(path:string) {
-        this._db = {}
+        this._db = new Map()
     }
 
     repr() :Roll {
@@ -24,54 +24,40 @@ class Rock {
 
     // emptyblob-initialized
     _get(key :Blob) :Blob {
-        let hkey = b2h(key)
-        let hval = this._db[hkey]
-        if (hval) return h2b(hval)
+        let skey = key.toString('binary')
+        let val = this._db.get(skey)
+        if (val) return val
         else return blob('')
     }
 
     // insert-only
     _set(key :Blob, val :Blob) {
-        let hkey = b2h(key)
-        let hval = b2h(val)
-        let pval = this._db[hkey]
+        let skey = key.toString('binary')
+        let pval = this._db.get(skey)
         if (!pval) {
-            this._db[hkey] = hval
+            this._db.set(skey, val)
         } else {
-            if (pval !== hval) {
+            if (!val.equals(pval)) {
                 toss(`panic, modifying insert-only value`)
-            }
+            } else {} // no-op, same value
         }
+        return val
     }
 
-    etch_tick(tick :Tick) :Mash {
-        let val = roll(tick)
-        let key = mash(val)
-        this._set(key, val)
-        return key
+    // assumes a flat roll of blobs with fixed sizes
+    etch(rk :Roll, rv :Roll) :Roll {
+        aver(_=>islist(rk), `etch rollkey must be a list`)
+        aver(_=>rk.every(isblob), `etch rollkey must be flat list`)
+        let v = roll(rv)
+        let k = roll(rk)
+        this._set(k, v)
+        return rv
     }
-    read_tick(tish :Mash) :Okay<Tick> {
-        let val = this._get(tish)
-        if (val.length) return pass(unroll(val))
-        else return fail(`no such tick`)
-    }
-
-    etch_tock(tock :Tock) :Mash {
-        let val = roll(tock)
-        let key = mash(val)
-        this._set(key, val)
-        return key
-    }
-    read_tock(tosh :Mash) :Okay<Tock> {
-        let val = this._get(tosh)
-        if (val.length) return pass(unroll(val))
-        else return fail(`no such tock in rock: ${tosh}`)
+    read(rk :Roll) :Roll {
+        aver(_=>islist(rk), `read rollkey must be a list`)
+        aver(_=>rk.every(isblob), `read rollkey must be a flat list`)
+        let k = roll(rk)
+        return this._get(k)
     }
 
-    /*
-    // [tockhash,idx] -> tickhash
-    tack_etch(tack :Tack, indx :number) :Mash
-    tack_read(tosh :Mash, indx :number) :Mash
-
-    */
 }
