@@ -31,12 +31,6 @@ function vult_thin(rock :Rock, tree :Tree, tock:Tock) :Okay<Stat> {
     return fail(`todo`)
 }
 
-// applies a part of a block
-// returns net fees
-function vult_part(rock :Rock, tree :Tree, tack :Tack) :Okay<Bnum> {
-    return fail(`todo`)
-}
-
 // !warn returns [true, false, _] result when vult fails
 //    - this is still a successful state transition which
 //      still causes a mutation:  possibly_valid -> definitely_invalid

@@ -1,4 +1,3 @@
-
 import {
     Roll,
     Memo, memo,
@@ -8,7 +7,6 @@ import {
 
 import { Rock } from './rock.js'
 import { Djin } from './djin.js'
-
 import { Plug } from './plug.js'
 
 // one sync task deals with one finite possibly-valid branch

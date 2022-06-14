@@ -51,7 +51,7 @@ class Tree {
     constructor(rock :Rock) {
         this.rock = rock
         this._snapc = 0
-        this._snaps = { "": immu.Map() }
+        this._snaps = { "": immu.Map() } // todo, make it in lmdb
     }
 
     // ['thin', tockhash] -> stat
@@ -61,10 +61,6 @@ class Tree {
     // ['know', tockhash] -> PV | DV | PN | DN
     read_know(tosh :Mash) :Okay<Know> { return fail(`todo`) }
     grow_know(tosh :Mash, know :Know) { return fail(`todo`) }
-
-    // ['part', tockhash, tackhash] -> [snap,fees]
-    read_part(tosh :Mash, tash :Mash) :Okay<[Snap,Fees]> { return fail(`todo`) }
-    grow_part(tosh :Mash, tash :Mash, snap :Snap) { return fail(`todo`) }
 
     // ['full', tockhash] -> snap
     read_full(tosh :Mash) :Okay<Snap> { return fail(`todo`) }
@@ -96,17 +92,19 @@ class Tree {
         return hexblob
     }
 
-    //  not necessary, but useful:
-
-    //    early dup check
-    //      ['tickpage', snap] -> tickhash -> tockhash)
-    //      read_tickpage
-    //      grow_tickpage
-
-    //    fast common ancestor
-    //      ['tockpage', snap] -> tockhash -> height
-    //      read_tockpage
-    //      grow_tockpage
+    // not necessary, but useful:
+    // simple tree:
+    //    height reverse index
+    //      tockhash -> height
+    //    spent reverse index
+    //      ['used', utxo] -> (tickhash,tockhash)[]  // all forks
+    //    next tock reverse index
+    //      ['next', tockhash] -> tockhash[]
+    // immu pages:
+    //    early dup check (seen tx)
+    //      ['conf', snap] -> tickhash -> tockhash
+    //    fast common ancestor (tock in this branch)
+    //      ['hist', snap] -> tockhash -> bool
 
 }
 

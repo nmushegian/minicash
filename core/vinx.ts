@@ -39,7 +39,7 @@ function vinx_tick(conx : Tick[], tick : Tick) : Okay<Bnum> {
 
 // context is previous tock
 // returns *marginal* work, the number you sum to get cumulative work
-function vinx_tock(prev :Tock, tock :Tock) : Okay<Bnum> {
+function vinx_tock(prev :Tock, tock :Tock) :Okay<Bnum> {
     // prev is well-formed
     // tock is well-formed
     // tock.prev = prev (this defines the context)
@@ -55,8 +55,7 @@ function vinx_tock(prev :Tock, tock :Tock) : Okay<Bnum> {
 // there has to be a vinx check to ensure the root is part of the tock specified.
 // Second, it is a crypto-heavy operation that makes sense to group conceptually
 // with the other crypto-related checks.
-// It returns which index this tack corresponds to in the tock.
 // We include tock explicitly as a separate argument as guidance for other systems.
-function vinx_tack(tock :Tock, tack :Tack) :Okay<Bnum> {
+function vinx_tack(tock :Tock, tack :Tack) :Okay<void> {
     return fail(`todo`)
 }

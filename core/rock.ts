@@ -11,7 +11,6 @@ export {
 }
 
 class Rock {
-    // tmp: hexs -> hexs
     _db
 
     constructor(path:string) {
@@ -19,6 +18,7 @@ class Rock {
     }
 
     repr() :Roll {
+        toss(`todo`)
         return [] // sorted kv pairs for inspection
     }
 
@@ -53,6 +53,7 @@ class Rock {
         this._set(k, v)
         return rv
     }
+
     read(rk :Roll) :Roll {
         aver(_=>islist(rk), `read rollkey must be a list`)
         aver(_=>rk.every(isblob), `read rollkey must be a flat list`)
