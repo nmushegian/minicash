@@ -18,6 +18,7 @@ export type {
     Stat, Know,
     Snap, Fees,
     Peer, Mail, Memo,
+    Mode
 }
 
 export {
@@ -105,6 +106,12 @@ type Time = Blob7
 type Fuzz = Blob
 7
 type Fees = Bnum
+
+type Mode
+ = 'thin'
+ | 'full'
+ | 'pool'
+ | 'stat'
 
 type Stat = [
     Bnum,  // work  cumulative work

@@ -2,6 +2,7 @@ import {
     Roll, h2b,
     Memo, memo,
     Tock,
+    Mode,
     okay,
 } from './word.js'
 
@@ -12,9 +13,10 @@ import { Plug } from './plug.js'
 class Dmon {
     djin :Djin
     plug :Plug
+    mode :Mode
 
     // data dir, wss port
-    async init(path :string, port :number) {
+    async init(path :string, port :number, mode :Mode = 'full') {
         let  rock = new Rock(path)
         this.djin = new Djin(rock)
         this.plug = new Plug(port)
