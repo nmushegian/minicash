@@ -1,6 +1,6 @@
 
 import {
-    Mail, Tock,
+    Roll, Mail, Tock,
     okay,
     blob,
 } from './word.js'
@@ -27,10 +27,10 @@ class Task {
     async step() {
         let init = this.lead[0]
         // djin.turn / vult_thin
-        this.plug.emit([blob(''), [Buffer.from('ask/tacks'), init]], mail => {
+        this.plug.emit(memo('ask/tacks', init), mail => {
             // djin.turn / vult_part
             let tickhashes = []
-            this.plug.emit([blob(''), [Buffer.from('ask/ticks'), tickhashes]], mail => {
+            this.plug.emit(memo('ask/ticks', tickhashes), mail => {
                 // djin.turn / vult_full
                 // if valid, proceed
                 // if invalid, kill(true)
@@ -45,6 +45,10 @@ class Task {
         // if (bane)
         //   mark definitely-invalid all subsequent tocks in chain
     }
+}
+
+function memo(line :string, body :Roll) :Mail {
+    return [blob(''), [Buffer.from(line), body]]
 }
 
 class Dmon {
@@ -86,21 +90,11 @@ class Dmon {
     async *sync() {
         // while true {
 
-        // clear self-messages first
-        // don't spam requests while we can make progress
-        // for await (let ins of this.ins.deq()) {
-        //    let [ok, val, err] = await this.djin.spin(outs)
-        //    if (ok) {
-        //        await this.ins.enq(...val)
-        //    } else {
-        //    }
-        // }
-
         // get the best possibly-valid tocks from peers
         // to update our set of leads
         // start new sync tasks and kill old sync tasks
         let init = []
-        this.plug.emit([blob(''), [blob(''), init]], mail => {
+        this.plug.emit(memo('ask/tocks', init), mail => {
             // assert response is what we expect
             //this.ins.enq(mail)
         })

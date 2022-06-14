@@ -6,7 +6,7 @@ import {
     b2h, h2b,
     blob, roll,
     Mash, mash,
-    Mail
+    Memo
 } from './word.js'
 
 import { Rock } from './rock.js'
@@ -36,8 +36,8 @@ class Djin {
         //vult_full(this.rock, this.tree, this.tockzero, [this.tickzero])
     }
 
-    turn(mail :Mail) :Okay<Mail[]> {
-        let [line, body] = mail
+    turn(memo :Memo) :Okay<Memo[]> {
+        let [line, body] = memo
 
         try { switch (line.toString()) {
 
@@ -94,7 +94,7 @@ class Djin {
         toss(`panic/unreachable`)
     }
 
-    async *spin(mails:Mail[]) :AsyncGenerator<Okay<Mail[]>, null, void> {
+    async *spin(mails:Memo[]) :AsyncGenerator<Okay<Memo[]>, null, void> {
         for (let mail of mails) {
             yield this.turn(mail)
         }

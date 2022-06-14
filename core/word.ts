@@ -17,7 +17,7 @@ export type {
     Move, Bill,
     Stat, Know,
     Snap, Fees,
-    Peer, Mail,
+    Peer, Mail, Memo,
 }
 
 export {
@@ -167,7 +167,12 @@ type Tack = [
 type Peer = Blob  // opaque peer ID
 type Mail = [
     Peer, // peer  from
-    [Blob, Roll]  // memo  [line, body]  (subject, payload)
+    Memo  // memo  [line, body]  (type, data)
+]
+
+type Memo = [
+    Blob, // line  type
+    Roll  // body  data
 ]
 
 type Blob32 = Blob;

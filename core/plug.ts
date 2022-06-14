@@ -1,6 +1,8 @@
 
 import { WebSocketServer } from 'ws'
-import { Mail } from './word.js'
+import {
+    Mail, Memo
+} from './word.js'
 
 export { Plug }
 
@@ -19,16 +21,20 @@ class Plug {
             let peer = 'sock.url'
             this.link(peer, sock)
             sock.on(mail => {
-                what(mail, outs => {
+                let [_, memo] = mail // peer enforced in other transport types
+                what(memo, outs => {
                     for (let out of outs) {
-                        this.drop(peer)
+                        sock.send(out)
+                        let [oline, obody] = out as Memo;
+                        if (oline.slice(0,3).equals(Buffer.from('end'))) {
+                            this.drop(peer)
+                        }
                     }
-                    outs.map(out => sock.send(out))
                 })
             })
         })
     }
-    async emit(mail:Mail, back:((mail:Mail)=>void)) {
+    async emit(memo:Memo, back:((memo:Memo)=>void)) {
         // for each connection, send it
         // can also take K random, rotate, etc
     }
