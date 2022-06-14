@@ -1,6 +1,6 @@
 
 import {
-    Mail,
+    Mail, Tock,
     okay,
     blob,
 } from './word.js'
@@ -10,9 +10,47 @@ import { Djin } from './djin.js'
 
 import { Plug } from './plug.js'
 
-class Dmon {
-    djin :Djin // can access .rock, .tree
+// one sync task deals with one finite possibly-valid branch
+// run by dmon.sync cycle
+class Task {
+    djin :Djin
     plug :Plug
+    lead :Tock[]
+    constructor(djin :Djin, plug :Plug, lead :Tock[]) {
+        this.djin = djin
+        this.plug = plug
+        this.lead = lead
+    }
+    // one step initiates one callback chain, will require
+    // as many steps as needed to download everything
+    // duplicate mails can be made close to no-ops on both ends of plug
+    async step() {
+        let init = this.lead[0]
+        // djin.turn / vult_thin
+        this.plug.emit([blob(''), [Buffer.from('ask/tacks'), init]], mail => {
+            // djin.turn / vult_part
+            let tickhashes = []
+            this.plug.emit([blob(''), [Buffer.from('ask/ticks'), tickhashes]], mail => {
+                // djin.turn / vult_full
+                // if valid, proceed
+                // if invalid, kill(true)
+                // this.leads = this.leads.slice(1)
+            })
+        })
+        // if timed out
+        //   kill(false)  // dont invalidate, just give up
+    }
+    kill(bane :boolean) {
+        // gracefully end all active callbacks
+        // if (bane)
+        //   mark definitely-invalid all subsequent tocks in chain
+    }
+}
+
+class Dmon {
+    djin :Djin
+    plug :Plug
+    jobs :Task[]
 
     // data dir, wss port
     async init(path :string, port :number) {
@@ -45,9 +83,9 @@ class Dmon {
         })
     }
 
-    // core basic sync algorithm
-    // incrementally makes progress, yield as much as possible
     async *sync() {
+        // while true {
+
         // clear self-messages first
         // don't spam requests while we can make progress
         // for await (let ins of this.ins.deq()) {
@@ -58,26 +96,21 @@ class Dmon {
         //    }
         // }
 
-        // incrementally make progress
-        // this code is written in a linear style but engine makes
-        // progress in whatever order callbacks arrive in
-
-        let init = ''
-
         // get the best possibly-valid tocks from peers
         // to update our set of leads
-        //this.plug.emit(memo('ask/tocks', init), mail => {
+        // start new sync tasks and kill old sync tasks
+        let init = []
+        this.plug.emit([blob(''), [blob(''), init]], mail => {
             // assert response is what we expect
             //this.ins.enq(mail)
-        //})
+        })
 
-        // get the tacks for the next possibly-valid tock
-        //this.plug.emit(memo('ask/tacks', tockhashes), mail => {
-        //})
+        // cycle through sync tasks for a little while
+        //   for task in _tasks[taskc++ % taskc]
+        //     yield await task.step()
 
-        // get the ticks for the next possibly-valid tack
-        // this.plug.emit(memo('ask/ticks', tickhashes), mail => {
-        //})
+        // yield
+        // } // while true
     }
 
 }

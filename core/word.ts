@@ -166,10 +166,8 @@ type Tack = [
 
 type Peer = Blob  // opaque peer ID
 type Mail = [
-    Peer,  // peer  from
-    [ Blob // line  'subject' / 'route' / processing queue
-    , Roll // body  payload
-    ]
+    Peer, // peer  from
+    [Blob, Roll]  // memo  [line, body]  (subject, payload)
 ]
 
 type Blob32 = Blob;
