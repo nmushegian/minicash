@@ -33,10 +33,13 @@ class Dmon {
             // respond to requests immediately
             // this will be read-only turn, except ann/* does rock.etch
 
-            // ask/tocks -> res/tocks back
-            // ask/tacks -> res/tacks back
-            // ask/ticks -> res/ticks back
-            // ann/ticks -> ann/ticks emit
+            // assert mail is ask/* or ann/*
+
+            // djin will give:
+            //   ask/tocks -> res/tocks back
+            //   ask/tacks -> res/tacks back
+            //   ask/ticks -> res/ticks back
+            //   ann/ticks -> ann/ticks emit
 
             let outs = okay(this.djin.turn(mail))
             back(outs)
@@ -65,7 +68,7 @@ class Dmon {
         // get the best possibly-valid tocks from peers
         // to update our set of leads
         //this.plug.emit(memo('ask/tocks', init), mail => {
-            // ensure response is what we expect
+            // assert response is what we expect
             //this.ins.enq(mail)
         //})
 
