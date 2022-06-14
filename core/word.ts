@@ -120,8 +120,6 @@ type Know
   | 'PN' // possibly-not-valid
   | 'DN' // definitely-not-valid
 
-// tick can be in more than one (candidate) tack
-// tack can be in more than one (candidate) tock
 type Tack = [
     Tock   // head  tock these ticks belong to
   , Mash[] // neck  merkle nodes at depth 7 (empty if <1024 ticks in tock)

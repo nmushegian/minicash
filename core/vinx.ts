@@ -37,6 +37,21 @@ function vinx_tick(conx : Tick[], tick : Tick) : Okay<Bnum> {
     return fail('todo')
 }
 
+// vinx_tack is technically a well-formed check, because all information
+// is present in the structure. However, we imagine it as a valid-in-context
+// check, for several reasons. First, it is really a response to a tockhash,
+// so the tock in theory could be excluded from the response. That would imply
+// there has to be a vinx check to ensure the root is part of the tock specified.
+// Second, it is a crypto-heavy operation that makes sense to group conceptually
+// with the other crypto-related checks.
+// We include tock explicitly as a separate argument as guidance for other systems.
+// Returns which index the ticks in this tack begin at within this tock, determined
+// by examining which neck hash these ticks start at. (Ticks must start at index multiple
+// of 1024 and must be 'complete', ie, only the last chunk can be length <1024.
+function vinx_tack(tock :Tock, tack :Tack) :Okay<Bnum> {
+    return fail(`todo`)
+}
+
 // context is previous tock
 // returns *marginal* work, the number you sum to get cumulative work
 function vinx_tock(prev :Tock, tock :Tock) :Okay<Bnum> {
@@ -46,16 +61,4 @@ function vinx_tock(prev :Tock, tock :Tock) :Okay<Bnum> {
     // work = tuff(hash(tock))
     // return pass(work)
     return fail('todo')
-}
-
-// vinx_tack is technically a well-formed check, because all information
-// is present in the structure. However, we imagine it as a valid-in-context
-// check, for several reasons. First, it is really a response to a tockhash,
-// so the tock in theory could be excluded from the response. That would imply
-// there has to be a vinx check to ensure the root is part of the tock specified.
-// Second, it is a crypto-heavy operation that makes sense to group conceptually
-// with the other crypto-related checks.
-// We include tock explicitly as a separate argument as guidance for other systems.
-function vinx_tack(tock :Tock, tack :Tack) :Okay<void> {
-    return fail(`todo`)
 }
