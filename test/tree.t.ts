@@ -1,7 +1,8 @@
 import { test } from 'tapzero'
 
 import {
-    okay, blob,
+    okay,
+    h2b,
     Snap
 } from '../core/word.js'
 
@@ -11,14 +12,14 @@ import { Tree } from '../core/tree.js'
 test('leaf keys', t=>{
     let rock = new Rock('')
     let tree = new Tree(rock)
-    let snap = tree.grow_page(blob(''), leaf => {
-        leaf.set(blob('ff'), blob('ff'))
+    let snap = tree.grow_page(h2b(''), leaf => {
+        leaf.set(h2b('ff'), h2b('ff'))
     })
     console.log('returned snap', snap)
     let next = okay(snap)
     console.log('next', next)
-    let val = okay(tree.read_page(next, blob('ff')))
+    let val = okay(tree.read_page(next, h2b('ff')))
     console.log(val)
-    t.ok(val.equals(blob('ff')), `must return same key as was set`)
+    t.ok(val.equals(h2b('ff')), `must return same key as was set`)
 })
 

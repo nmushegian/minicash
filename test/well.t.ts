@@ -4,7 +4,7 @@ import { readdirSync, readFileSync } from 'fs'
 
 import {
     Okay, okay, need,
-    Blob, blob, h2b, rmap,
+    Blob, h2b, rmap,
 } from '../core/word.js'
 
 import {
@@ -51,7 +51,7 @@ test('cases', t=>{
             need(data.want.length == 2, 'want must be len 2, use result type')
             need($[data.func], `test func must be bound for ${data.func}`)
             let func = $[data.func]
-            let args = rmap(data.args, blob)
+            let args = rmap(data.args, h2b)
             let [ok, val, errs] = func(...args)
             if (ok) {
                 t.ok(data.want[0] == "true", `must succeed`)

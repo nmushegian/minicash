@@ -2,7 +2,7 @@
 
 import {
     Okay, okay, pass, fail, toss, aver,
-    Blob, Roll, blob, isblob, islist, roll, unroll,
+    Blob, Roll, isblob, islist, roll, unroll,
     Tick, Tack, Tock, Mash, mash, b2h, h2b
 } from './word.js'
 
@@ -27,7 +27,7 @@ class Rock {
         let skey = key.toString('binary')
         let val = this._db.get(skey)
         if (val) return val
-        else return blob('')
+        else return h2b('')
     }
 
     // insert-only

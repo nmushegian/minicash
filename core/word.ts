@@ -1,6 +1,6 @@
 import {
     Okay, okay, toss, pass, fail,
-    Blob, blob,
+    Blob,
     Roll, roll, unroll, rmap,
     Hexs,
     Hash, hash,
@@ -22,7 +22,7 @@ export type {
 
 export {
     okay, toss, pass, fail, need, aver,
-    blob, roll, unroll, rmap,
+    roll, unroll, rmap,
     isblob, islist, isroll,
     b2h, h2b,
     mash, mosh,
@@ -78,6 +78,10 @@ function mash(x :Blob) :Mash {
     return chop(hash(x), 24)
 }
 
+function memo(line :string, body :Roll) :Mail {
+    return [h2b(''), [Buffer.from(line), body]]
+}
+
 function _merk(x :Blob[]) :Hash {
     aver(_=> isroll(x), `panic, _merk arg is not roll`)
     aver(_=> x.length != 0, `panic, _merk arg len 0`)
@@ -85,7 +89,7 @@ function _merk(x :Blob[]) :Hash {
         return hash(x[0])
     }
     if (x.length % 2 == 1) {
-        x.push(blob('00'.repeat(24)))
+        x.push(h2b('00'.repeat(24)))
     }
     for (let i = 0; i < x.length; i += 2) { // ! +2
         x[i] = hash(Buffer.concat([x[i], x[i+1]]))
@@ -175,10 +179,6 @@ type Memo = [
     Blob, // line  type
     Roll  // body  data
 ]
-
-function memo(line :string, body :Roll) :Mail {
-    return [blob(''), [Buffer.from(line), body]]
-}
 
 type Blob32 = Blob;
 type Blob20 = Blob;

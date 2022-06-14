@@ -1,7 +1,7 @@
 
 import { WebSocketServer } from 'ws'
 import {
-    Blob, blob,
+    Blob,
     Mail, Memo, memo,
     Peer
 } from './word.js'

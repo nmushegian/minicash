@@ -9,7 +9,7 @@
     "test": "node --loader ts-node/esm test/test.ts"
   },
   "dependencies": {
-    "coreword": "^0.0.13",
+    "coreword": "^0.0.16",
     "croc32": "^0.1.0",
     "immutable": "^4.1.0",
     "jams.js": "^0.0.8",

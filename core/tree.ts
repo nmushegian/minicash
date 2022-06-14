@@ -4,7 +4,7 @@ import * as immu from 'immutable'
 
 import {
     Okay, pass, fail,
-    Blob, blob, b2h, h2b,
+    Blob, b2h, h2b,
     Tock, Tack,
     Mash,
     Bnum,
@@ -30,7 +30,7 @@ class Leaf {
         let skey = k.toString('binary')
         let val = this._mut.get(skey)
         if (val) return val
-        else return blob('')
+        else return h2b('')
     }
     set(k :Blob, v :Blob) {
         let skey = k.toString('binary')
@@ -92,7 +92,7 @@ class Tree {
 
     _nextsnap() :Snap {
         let hexnum = (++this._snapc).toString(16)
-        let hexblob = blob(hexnum)
+        let hexblob = h2b(hexnum)
         return hexblob
     }
 

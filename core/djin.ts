@@ -4,7 +4,7 @@
 import {
     Okay, pass, fail, toss,
     b2h, h2b,
-    blob, roll,
+    roll,
     Mash, mash,
     Memo
 } from './word.js'
