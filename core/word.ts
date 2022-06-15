@@ -43,38 +43,32 @@ function memo(line :string, body :Roll) :Memo {
     return [Buffer.from(line), body]
 }
 
-function _merk(x :Blob[]) :Hash {
+function _merk(x :Blob[]) :Mash {
     aver(_=> isroll(x), `panic, _merk arg is not roll`)
     aver(_=> x.length != 0, `panic, _merk arg len 0`)
+    aver(_=> x.every(b => b.length == 24), `panic, _merk arg is not a mash`)
     if (x.length == 1) {
-        return hash(x[0])
+        return mash(x[0])
     }
     if (x.length % 2 == 1) {
         x.push(h2b('00'.repeat(24)))
     }
     for (let i = 0; i < x.length; i += 2) { // ! +2
-        x[i] = hash(Buffer.concat([x[i], x[i+1]]))
+        x[i] = mash(Buffer.concat([x[i], x[i+1]]))
     }
+    x = x.slice(x.length/2)
     return _merk(x)
 }
 
-function merk(x :Mash[]) {
+function merk(x :Blob[]) :Mash {
     aver(_=>{
         need(islist(x), `merk arg must be a list`)
         need(x.length > 0, `merk arg must have len > 0`)
         need(x.length <= 1024, `merk arg must have len <= 1024`)
-        x.every(y => {
-            need(isblob(y), `merk arg item is not a blob`)
-            need(y.length == 24, `merk arg item is not a mash`)
-        })
+        x.every(y => isblob(y), `merk arg item is not a blob`)
         return true
     }, `merk preconditions`)
-    let ms = x
-    if (x.length == 1) {
-        return mash(x[0])
-    } else {
-        return _merk(x)
-    }
+    return _merk(x.map(mash))
 }
 
 type Tick = [
