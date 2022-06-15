@@ -43,12 +43,13 @@ function memo(line :string, body :Roll) :Memo {
     return [Buffer.from(line), body]
 }
 
-function _merk(x :Blob[]) :Mash {
-    aver(_=> isroll(x), `panic, _merk arg is not roll`)
-    aver(_=> x.length != 0, `panic, _merk arg len 0`)
-    aver(_=> x.every(b => b.length == 24), `panic, _merk arg is not a mash`)
+function _merk(x :Mash[]) :Mash {
+    aver(_=> isroll(x), `_merk arg must be a roll`)
+    aver(_=> x.length != 0, `_merk arg list must not be empty`)
+    aver(_=> x.every(b => isblob(b)), `_merk arg list item must be a blob`)
+    aver(_=> x.every(b => b.length == 24), `_merk arg list item must be len 24`)
     if (x.length == 1) {
-        return mash(x[0])
+        return x[0]
     }
     if (x.length % 2 == 1) {
         x.push(h2b('00'.repeat(24)))
@@ -60,11 +61,11 @@ function _merk(x :Blob[]) :Mash {
     return _merk(x)
 }
 
-function merk(x :Blob[]) :Mash {
+function merk(x :Mash[]) :Mash {
     aver(_=>{
         need(islist(x), `merk arg must be a list`)
         need(x.length > 0, `merk arg must have len > 0`)
-        need(x.length <= 1024, `merk arg must have len <= 1024`)
+        need(x.length <= 1024, `merk arg must have len <= 1024, use chunks`)
         x.every(y => isblob(y), `merk arg item is not a blob`)
         return true
     }, `merk preconditions`)

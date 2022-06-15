@@ -20,8 +20,10 @@ class Pool {
     djin :Djin
     plug :Plug
 
-    bowl :Tick[] // mempool
-    sink :Tick[] // block template
+    bowl :Tick[]           // mempool
+    // each of these should be in per-candidate map
+    sink :Tick[]           // tock template
+    sunk :{string:boolean} // ticks in this sink back index
     root :Mash   // active merk root
     snap :Snap   // active UTXO set handle
 
