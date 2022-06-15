@@ -7,8 +7,9 @@ import {
 } from './word.js'
 
 export {
+    vinx_tick,
+    vinx_tack,
     vinx_tock,
-    vinx_tick
 }
 
 // context is set of ticks that contain ments being moved

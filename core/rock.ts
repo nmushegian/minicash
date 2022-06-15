@@ -10,24 +10,31 @@ export {
     Rock
 }
 
-// core data
+// rock view: pure hash DB    hash(val)   -> val
+// slab view: insert-only     key  -> val
+// tree view: pure map        snap -> key -> val
 
-// ['tick', tickhash]    -> tick
-// ['tock', tockhash]    -> tock
-// ['tack', tockhash, i] -> tack
+// rock:
+//   ['tick', tickhash]    -> tick
+//   ['tock', tockhash]    -> tock
 
-// ['thin', tockhash]    -> stat
-// ['full', tockhash]    -> snap
+// slab:
+//   ['tack', tockhash, i] -> tack
+//   ['thin', tockhash]    -> stat
+//   ['full', tockhash]    -> snap
 
-// pure kvdb implemented by Tree
-// ['tree', snap] -> (bill -> leaf)
+// tree:
+//   ['tree', snap] -> (mark -> leaf)
 
 // not necessary, but useful tree reverse indices:
-
+// (slab):
 // next fork tree for smarter sync loop, sorted set by work
 //    ['next', tockhash, work, tockhash]  ->  bool
 // per-branch tock set for fast common ancestor
 //    ['hist', snap] -> (tockhash -> bool) // pure map
+// can also be used for tracking ticks in this branch
+//    ['hist', snap] -> (tickhash -> bool) // pure map
+// you can also check ticks-in-branch by checking an input spent state
 
 class Rock {
     _db

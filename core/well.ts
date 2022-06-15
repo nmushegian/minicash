@@ -6,8 +6,8 @@ import {
 
 export {
     form_tick,
-    form_tock,
     form_tack,
+    form_tock,
 }
 
 function form_tock(x :Roll) :Okay<Tock> {
