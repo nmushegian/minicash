@@ -18,7 +18,8 @@ export type {
     Stat, Know,
     Snap, Fees, Work,
     Peer, Mail, Memo,
-    Mode
+    Mode,
+    Hexs
 }
 
 export {
@@ -26,7 +27,7 @@ export {
     roll, unroll, rmap,
     bleq, blen, isblob, islist, isroll,
     b2h, h2b,
-    mash, mosh,
+    mash, mosh, merk,
     sign, scry,
     memo
 }

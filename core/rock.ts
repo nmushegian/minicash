@@ -53,7 +53,6 @@ class Rock {
     // insert-only
     etch(k :Blob, v :Blob) {
         let pv = this.read(k)
-        console.log(pv)
         if (pv.length > 0 && !bleq(v, pv)) {
             toss(`panic: etch key with new value`)
         }

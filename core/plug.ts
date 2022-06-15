@@ -31,7 +31,7 @@ class Plug {
             })
         })
     }
-    async emit(memo:Memo, back:((memo:Memo)=>void)) {
+    async emit(memo:Memo, back:((memo:Memo)=>void)) { //todo double-back?
         // can also take K random, rotate, etc
         this.peers.forEach((p,_) => {
             p.send([this.pubk, memo], back)

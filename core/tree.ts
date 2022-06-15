@@ -13,7 +13,7 @@ import {
 } from './rock.js'
 
 export {
-    Tree
+    Tree, Twig
 }
 
 // mutable handle

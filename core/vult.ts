@@ -7,7 +7,7 @@ import {
     Memo
 } from './word.js'
 
-import { Tree } from './tree.js'
+import { Tree, Twig } from './tree.js'
 
 export {
     vult_thin,
@@ -23,5 +23,10 @@ function vult_thin(tree :Tree, tock :Tock) :Okay<Memo> {
 //      - block invalidation: possibly_valid -> definitely_invalid
 //   - false result is an engine panic
 function vult_full(tree :Tree, tock :Tock) :Okay<Memo> {
+    return fail(`todo`)
+}
+
+// utxo use / new
+function vult_tick(twig :Twig, tick :Tick) :Okay<void> {
     return fail(`todo`)
 }
