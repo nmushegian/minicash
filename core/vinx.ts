@@ -22,13 +22,13 @@ function vinx_tick(conx : Tick[], tick : Tick) : Okay<Cash> {
     //   let txin, indx, sign = move
     //   let intx = find(x | mash(x) == txin)
     //   let ment = intx.ments[indx]
-    //   let [lock, cash] = ment
-    //   checksig(tick, i, lock) for i in len(inputs):
+    //   let [code, cash] = ment
+    //   checksig(tick, i, code) for i in len(inputs):
     //     let [ins, outs] = tick
     //     let [intx, indx, sign] = ins[i]
     //     let mask = [ [intx,indx,""], outs ]
     //     let pubk = scry(mask, sign)
-    //     need lock == mosh(pubk)
+    //     need code == addr(pubk)
     //   fees += incash
     // for each (i,ment) in tick.ments
     //   fees -= ment.cash

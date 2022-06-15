@@ -81,10 +81,10 @@ function form_tick(x :Roll) :Okay<Tick> {
             need(islist(ment), `ment must be a list`)
             ment = (ment as Blob[])
             need(ment.length == 2, `ment must have len 2`)
-            let [lock, cash] = ment
-            need(isblob(lock), `lock must be blob`)
+            let [code, cash] = ment
+            need(isblob(code), `code must be blob`)
             need(isblob(cash), `cash must be blob`)
-            need((lock as Blob).length == 20, `lock must have len 20`)
+            need((code as Blob).length == 20, `code must have len 20`)
             need((cash as Blob).length ==  7, `cash must have len 7`)
         }
         return pass(x as Tick)

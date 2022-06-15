@@ -12,7 +12,7 @@ export type {
     Okay,
     Bnum, Blob, Roll, Byte,
     Sign, Pubk,
-    Mash, Lock, Cash,
+    Mash, Code, Cash,
     Tick, Tock, Tack,
     Move, Ment,
     Stat, Know,
@@ -27,12 +27,12 @@ export {
     roll, unroll, rmap,
     bleq, blen, isblob, islist, isroll,
     b2h, h2b,
-    mash, mosh, merk,
+    mash, addr, merk,
     sign, scry,
     memo
 }
 
-function mosh(x :Blob) :Lock {
+function addr(x :Blob) :Code {
     return chop(hash(x), 20)
 }
 function mash(x :Blob) :Mash {
@@ -73,8 +73,8 @@ function merk(x :Mash[]) :Mash {
 }
 
 type Tick = [
-    Move[], // max 7 inputs
-    Ment[]  // max 7 outputs
+    Move[], // max 7 inputs   [(Mark) Sign ]
+    Ment[]  // max 7 outputs  [ Code  Cash ]
 ]
 type Move = [
     Mash,  // utxo txin (input tick hash)
@@ -82,20 +82,20 @@ type Move = [
     Sign   // signature
 ]
 
-// concatenated utxo+txin, yields different croc32 checksum
-// when they are checked like this instead of checked mash ++ idx
-// in the protocol spec they are separate items because it makes
-// no difference to the encoding and it is easier to specify
-// these are the actual objects containing cash
-//type Bill = Blob25
+// Concatenated utxo+txin, yields different croc32 checksum
+// when they are checked like this instead of checked mash ++ idx.
+// In the protocol spec they are separate items because it makes
+// no difference to the encoding and it is easier to specify.
+// These are the actual objects containing cash.
+//type Mark = Blob25
 
 type Ment = [
-    Lock,  // pkeyhash
+    Code,  // pkeyhash
     Cash   // minicash
 ]
 
 type Mash = Blob24 // content hash
-type Lock = Blob20 // "address" (pubkeyhash)
+type Code = Blob20 // "address" (pubkeyhash)
 type Cash = Blob7  // amount up to 2^53
 type Byte = Blob1
 
@@ -117,7 +117,7 @@ type Mode
  | 'stat'
 
 type Leaf = [
-    Lock, // address
+    Code, // address
     Cash, // amount
     Time, // expiry
     Mash, // spent by tick
