@@ -49,20 +49,17 @@ class Dmon {
 
     sync(freq=5000) {
         return setInterval(()=>{
-            // get the best possibly-valid tocks from peers
-            // to update our set of leads
-            let init = h2b('') // pick a 'finalized' block in our best chain
-            // one response from each peer
-            this.plug.emit(memo('ask/tocks', init), ([line, body]) => {
-                // one step can emit more than one request memo.
-                // send requests and apply those responses, but only one layer.
-                // retry via sync loop rather than trying to follow
-                // branches in an intelligent way
-                let next = body[0] as Memo // follow lead until your last possibly-valid
-                let outs = okay(this.djin.turn(next))
-                outs.forEach(out => this.plug.emit(out, then => {
-                     this.djin.turn(then)
-                }))
+            // get the best possibly-valid tocks from peers, then make a
+            // request for the thing you need on each branch
+            let init = this.djin.tail()
+            this.plug.emit(memo('ask/tocks', init), async ([line, lead]) => {
+                let yarn = (lead as Tock[]).map(tock => memo('say/tocks', [tock])) // todo api
+                for await (let miss of this.djin.spin(yarn)) {
+                    if (miss) {
+                        this.plug.emit(miss, fill => this.djin.turn(fill))
+                        break
+                    }
+                }
             })
         }, freq)
     }

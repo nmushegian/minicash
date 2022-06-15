@@ -1,9 +1,10 @@
 // engine
 
 import {
-    Okay, pass, fail, toss,
+    Okay, okay, pass, fail, toss, aver,
     b2h, h2b,
     roll,
+    Tock,
     Mash, mash,
     Memo
 } from './word.js'
@@ -14,8 +15,6 @@ import { Tree } from './tree.js'
 export { Djin }
 
 class Djin {
-    best :Mash   // best definitely-valid tock (cumulative work)
-    race :Mash[] // top K possibly-valid tocks (cumulative work)
     rock :Rock   // content-addressed values
     tree :Tree   // per-tock view of state
 
@@ -44,7 +43,7 @@ class Djin {
         }
     }
 
-    turn(memo :Memo) :Okay<Memo[]> {
+    turn(memo :Memo) :Okay<Memo> {
         let [line, body] = memo
 
         try { switch (line.toString()) {
@@ -79,9 +78,29 @@ class Djin {
         }
     }
 
-    async *spin(memos :Memo[]) {
+    // todo no null return when use result type...
+    async *spin(memos :Memo[]) : AsyncGenerator<null, Okay<Memo>, null> {
         for (let memo of memos) {
-            yield this.turn(memo)
+            let next = memo
+            while (true) {
+                // try to answer yourself first
+                let refl = this.turn(next)
+                let [ok, v, e] = refl
+                if (ok) {
+                    let _next = this.turn(okay(refl))
+                    aver(_=>okay(_next), `panic, self-reply not okay`)
+                    next = okay(_next)
+                    yield
+                    continue
+                } else {
+                    return refl
+                }
+            }
+            yield
         }
     }
+
+    leads(k) :Tock[][] {throw new Error()} // set of possibly-valid leads
+    best() :Tock {throw new Error()} // best definitely-valid tock
+    tail() :Tock {throw new Error()} // finalized trail
 }
