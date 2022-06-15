@@ -78,25 +78,26 @@ class Djin {
         }
     }
 
-    // todo no null return when use result type...
-    async *spin(memos :Memo[]) : AsyncGenerator<null, Okay<Memo>, null> {
-        for (let memo of memos) {
-            let next = memo
-            while (true) {
-                // try to answer yourself first
-                let refl = this.turn(next)
-                let [ok,,] = okay(refl)
-                if (ok) { // apply self response, yield, continue
-                    let _next = this.turn(okay(refl))
-                    aver(_=>okay(_next), `panic, self-reply not okay`)
-                    next = okay(_next)
-                    yield
-                    continue
-                } else { // respond with what we need to continue
-                    return refl
-                }
+    async *_spin(next :Memo) : AsyncGenerator<void, Memo, void> {
+        while (true) {
+            let back = okay(this.turn(next))
+            let [have, miss, errs] = this.turn(back)
+            if (have) {
+                next = okay(this.turn(miss))
+                yield
+            } else {
+                return miss
             }
-            yield
+        }
+        toss(`unreachable`)
+    }
+
+    async *spin(memos :Memo[]) : AsyncGenerator<Memo, void, void> {
+        for (let memo of memos) {
+            let miss
+            for await (miss of this._spin(memo))
+            { continue }
+            yield miss
         }
     }
 

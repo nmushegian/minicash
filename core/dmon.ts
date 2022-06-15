@@ -56,10 +56,8 @@ class Dmon {
                 // split response into distinct messages for spin yield
                 let yarn = (lead as Tock[]).map(tock => memo('say/tocks', [tock])) // todo api
                 for await (let miss of this.djin.spin(yarn)) {
-                    if (miss) {
-                        this.plug.emit(miss, fill => this.djin.turn(fill))
-                        break
-                    }
+                    this.plug.emit(miss, fill => this.djin.turn(fill))
+                    break
                 }
             })
         }, freq)
