@@ -33,16 +33,19 @@ function form_tack(x :Roll) :Okay<Tack> {
     aver(_=>isroll(x), `must be a roll`)
     try {
         need(islist(x), `must be a list`)
-        need(x.length == 3, `must be len 3`)
+        need(x.length == 4, `must be len 4`)
+        need(x.every(i=>islist(i)), `tack items must all be lists`)
         let tock = x[0] as Roll
-        let neck = x[1] as Roll
-        let feet = x[2] as Roll
+        let eyes = x[1] as Roll
+        let ribs = x[2] as Roll
+        let feet = x[3] as Roll
         need(okay(form_tock(tock)), `tack.tock is not well-formed`)
-        need(islist(neck), `neck must be a list`)
-        need(neck.length <= 2**7, `neck must have len <= 2^7`)
-        need(neck.every(isblob), `neck must be a list of blobs`)
-        need(neck.every(b=>b.length == 24), `neck must be list of hashes`)
-        need(islist(feet), `feet must be a list`)
+        need(eyes.length == ribs.length, `len(tack.eyes) must equal len(tack.ribs)`)
+        need(eyes.every(isblob), `eyes must be blobs`)
+        need(eyes.every(b=>b.length == 1), `eyes must be blobs of len 1`)
+        need(ribs.length <= 2**7, `ribs must have len <= 2^7`)
+        need(ribs.every(isblob), `ribs must be a list of blobs`)
+        need(ribs.every(b=>b.length == 24), `ribs must be list of hashes`)
         need(feet.every(isblob), `feet must be a list of blobs`)
         need(feet.every(b=>b.length == 24), `feet must be list of hashes`)
         need(feet.length <= 2**17, `feet must have len <= 2^17`)
