@@ -85,14 +85,14 @@ class Djin {
             while (true) {
                 // try to answer yourself first
                 let refl = this.turn(next)
-                let [ok, v, e] = refl
-                if (ok) {
+                let [ok,,] = okay(refl)
+                if (ok) { // apply self response, yield, continue
                     let _next = this.turn(okay(refl))
                     aver(_=>okay(_next), `panic, self-reply not okay`)
                     next = okay(_next)
                     yield
                     continue
-                } else {
+                } else { // respond with what we need to continue
                     return refl
                 }
             }

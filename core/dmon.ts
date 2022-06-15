@@ -53,6 +53,7 @@ class Dmon {
             // request for the thing you need on each branch
             let init = this.djin.tail()
             this.plug.emit(memo('ask/tocks', init), async ([line, lead]) => {
+                // split response into distinct messages for spin yield
                 let yarn = (lead as Tock[]).map(tock => memo('say/tocks', [tock])) // todo api
                 for await (let miss of this.djin.spin(yarn)) {
                     if (miss) {
