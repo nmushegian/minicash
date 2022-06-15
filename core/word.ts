@@ -15,7 +15,7 @@ export type {
     Mash, Code, Cash,
     Tick, Tock, Tack,
     Move, Ment,
-    Stat, Know,
+    Know,
     Snap, Fees, Work,
     Peer, Mail, Memo,
     Mode,
@@ -124,12 +124,6 @@ type Leaf = [
     Mash  // spent in tock
 ]
 
-type Stat = [
-    Work,  // work  cumulative work
-    Cash,  // left  remaining subsidy  (initial: 2^53-1)
-    Cash,  // mint  subsidy this block
-    Know,  // know  state of knowledge about validity
-]
 
 type Work = Bnum
 

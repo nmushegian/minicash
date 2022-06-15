@@ -19,9 +19,10 @@ export {
 //   ['tock', tockhash]    -> tock
 
 // slab:
-//   ['tack', tockhash, i] -> tack
-//   ['thin', tockhash]    -> stat
-//   ['full', tockhash]    -> snap
+//   ['work', tockhash]      -> work
+//   ['tack', tockhash, i]   -> tack
+//   ['know', tockhash]      -> know
+//   ['snap', tockhash]      -> snap
 
 // tree:
 //   ['tree', snap] -> (mark -> leaf)
@@ -31,9 +32,9 @@ export {
 // next fork tree for smarter sync loop, sorted set by work
 //    ['next', tockhash, work, tockhash]  ->  bool
 // per-branch tock set for fast common ancestor
-//    ['hist', snap] -> (tockhash -> bool) // pure map
+//    ['hist', snap] -> (tockhash -> bool) // pure set
 // can also be used for tracking ticks in this branch
-//    ['hist', snap] -> (tickhash -> bool) // pure map
+//    ['hist', snap] -> (tickhash -> bool) // pure set
 // you can also check ticks-in-branch by checking an input spent state
 
 class Rock {
