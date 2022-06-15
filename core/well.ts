@@ -1,13 +1,13 @@
 import {
     Okay, okay, toss, pass, fail, need, aver,
     Blob, Roll, islist, isblob, isroll,
-    Tick, Tock,
-    Move, Bill
+    Tick, Tock, Tack
 } from './word.js'
 
 export {
     form_tick,
     form_tock,
+    form_tack,
 }
 
 function form_tock(x :Roll) :Okay<Tock> {
@@ -29,7 +29,7 @@ function form_tock(x :Roll) :Okay<Tock> {
     }
 }
 
-function form_tack(x :Roll) :Okay<Tick> {
+function form_tack(x :Roll) :Okay<Tack> {
     aver(_=>isroll(x), `must be a roll`)
     try {
         need(islist(x), `must be a list`)
@@ -58,13 +58,13 @@ function form_tick(x :Roll) :Okay<Tick> {
         need(islist(x), `must be a list`)
         need(x.length == 2, `must be len 2`)
         let moves = (x[0] as Roll)
-        let bills = (x[1] as Roll)
+        let ments = (x[1] as Roll)
         need(islist(moves), `moves must be a list`)
-        need(islist(bills), `bills must be a list`)
-        need(moves.length > 0 || bills.length > 0,
-             `moves and bills must not both be empty`)
+        need(islist(ments), `ments must be a list`)
+        need(moves.length > 0 || moves.length > 0,
+             `moves and ments must not both be empty`)
         need(moves.length <= 7, `moves must have len <= 7`)
-        need(bills.length <= 7, `bills must have len <= 7`)
+        need(ments.length <= 7, `ments must have len <= 7`)
         for (let move of moves) {
             need(islist(move), `move must be a list`)
             move = (move as Blob[])
@@ -77,14 +77,14 @@ function form_tick(x :Roll) :Okay<Tick> {
             need((indx as Blob).length ==  1, `indx must be len 1`)
             need((sign as Blob).length == 32, `sign must be len 32, got ${sign.length}`)
         }
-        for (let bill of bills) {
-            need(islist(bill), `bill must be a list`)
-            bill = (bill as Blob[])
-            need(bill.length == 2, `bill must have len 2`)
-            let [addr, cash] = bill
-            need(isblob(addr), `addr must be blob`)
+        for (let ment of ments) {
+            need(islist(ment), `ment must be a list`)
+            ment = (ment as Blob[])
+            need(ment.length == 2, `ment must have len 2`)
+            let [lock, cash] = ment
+            need(isblob(lock), `lock must be blob`)
             need(isblob(cash), `cash must be blob`)
-            need((addr as Blob).length == 20, `addr must have len 20`)
+            need((lock as Blob).length == 20, `lock must have len 20`)
             need((cash as Blob).length ==  7, `cash must have len 7`)
         }
         return pass(x as Tick)

@@ -11,7 +11,7 @@ export {
     vinx_tick
 }
 
-// context is set of ticks that contain bills being moved
+// context is set of ticks that contain ments being moved
 // do not worry about internal consistency of context at this step
 // returns total fees if ok
 function vinx_tick(conx : Tick[], tick : Tick) : Okay<Cash> {
@@ -21,18 +21,17 @@ function vinx_tick(conx : Tick[], tick : Tick) : Okay<Cash> {
     // for each (i,move) in tick.moves
     //   let txin, indx, sign = move
     //   let intx = find(x | mash(x) == txin)
-    //   let bill = intx[indx]
-    //   let [inhash, incash] = bill
-    //   checksig(tick, i, inhash) for i in len(inputs):
+    //   let ment = intx.ments[indx]
+    //   let [lock, cash] = ment
+    //   checksig(tick, i, lock) for i in len(inputs):
     //     let [ins, outs] = tick
     //     let [intx, indx, sign] = ins[i]
     //     let mask = [ [intx,indx,""], outs ]
     //     let pubk = scry(mask, sign)
-    //     let lock = mosh(pubk)
-    //     need lock == inhash
+    //     need lock == mosh(pubk)
     //   fees += incash
-    // for each (i,bill) in tick.bills
-    //   fees -= outcash
+    // for each (i,ment) in tick.ments
+    //   fees -= ment.cash
     // return pass(fees)
     return fail('todo')
 }

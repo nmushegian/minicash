@@ -14,7 +14,7 @@ export type {
     Sign, Pubk,
     Mash, Lock, Cash,
     Tick, Tock, Tack,
-    Move, Bill,
+    Move, Ment,
     Stat, Know,
     Snap, Fees, Work,
     Peer, Mail, Memo,
@@ -74,14 +74,22 @@ function merk(x :Mash[]) :Mash {
 
 type Tick = [
     Move[], // max 7 inputs
-    Bill[]  // max 7 outputs
+    Ment[]  // max 7 outputs
 ]
 type Move = [
     Mash,  // utxo txin (input tick hash)
     Byte,  // utxo indx (0-6)
     Sign   // signature
 ]
-type Bill = [
+
+// concatenated utxo+txin, yields different croc32 checksum
+// when they are checked like this instead of checked mash ++ idx
+// in the protocol spec they are separate items because it makes
+// no difference to the encoding and it is easier to specify
+// these are the actual objects containing cash
+//type Bill = Blob25
+
+type Ment = [
     Lock,  // pkeyhash
     Cash   // minicash
 ]
