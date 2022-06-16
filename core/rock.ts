@@ -19,13 +19,14 @@ export {
 //   ['tock', tockhash]    -> tock
 
 // slab:
-//   ['work', tockhash]      -> work
-//   ['tack', tockhash, i]   -> tack
-//   ['know', tockhash]      -> know
-//   ['snap', tockhash]      -> snap
+//   ['work', tockhash]      -> work // cumulative work
+//   ['tack', tockhash,i]    -> tack // set of 1024 ticks
+//   ['fees', tockhash,i]    -> fees // total per tack
+//   ['snap', tockhash,i]    -> snap // utxo set snaps
+//   ['know', tockhash]      -> know // validity state
 
 // tree:
-//   ['tree', snap] -> (mark -> leaf)
+//   ['tree', snap] -> (mark -> leaf) // utxo set
 
 // not necessary, but useful tree reverse indices:
 // (slab):

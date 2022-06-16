@@ -4,14 +4,14 @@ import {
     Roll, islist, isroll, roll, unroll, rmap,
     Hexs,
     Hash, hash,
-    Sign, sign,
+    Sign, Seck, sign,
     Pubk, scry
 } from 'coreword'
 
 export type {
     Okay,
     Bnum, Blob, Roll, Byte,
-    Sign, Pubk,
+    Sign, Pubk, Seck,
     Mash, Code, Cash,
     Tick, Tock, Tack,
     Move, Ment,
@@ -45,6 +45,12 @@ function mash(x :Blob) :Mash {
 
 function memo(line :string, body :Roll) :Memo {
     return [Buffer.from(line), body]
+}
+
+// marginal work
+// given a hash, return how much to add to cumulative work
+function work(x :Mash) :Bnum {
+    throw new Error(`todo word.work`)
 }
 
 function _merk(x :Mash[]) :Mash {
@@ -131,6 +137,13 @@ type Leaf = [
 
 type Work = Bnum
 
+export function tuff(x :Mash) :Work {
+    let work = bnum(x)
+    let u192 = bnum(h2b('ff'.repeat(24)))
+    let tuff = u192 * u192 / work
+    return tuff
+}
+
 type Snap = Blob // pure map snapshot internal representation
 
 type Know
@@ -164,4 +177,8 @@ type Blob24 = Blob;
 type Blob8  = Blob;
 type Blob7  = Blob;
 type Blob1  = Blob;
-type Bnum   = BigInteger // not serialized
+type Bnum   = bigint // not serialized
+
+export function bnum(b :Blob) :Bnum {
+    return BigInt("0x" + b.toString('hex'))
+}

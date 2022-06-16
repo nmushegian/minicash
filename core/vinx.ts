@@ -1,21 +1,33 @@
 // valid-in-context
 
-import {
-    Okay, pass, fail,
-    Cash, Byte, Work,
-    Tick, Tock, Tack,
-} from './word.js'
-
 export {
     vinx_tick,
     vinx_tack,
     vinx_tock,
 }
 
+import {
+    Okay, okay, pass, fail, need, toss, aver,
+    Bnum, bnum, bleq, mash, roll,
+    Cash, Byte, Work, Fees, tuff,
+    Tick, Tock, Tack,
+} from './word.js'
+
+import {
+    Rock
+} from './rock.js'
+
+// aver
+import {
+    form_tick,
+    form_tack,
+    form_tock,
+} from './well.js'
+
 // context is set of ticks that contain ments being moved
 // do not worry about internal consistency of context at this step
 // returns total fees if ok
-function vinx_tick(conx : Tick[], tick : Tick) : Okay<Cash> {
+function vinx_tick(conx :Tick[], tick :Tick) :Okay<Fees> {
     // conx all are well-formed
     // tick is well-formed
     // let fees = 0
@@ -34,7 +46,7 @@ function vinx_tick(conx : Tick[], tick : Tick) : Okay<Cash> {
     // for each (i,ment) in tick.ments
     //   fees -= ment.cash
     // return pass(fees)
-    return fail('todo')
+    return fail('todo vinx_tick')
 }
 
 // vinx_tack is technically a well-formed check, because all information
@@ -45,21 +57,24 @@ function vinx_tick(conx : Tick[], tick : Tick) : Okay<Cash> {
 // Second, it is a crypto-heavy operation that makes sense to group conceptually
 // with the other crypto-related checks.
 // We include tock explicitly as a separate argument as guidance for other systems.
-// Returns which tack index this tack corresponds to in this tock
-// by examining which neck hash these ticks start at. (Ticks must start at index multiple
-// of 1024 and must be 'complete', ie, only the last chunk can be length <1024.
-function vinx_tack(tock :Tock, tack :Tack) :Okay<Byte> {
-    return fail(`todo`)
+function vinx_tack(tock :Tock, tack :Tack) {
+    return fail(`todo vinx_tack`)
 }
 
 // context is previous tock
 // returns *marginal* work, the number you sum to get cumulative work
 function vinx_tock(prev :Tock, tock :Tock) :Okay<Work> {
-    // prev is well-formed
-    // tock is well-formed
-    // tock.prev = prev (this defines the context)
-    // work = tuff(hash(tock))
-    // return pass(work)
-    return fail('todo')
+    aver(_=> {
+        okay(form_tock(prev))
+        okay(form_tock(tock))
+        need(bleq(tock[0], mash(roll(prev))), `panic, bad vinx_tock context`)
+        return true
+    }, `vinx_tock precondition`)
+
+    let thistime = bnum(tock[2])
+    let prevtime = bnum(prev[2])
+    need(BigInt(57) == thistime - prevtime, `bad header time`)
+    let work = tuff(mash(roll(tock)))
+    return pass(work)
 }
 
