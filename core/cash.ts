@@ -6,8 +6,11 @@ export {
 
 import {
     okay, toss,
-    Byte, Roll,
-    Tick, Code, Cash,
+    Byte, Bnum,
+    Blob, Roll,
+    roll, mash,
+    Tick, Tock,
+    Code, Cash,
     Sign, Seck,
     b2h, h2b
 } from './word.js'
@@ -51,5 +54,50 @@ class TickMold {
         // vinx_tick
         toss(`todo tickmold`)
         return this._raw as Tick
+    }
+}
+
+class TockMold {
+    _raw : Blob[]
+    constructor() {
+        this._raw = [
+            h2b('00'.repeat(24)),
+            h2b('00'.repeat(24)),
+            h2b('00'.repeat(7)),
+            h2b('00'.repeat(7)),
+        ]
+    }
+    mold() {
+        // todo need form_tock
+        return this._raw as Tock
+    }
+    prev(blob) {
+        // todo assert
+        this._raw[0] = blob
+        return this
+    }
+    root(b) { return this }
+    time(b) { return this }
+    fuzz(b) { return this }
+    // how many ms to work
+    async mine(time:number) {
+        let best = ''
+        let done = false
+        return new Promise((resolve, reject) => {
+            setTimeout(() => {
+                done = true
+                resolve(best)
+            }, Math.floor(Date.now() + time));
+            for (let i = 0;; i++) {
+                if (done) {
+                    return best
+                } else {
+                    this.fuzz(h2b(i.toString(16)))
+                    let hash = mash(roll(this._raw))
+                    // if hash < best
+                    // best = hash
+                }
+            }
+        })
     }
 }

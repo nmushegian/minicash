@@ -47,6 +47,12 @@ function memo(line :string, body :Roll) :Memo {
     return [Buffer.from(line), body]
 }
 
+// marginal work
+// given a hash, return how much to add to cumulative work
+function work(x :Mash) :Bnum {
+    throw new Error(`todo word.work`)
+}
+
 function _merk(x :Mash[]) :Mash {
     aver(_=> isroll(x), `_merk arg must be a roll`)
     aver(_=> x.length != 0, `_merk arg list must not be empty`)
