@@ -137,6 +137,13 @@ type Leaf = [
 
 type Work = Bnum
 
+export function tuff(x :Mash) :Work {
+    let work = bnum(x)
+    let u192 = bnum(h2b('ff'.repeat(24)))
+    let tuff = u192 * u192 / work
+    return tuff
+}
+
 type Snap = Blob // pure map snapshot internal representation
 
 type Know

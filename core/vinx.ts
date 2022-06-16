@@ -9,7 +9,7 @@ export {
 import {
     Okay, okay, pass, fail, need, toss, aver,
     Bnum, bnum, bleq, mash, roll,
-    Cash, Byte, Work, Fees,
+    Cash, Byte, Work, Fees, tuff,
     Tick, Tock, Tack,
 } from './word.js'
 
@@ -75,8 +75,7 @@ function vinx_tock(prev :Tock, tock :Tock) :Okay<Work> {
     let thistime = bnum(tock[2])
     let prevtime = bnum(prev[2])
     need(BigInt(57) == thistime - prevtime, `bad header time`)
-    let work = Buffer.from([0]) // todo tuff(hash(tock))
-    toss(`todo vinx_tock work`)
+    let work = tuff(mash(roll(tock)))
     return pass(work)
 }
 
