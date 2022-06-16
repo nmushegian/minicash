@@ -54,11 +54,10 @@ class Dmon {
             this.plug.emit(memo('ask/tocks', init), async ([line, lead]) => {
                 // split response into distinct messages for spin yield
                 let yarn = (lead as Tock[]).map(tock => memo('say/tocks', [tock])) // todo api
-                let chan = new Chan() // temporary
-                this.djin.spin(chan)
-                for (let memo of yarn) { // not in parallel
-                    chan.send(memo)
-                    let miss = await chan.recv()
+                for (let memo of yarn) {
+                    let miss = await this.djin.spin(memo)
+                    // todo check miss error vs request
+                    this.plug.emit(miss, fill => this.djin.spin(fill))
                 }
                 // dealloc chan
             })

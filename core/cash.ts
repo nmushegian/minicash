@@ -21,7 +21,7 @@ import {
 } from './vinx.js'
 
 function tick() :TickMold {
-    return new TickMold
+    return new TickMold()
 }
 
 class TickMold {

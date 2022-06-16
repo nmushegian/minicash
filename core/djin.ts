@@ -139,24 +139,25 @@ class Djin {
         }
     }
 
-
-    async spin(chan :Chan) {
+    async *_spin(memo) {
         while (true) {
-            let memo = await chan.recv()
-            // well
-            // vinx
-            while (true) {
-                let [oki, back, ierr]= this.turn(memo)
-                let [oko, refl, oerr] = this.turn(back)
-                if (refl) {
-                    memo = refl
-                    continue
-                } else {
-                    chan.send(back)
-                    break
-                }
+            // todo infinite loop sentinel...
+            let [oki, back, ierr] = this.turn(memo)
+            let [oko, refl, oerr] = this.turn(back)
+            if (refl) {
+                memo = refl
+                yield
+            } else {
+                return back
             }
         }
+    }
+
+    async spin(memo) {
+        let back
+        for await (back of this._spin(memo))
+        { continue }
+        return back
     }
 
 }
