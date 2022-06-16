@@ -2,7 +2,7 @@
 
 import {
     Okay, pass, fail,
-    Cash, Byte, Work,
+    Cash, Byte, Work, Fees,
     Tick, Tock, Tack,
 } from './word.js'
 
@@ -45,10 +45,8 @@ function vinx_tick(conx : Tick[], tick : Tick) : Okay<Cash> {
 // Second, it is a crypto-heavy operation that makes sense to group conceptually
 // with the other crypto-related checks.
 // We include tock explicitly as a separate argument as guidance for other systems.
-// Returns which tack index this tack corresponds to in this tock
-// by examining which neck hash these ticks start at. (Ticks must start at index multiple
-// of 1024 and must be 'complete', ie, only the last chunk can be length <1024.
-function vinx_tack(tock :Tock, tack :Tack) :Okay<Byte> {
+// Returns total fees for this tack.
+function vinx_tack(tock :Tock, tack :Tack) :Okay<Fees> {
     return fail(`todo`)
 }
 

@@ -43,7 +43,7 @@ class Djin {
                     lead.push(prev)
                     let blob = this.tree.read_rock([t2b('tocks'), prev])
                     if (blob.length == 0) {
-                        toss(`no such tock`)
+                        return fail(`no such tock`)
                     } else {
                         let tock = unroll(blob) as Tock
                         prev = tock[0] // tock.prev
@@ -57,9 +57,9 @@ class Djin {
             case 'ask/ticks': {
                 toss(`todo`)
             }
-            default: toss(`panic/unrecognized memo line ${line}`)
+            default: return fail(`panic/unrecognized memo line ${line}`)
         } } catch (e) {
-            return fail(e.message)
+            toss(`engine panic: ${e.message}`)
         }
     }
 
@@ -92,9 +92,9 @@ class Djin {
                 // later, do something smarter to know what vult to retry
                 // for now, dumb sync will retry from ask/tocks
             }
-            default: toss(`unrecognized turn line: ${line}`)
+            default: return fail(`unrecognized turn line: ${line}`)
         } } catch(e) {
-            return fail(e.message)
+            toss(`engine panic: ${e.message}`)
         }
     }
 
