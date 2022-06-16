@@ -55,6 +55,12 @@ class Tree {
         return this.rock.read(key)
     }
 
+    etch_rock(rkey :Roll, val :Blob) :Blob {
+        let key = roll(rkey)
+        this.rock.etch(key, val)
+        return val
+    }
+
     read_twig(copy :Snap, key :Blob) :Okay<Blob> {
         let snap = this._snaps[b2h(copy)]
         if (!snap) return fail(`read_twig: no such snap: ${copy}`)

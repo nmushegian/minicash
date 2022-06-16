@@ -3,6 +3,7 @@ import { test } from 'tapzero'
 import { Djin } from '../core/djin.js'
 
 import {
+    okay,
     roll,
     mash,
     memo,
@@ -11,10 +12,9 @@ import {
 
 test('djin', t=>{
     let djin = new Djin('')
-    let tockzero = []
-    let tockzerohash = mash(roll(tockzero))
+    let bang = djin.bang()
     let out
-
-    out = djin.read(memo('ask/tocks', [tockzerohash]))
-    t.deepEqual(out, memo('say/tocks', [tockzero]))
+    out = okay(djin.read(memo('ask/tocks', [mash(roll(bang))])))
+    console.log(out.toString())
+    t.deepEqual(out, memo('say/tocks', [bang]))
 })

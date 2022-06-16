@@ -21,10 +21,17 @@ class Djin {
     constructor(path :string) {
         this.rock = new Rock(path)
         this.tree = new Tree(this.rock)
+        this.tree.etch_rock([t2b('best')], mash(roll(this.bang())))
+        this.tree.etch_rock([t2b('tock'), mash(roll(this.bang()))], roll(this.bang()))
     }
 
     bang() {
-        return []
+        return [
+            h2b('00'.repeat(24)),
+            h2b('00'.repeat(24)),
+            h2b('00'.repeat(7)),
+            h2b('00'.repeat(7)),
+        ]
     }
     tail() {
         return []
@@ -37,18 +44,21 @@ class Djin {
                 let init = body as Mash; // tockhash
                 // todo need init in history
                 let best = this.tree.read_rock([t2b('best')])
-                let lead = [best]
+                let lead = []
                 let prev = best
-                while(!bleq(prev, init)) {
-                    lead.push(prev)
-                    let blob = this.tree.read_rock([t2b('tocks'), prev])
+                do {
+                    console.log('prev', prev)
+                    let blob = this.tree.read_rock([t2b('tock'), prev])
                     if (blob.length == 0) {
-                        return fail(`no such tock`)
+                        return fail(`no such tock: ${prev}`)
                     } else {
                         let tock = unroll(blob) as Tock
+                        lead.push(tock)
                         prev = tock[0] // tock.prev
                     }
-                }
+                } while( !bleq(prev, init)
+                      && !bleq(prev, mash(roll(this.bang())))
+                      && !bleq(prev, h2b('00'.repeat(24))) )
                 return pass([Buffer.from('say/tocks'), lead])
             }
             case 'ask/tacks': {
