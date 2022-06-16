@@ -3,11 +3,25 @@
 import {
     Okay, okay, pass, fail, toss, aver,
     b2h, h2b, t2b,
-    roll, unroll, bleq,
+    roll, unroll, bleq, islist,
     Tock,
     Mash, mash,
     Memo
 } from './word.js'
+
+// todo well task
+import {
+    form_tock,
+} from './well.js'
+
+// todo vinx task
+import {
+    vinx_tock
+} from './vinx.js'
+
+import {
+    vult_thin
+} from './vult.js'
 
 import { Rock } from './rock.js'
 import { Tree } from './tree.js'
@@ -78,12 +92,17 @@ class Djin {
 
         try { switch (line.toString()) {
             case 'say/tocks': {
-                // ...
-                // tock_form
-                // tock_vinx
-                // rock.etch
-                // outs << vult_thin
-                // send outs
+                let tocks = body as Tock[]
+                // form_mail / form_tock
+                aver(_=> islist(tocks), `say/tocks arg must be a list`)
+                aver(_=> tocks.every(t=>form_tock(t)), `say/tocks arg must be tocks list`)
+                // vinx_tock
+                //   todo
+                for (let tock of tocks) {
+                    let [ok,val,errs] = vult_thin(this.tree, tock)
+                    toss(`todo djin vult_thin`)
+                }
+                return pass([])
             }
             case 'say/tacks': {
                 // ...
