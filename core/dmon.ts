@@ -6,7 +6,6 @@ import {
     okay,
 } from './word.js'
 
-import { Rock } from './rock.js'
 import { Djin } from './djin.js'
 import { Plug } from './plug.js'
 
@@ -16,8 +15,7 @@ class Dmon {
 
     // data dir, wss port
     async init(path :string, port :number) {
-        let  rock = new Rock(path)
-        this.djin = new Djin(rock)
+        this.djin = new Djin(path)
         this.plug = new Plug(port)
     }
 

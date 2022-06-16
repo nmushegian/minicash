@@ -4,7 +4,7 @@ import * as immu from 'immutable'
 
 import {
     Okay, pass, fail,
-    Blob, b2h, h2b,
+    Roll, Blob, roll, b2h, h2b,
     Snap
 } from './word.js'
 
@@ -48,6 +48,11 @@ class Tree {
         this.rock = rock
         this._snapc = 0
         this._snaps = { "": immu.Map() } // todo, make it in lmdb
+    }
+
+    read_rock(rkey :Roll) :Blob {
+        let key = roll(rkey)
+        return this.rock.read(key)
     }
 
     read_twig(copy :Snap, key :Blob) :Okay<Blob> {

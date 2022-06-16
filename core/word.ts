@@ -26,10 +26,14 @@ export {
     okay, toss, pass, fail, need, aver,
     roll, unroll, rmap,
     bleq, blen, isblob, islist, isroll,
-    b2h, h2b,
+    b2h, h2b, t2b,
     mash, addr, merk,
     sign, scry,
     memo
+}
+
+function t2b(x :string) :Blob {
+    return Buffer.from(x)
 }
 
 function addr(x :Blob) :Code {

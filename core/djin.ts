@@ -2,8 +2,8 @@
 
 import {
     Okay, okay, pass, fail, toss, aver,
-    b2h, h2b,
-    roll,
+    b2h, h2b, t2b,
+    roll, unroll, bleq,
     Tock,
     Mash, mash,
     Memo
@@ -18,18 +18,38 @@ class Djin {
     rock :Rock   // content-addressed values
     tree :Tree   // per-tock view of state
 
-    constructor(rock :Rock) {
-        this.rock = rock
+    constructor(path :string) {
+        this.rock = new Rock(path)
         this.tree = new Tree(this.rock)
-        // sync tree from rock
+    }
+
+    bang() {
+        return []
+    }
+    tail() {
+        return []
     }
 
     read(memo :Memo) :Okay<Memo> {
         let [line, body] = memo
         try { switch (line.toString()) {
             case 'ask/tocks': {
-                toss(`todo`)
-                return pass([Buffer.from('say/tocks'), []])
+                let init = body as Mash; // tockhash
+                // todo need init in history
+                let best = this.tree.read_rock([t2b('best')])
+                let lead = [best]
+                let prev = best
+                while(!bleq(prev, init)) {
+                    lead.push(prev)
+                    let blob = this.tree.read_rock([t2b('tocks'), prev])
+                    if (blob.length == 0) {
+                        toss(`no such tock`)
+                    } else {
+                        let tock = unroll(blob) as Tock
+                        prev = tock[0] // tock.prev
+                    }
+                }
+                return pass([Buffer.from('say/tocks'), lead])
             }
             case 'ask/tacks': {
                 toss(`todo`)
@@ -39,7 +59,7 @@ class Djin {
             }
             default: toss(`panic/unrecognized memo line ${line}`)
         } } catch (e) {
-            return fail(e.reason)
+            return fail(e.message)
         }
     }
 
@@ -72,7 +92,7 @@ class Djin {
                 // later, do something smarter to know what vult to retry
                 // for now, dumb sync will retry from ask/tocks
             }
-            default: toss(`unrecognized mail line: ${line}`)
+            default: toss(`unrecognized turn line: ${line}`)
         } } catch(e) {
             return fail(e.message)
         }
@@ -101,7 +121,4 @@ class Djin {
         }
     }
 
-    leads(k) :Tock[][] {throw new Error()} // set of possibly-valid leads
-    best() :Tock {throw new Error()} // best definitely-valid tock
-    tail() :Tock {throw new Error()} // finalized trail
 }
