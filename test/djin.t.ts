@@ -37,7 +37,7 @@ test('djin', t=>{
     let tock1 = [
         mash(roll(bang)),
         merk([mash(roll(tick1 as Tick))]),
-        h2b('00'.repeat(7)), // todo time
+        h2b('00'.repeat(6) + '39'), // 57 in hex
         h2b('ff'.repeat(7))
     ]
 

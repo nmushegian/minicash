@@ -1,7 +1,14 @@
 // valid-in-context
 
+export {
+    vinx_tick,
+    vinx_tack,
+    vinx_tock,
+}
+
 import {
-    Okay, pass, fail,
+    Okay, okay, pass, fail, need, toss, aver,
+    Bnum, bnum, bleq, mash, roll,
     Cash, Byte, Work, Fees,
     Tick, Tock, Tack,
 } from './word.js'
@@ -10,11 +17,12 @@ import {
     Rock
 } from './rock.js'
 
-export {
-    vinx_tick,
-    vinx_tack,
-    vinx_tock,
-}
+// aver
+import {
+    form_tick,
+    form_tack,
+    form_tock,
+} from './well.js'
 
 // context is set of ticks that contain ments being moved
 // do not worry about internal consistency of context at this step
@@ -57,13 +65,18 @@ function vinx_tack(tock :Tock, tack :Tack) :Okay<Fees> {
 // context is previous tock
 // returns *marginal* work, the number you sum to get cumulative work
 function vinx_tock(prev :Tock, tock :Tock) :Okay<Work> {
-    // prev is well-formed
-    // tock is well-formed
-    // tock.prev == prev (this defines the context)
-    // tock.root not null sanity check (empty block not allowed)
-    // tock.time == prev.time + 57
-    // work = tuff(hash(tock))
-    // return pass(work)
-    return fail('todo vinx_tock')
+    aver(_=> {
+        okay(form_tock(prev))
+        okay(form_tock(tock))
+        need(bleq(tock[0], mash(roll(prev))), `panic, bad vinx_tock context`)
+        return true
+    }, `vinx_tock precondition`)
+
+    let thistime = bnum(tock[2])
+    let prevtime = bnum(prev[2])
+    need(BigInt(57) == thistime - prevtime, `bad header time`)
+    let work = Buffer.from([0]) // todo tuff(hash(tock))
+    toss(`todo vinx_tock work`)
+    return pass(work)
 }
 

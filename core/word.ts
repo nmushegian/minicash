@@ -170,4 +170,8 @@ type Blob24 = Blob;
 type Blob8  = Blob;
 type Blob7  = Blob;
 type Blob1  = Blob;
-type Bnum   = BigInteger // not serialized
+type Bnum   = bigint // not serialized
+
+export function bnum(b :Blob) :Bnum {
+    return BigInt("0x" + b.toString('hex'))
+}
