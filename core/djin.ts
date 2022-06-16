@@ -10,6 +10,10 @@ import {
     Memo
 } from './word.js'
 
+import {
+    Chan
+} from './chan.js'
+
 // todo well task
 import {
     form_tock,
@@ -135,26 +139,23 @@ class Djin {
         }
     }
 
-    async *_spin(next :Memo) : AsyncGenerator<void, Memo, void> {
-        while (true) {
-            let back = okay(this.turn(next))
-            let [have, miss, errs] = this.turn(back)
-            if (have) {
-                next = okay(this.turn(miss))
-                yield
-            } else {
-                return miss
-            }
-        }
-        toss(`unreachable`)
-    }
 
-    async *spin(memos :Memo[]) : AsyncGenerator<Memo, void, void> {
-        for (let memo of memos) {
-            let miss
-            for await (miss of this._spin(memo))
-            { continue }
-            yield miss
+    async spin(chan :Chan) {
+        while (true) {
+            let memo = await chan.recv()
+            // well
+            // vinx
+            while (true) {
+                let [oki, back, ierr]= this.turn(memo)
+                let [oko, refl, oerr] = this.turn(back)
+                if (refl) {
+                    memo = refl
+                    continue
+                } else {
+                    chan.send(back)
+                    break
+                }
+            }
         }
     }
 

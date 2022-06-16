@@ -8,6 +8,7 @@ import {
 
 import { Djin } from './djin.js'
 import { Plug } from './plug.js'
+import { Chan } from './chan.js'
 
 class Dmon {
     djin :Djin
@@ -53,10 +54,13 @@ class Dmon {
             this.plug.emit(memo('ask/tocks', init), async ([line, lead]) => {
                 // split response into distinct messages for spin yield
                 let yarn = (lead as Tock[]).map(tock => memo('say/tocks', [tock])) // todo api
-                for await (let miss of this.djin.spin(yarn)) {
-                    this.plug.emit(miss, fill => this.djin.turn(fill))
-                    break
+                let chan = new Chan() // temporary
+                this.djin.spin(chan)
+                for (let memo of yarn) { // not in parallel
+                    chan.send(memo)
+                    let miss = await chan.recv()
                 }
+                // dealloc chan
             })
         }, freq)
     }
