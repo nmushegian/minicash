@@ -113,8 +113,8 @@ class Djin {
                     }
                     for (let tock of tocks) {
                         vult_thin(this.tree, tock)
-                        //vult_part() ?  -> ask/tacks
-                        //vult_full() ?  -> ask/ticks
+                        // ask/tocks from here if know valid
+                        // ask/tacks for this tock if dont know valid
                     }
                     toss(`todo say/tocks`)
                 }
@@ -123,17 +123,17 @@ class Djin {
                     // ...
                     // tack_form
                     // tack_vinx
-                    // rock.etch
-                    // outs << vult_part
-                    // outs << vult_full
-                    // send outs
+                    // vult_part
+                    //   ask/ticks if we need ticks
+                    //   ask/tacks if we need next tack
+                    //   ask/tocks if we can make progress
                 }
 
                 case 'say/ticks': {
                     // ...
                     // tick_form
                     // tick_vinx
-                    // rock.etch
+                    //   say/ticks to rebroadcast
                     // later, do something smarter to know what vult to retry
                     // for now, dumb sync will retry from ask/tocks
                 }
