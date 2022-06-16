@@ -6,6 +6,10 @@ import {
     Tick, Tock, Tack,
 } from './word.js'
 
+import {
+    Rock
+} from './rock.js'
+
 export {
     vinx_tick,
     vinx_tack,
@@ -15,7 +19,8 @@ export {
 // context is set of ticks that contain ments being moved
 // do not worry about internal consistency of context at this step
 // returns total fees if ok
-function vinx_tick(conx : Tick[], tick : Tick) : Okay<Cash> {
+function vinx_tick(rock :Rock, tick :Tick) :Okay<Cash> {
+    // let conx = rock.read ...
     // conx all are well-formed
     // tick is well-formed
     // let fees = 0
@@ -34,7 +39,7 @@ function vinx_tick(conx : Tick[], tick : Tick) : Okay<Cash> {
     // for each (i,ment) in tick.ments
     //   fees -= ment.cash
     // return pass(fees)
-    return fail('todo')
+    return fail('todo vinx_tick')
 }
 
 // vinx_tack is technically a well-formed check, because all information
@@ -46,13 +51,13 @@ function vinx_tick(conx : Tick[], tick : Tick) : Okay<Cash> {
 // with the other crypto-related checks.
 // We include tock explicitly as a separate argument as guidance for other systems.
 // Returns total fees for this tack.
-function vinx_tack(tock :Tock, tack :Tack) :Okay<Fees> {
-    return fail(`todo`)
+function vinx_tack(rock :Rock, tack :Tack) :Okay<Fees> {
+    return fail(`todo vinx_tack`)
 }
 
 // context is previous tock
 // returns *marginal* work, the number you sum to get cumulative work
-function vinx_tock(prev :Tock, tock :Tock) :Okay<Work> {
+function vinx_tock(rock :Rock, tock :Tock) :Okay<Work> {
     // prev is well-formed
     // tock is well-formed
     // tock.prev = prev (this defines the context)
