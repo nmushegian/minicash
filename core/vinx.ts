@@ -57,8 +57,7 @@ function vinx_tick(conx :Tick[], tick :Tick) :Okay<Fees> {
 // Second, it is a crypto-heavy operation that makes sense to group conceptually
 // with the other crypto-related checks.
 // We include tock explicitly as a separate argument as guidance for other systems.
-// Returns total fees for this tack.
-function vinx_tack(tock :Tock, tack :Tack) :Okay<Fees> {
+function vinx_tack(tock :Tock, tack :Tack) {
     return fail(`todo vinx_tack`)
 }
 

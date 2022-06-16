@@ -93,29 +93,26 @@ class Djin {
         }
     }
 
-    turn(memo :Memo, skip : any = { 'skip_form': false, 'skip_vinx': false }) :Okay<Memo> {
+    turn(memo :Memo) :Okay<Memo> {
         try {
             let [line, body] = memo
             switch (line.toString()) {
 
                 case 'say/tocks': {
-                    let tocks = body as Tock[]
-                    if (!skip.skip_form) {
-                        tocks.forEach(tock => okay(form_tock(tock)))
+                    // aver tocks len 1
+                    // spin splits up messages into units
+                    let tock = body[0] as Tock
+                    if (true) { //!this.skip_form
+                        okay(form_tock(tock))
                     }
-                    if (!skip.skip_vinx) {
-                        tocks.forEach(tock => {
-                            let prevhash = tock[0]
-                            let prevtock = this.tree.read_rock(rkey('tock', prevhash))
-                            okay(vinx_tock(prevtock as Tock, tock))
-                            this.tree.etch_rock(rkey('tock', mash(roll(tock))), tock)
-                        })
+                    if (true) { //!this.skip_vinc
+                        let prevhash = tock[0]
+                        let prevtock = this.tree.read_rock(rkey('tock', prevhash))
+                        okay(vinx_tock(prevtock as Tock, tock))
                     }
-                    for (let tock of tocks) {
-                        vult_thin(this.tree, tock)
-                        // ask/tocks from here if know valid
-                        // ask/tacks for this tock if dont know valid
-                    }
+                    vult_thin(this.tree, tock)
+                    // ask/tocks from here if know valid
+                    // ask/tacks for this tock if dont know valid
                     toss(`todo say/tocks`)
                 }
 
@@ -145,24 +142,9 @@ class Djin {
         }
     }
 
-    async *_spin(memo, skip?) {
-        while (true) {
-            let [oki, back, ierr] = this.turn(memo, skip)
-            let [oko, refl, oerr] = this.turn(back, skip)
-            if (refl) {
-                memo = refl
-                yield
-            } else {
-                return back
-            }
-        }
-    }
-
-    async spin(memo, skip?) {
-        let back
-        for await (back of this._spin(memo, skip))
-        { continue }
-        return back
+    async *spin(memo) {
+        // split up memo into units
+        // turn/yield one at a time
     }
 
 }
