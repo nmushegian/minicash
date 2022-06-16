@@ -1,7 +1,7 @@
 import {
     Okay, okay, toss, pass, fail, need, aver,
     Blob, Roll, islist, isblob, isroll,
-    Tick, Tock, Tack
+    Tick, Tock, Tack, bleq, roll
 } from './word.js'
 
 export {
@@ -68,7 +68,7 @@ function form_tick(x :Roll) :Okay<Tick> {
              `moves and ments must not both be empty`)
         need(moves.length <= 7, `moves must have len <= 7`)
         need(ments.length <= 7, `ments must have len <= 7`)
-        for (let move of moves) {
+        for (let [moveidx, move] of moves.entries()) {
             need(islist(move), `move must be a list`)
             move = (move as Blob[])
             need(move.length == 3, `move must have len 3`)
@@ -79,6 +79,8 @@ function form_tick(x :Roll) :Okay<Tick> {
             need((txin as Blob).length == 24, `txin must be len 24`)
             need((indx as Blob).length ==  1, `indx must be len 1`)
             need((sign as Blob).length == 32, `sign must be len 32, got ${sign.length}`)
+            const first = moves.findIndex(x => bleq(roll(x as Blob[]), roll(move as Blob[])))
+            need(first == moveidx++, `moves can't have duplicate entries`)
         }
         for (let ment of ments) {
             need(islist(ment), `ment must be a list`)
