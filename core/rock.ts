@@ -18,25 +18,19 @@ export {
 //   ['tick', tickhash]    -> tick
 //   ['tock', tockhash]    -> tock
 
-// slab:
-//   ['work', tockhash]      -> work // cumulative work
+// slab/thin
+//   ['work', tockhash]                  -> work // cumulative work
+//   ['next', tockhash, work, tockhash]  -> ()   // next tock by work
+// slab/part
 //   ['tack', tockhash,i]    -> tack // set of 1024 ticks
-//   ['fees', tockhash,i]    -> fees // total per tack
-//   ['snap', tockhash,i]    -> snap // utxo set snaps
+//   ['fold', tockhash,i]    -> fold // [snap, cash, cash]
+// slab/full
 //   ['know', tockhash]      -> know // validity state
 
-// tree:
-//   ['tree', snap] -> (mark -> leaf) // utxo set
-
-// not necessary, but useful tree reverse indices:
-// (slab):
-// next fork tree for smarter sync loop, sorted set by work
-//    ['next', tockhash, work, tockhash]  ->  bool
-// per-branch tock set for fast common ancestor
-//    ['hist', snap] -> (tockhash -> bool) // pure set
-// can also be used for tracking ticks in this branch
-//    ['hist', snap] -> (tickhash -> bool) // pure set
-// you can also check ticks-in-branch by checking an input spent state
+// tree/thin
+//   ['hist', snap] -> (tockhash -> ())          // fast common ancestor
+// tree/part
+//   ['tree', snap] -> (mark     -> leaf) // utxo set
 
 class Rock {
     _db

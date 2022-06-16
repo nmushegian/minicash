@@ -134,6 +134,11 @@ type Leaf = [
     Mash  // spent in tock
 ]
 
+type Fold = [
+    Snap, // partial utxo
+    Cash, // total in
+    Cash, // total out
+]
 
 type Work = Bnum
 
