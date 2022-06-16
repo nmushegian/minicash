@@ -4,8 +4,8 @@ import * as immu from 'immutable'
 
 import {
     Okay, pass, fail,
-    Roll, Blob, roll, b2h, h2b,
-    Snap
+    Roll, Blob, roll, unroll, b2h, h2b, t2b,
+    Snap,
 } from './word.js'
 
 import {
@@ -13,7 +13,7 @@ import {
 } from './rock.js'
 
 export {
-    Tree, Twig
+    Tree, Twig, rkey
 }
 
 // mutable handle
@@ -38,6 +38,12 @@ class Twig {
     }
 }
 
+type RKey = Blob
+
+function rkey(s :string, ...args :Blob[]) :RKey {
+    return Buffer.concat([t2b(s), ...args])
+}
+
 class Tree {
     rock :Rock
     _snapc
@@ -50,15 +56,15 @@ class Tree {
         this._snaps = { "": immu.Map() } // todo, make it in lmdb
     }
 
-    read_rock(rkey :Roll) :Blob {
+    read_rock(rkey :RKey) :Roll {
         let key = roll(rkey)
-        return this.rock.read(key)
+        return unroll(this.rock.read(key))
     }
 
-    etch_rock(rkey :Roll, val :Blob) :Blob {
+    etch_rock(rkey :Roll, rval :Roll) {
         let key = roll(rkey)
+        let val = roll(rval)
         this.rock.etch(key, val)
-        return val
     }
 
     read_twig(copy :Snap, key :Blob) :Okay<Blob> {

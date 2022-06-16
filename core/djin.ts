@@ -3,6 +3,7 @@
 import {
     Okay, okay, pass, fail, toss, aver,
     b2h, h2b, t2b,
+    Blob, isblob,
     roll, unroll, bleq, islist,
     Tock,
     Mash, mash,
@@ -24,7 +25,7 @@ import {
 } from './vult.js'
 
 import { Rock } from './rock.js'
-import { Tree } from './tree.js'
+import { Tree, rkey } from './tree.js'
 
 export { Djin }
 
@@ -35,8 +36,9 @@ class Djin {
     constructor(path :string) {
         this.rock = new Rock(path)
         this.tree = new Tree(this.rock)
-        this.tree.etch_rock([t2b('best')], mash(roll(this.bang())))
-        this.tree.etch_rock([t2b('tock'), mash(roll(this.bang()))], roll(this.bang()))
+        let banghash = mash(roll(this.bang()))
+        this.tree.etch_rock(rkey('best'), banghash)
+        this.tree.etch_rock(rkey('tock', banghash), this.bang())
     }
 
     bang() {
@@ -57,23 +59,23 @@ class Djin {
             case 'ask/tocks': {
                 let init = body as Mash; // tockhash
                 // todo need init in history
-                let best = this.tree.read_rock([t2b('best')])
+                let best = this.tree.read_rock(rkey('best'))
                 let lead = []
-                let prev = best
+                aver(_=>isblob(best), `best in db must be a blob`)
+                let prev = best as unknown as Blob // mash
                 do {
-                    console.log('prev', prev)
-                    let blob = this.tree.read_rock([t2b('tock'), prev])
-                    if (blob.length == 0) {
+                    let roll = this.tree.read_rock(rkey('tock', prev))
+                    if (roll.length == 0) {
                         return fail(`no such tock: ${prev}`)
                     } else {
-                        let tock = unroll(blob) as Tock
+                        let tock = roll as Tock
                         lead.push(tock)
                         prev = tock[0] // tock.prev
                     }
                 } while( !bleq(prev, init)
                       && !bleq(prev, mash(roll(this.bang())))
                       && !bleq(prev, h2b('00'.repeat(24))) )
-                return pass([Buffer.from('say/tocks'), lead])
+                return pass([t2b('say/tocks'), lead])
             }
             case 'ask/tacks': {
                 toss(`todo`)
