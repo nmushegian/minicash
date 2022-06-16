@@ -80,7 +80,7 @@ function form_tick(x :Roll) :Okay<Tick> {
             need((indx as Blob).length ==  1, `indx must be len 1`)
             need((sign as Blob).length == 32, `sign must be len 32, got ${sign.length}`)
             const first = moves.findIndex(x => bleq(roll(x as Blob[]), roll(move as Blob[])))
-            need(first == moveidx++, `moves can't have duplicate entries`)
+            need(first == moveidx, `moves can't have duplicate entries`)
         }
         for (let ment of ments) {
             need(islist(ment), `ment must be a list`)
