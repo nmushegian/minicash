@@ -96,25 +96,29 @@ class Djin {
     turn(memo :Memo, skip : any = { 'skip_form': false, 'skip_vinx': false }) :Okay<Memo> {
         try {
             let [line, body] = memo
-            switch (memo[0].toString()) {
+            switch (line.toString()) {
+
                 case 'say/tocks': {
                     let tocks = body as Tock[]
                     if (!skip.skip_form) {
-                        // form_tock
+                        tocks.forEach(tock => okay(form_tock(tock)))
                     }
                     if (!skip.skip_vinx) {
-                        // vinx_tock
+                        tocks.forEach(tock => {
+                            let prevhash = tock[0]
+                            let prevtock = this.tree.read_rock(rkey('tock', prevhash))
+                            okay(vinx_tock(prevtock as Tock, tock))
+                            this.tree.etch_rock(rkey('tock', mash(roll(tock))), tock)
+                        })
                     }
                     for (let tock of tocks) {
-                        let [ok,val,errs] = vult_thin(this.tree, tock)
-                        if (ok && val) {
-                            return pass(val)
-                        } else {
-                            toss(`djin panic: ${errs}`)
-                        }
+                        vult_thin(this.tree, tock)
+                        //vult_part() ?  -> ask/tacks
+                        //vult_full() ?  -> ask/ticks
                     }
                     toss(`todo say/tocks`)
                 }
+
                 case 'say/tacks': {
                     // ...
                     // tack_form
@@ -124,6 +128,7 @@ class Djin {
                     // outs << vult_full
                     // send outs
                 }
+
                 case 'say/ticks': {
                     // ...
                     // tick_form
@@ -132,6 +137,7 @@ class Djin {
                     // later, do something smarter to know what vult to retry
                     // for now, dumb sync will retry from ask/tocks
                 }
+
                 default: return fail(`unrecognized turn line: ${line}`)
             }
         } catch(e) {
@@ -139,11 +145,10 @@ class Djin {
         }
     }
 
-    async *_spin(memo) {
+    async *_spin(memo, skip?) {
         while (true) {
-            // todo infinite loop sentinel...
-            let [oki, back, ierr] = this.turn(memo)
-            let [oko, refl, oerr] = this.turn(back)
+            let [oki, back, ierr] = this.turn(memo, skip)
+            let [oko, refl, oerr] = this.turn(back, skip)
             if (refl) {
                 memo = refl
                 yield
@@ -153,9 +158,9 @@ class Djin {
         }
     }
 
-    async spin(memo) {
+    async spin(memo, skip?) {
         let back
-        for await (back of this._spin(memo))
+        for await (back of this._spin(memo, skip))
         { continue }
         return back
     }

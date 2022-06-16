@@ -13,7 +13,7 @@ export {
     vult_full
 }
 
-function vult_thin(tree :Tree, tock :Tock) :Okay<Work> {
+function vult_thin(tree :Tree, tock :Tock) {
     // get prev
     // aver vinx_tock
     // head = hash(tock)
@@ -26,7 +26,7 @@ function vult_thin(tree :Tree, tock :Tock) :Okay<Work> {
     return fail(`todo vult_thin`)
 }
 
-function vult_full(tree :Tree, tock :Tock) :Okay<Snap> {
+function vult_full(tree :Tree, tock :Tock) {
     // for tack in ['tack', tockhash, i]
     //   twig.grow =>
     //     vult_part twig tack
@@ -37,7 +37,7 @@ function vult_full(tree :Tree, tock :Tock) :Okay<Snap> {
     return fail(`todo vult_full`)
 }
 
-function vult_part(twig :Twig, tack :Tack) :Okay<Snap> {
+function vult_part(twig :Twig, tack :Tack) {
     // let head,i,ribs,feet
     // let fees = 0
     // aver vinx_tack

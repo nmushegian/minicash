@@ -16,18 +16,6 @@ export {
     vinx_tock,
 }
 
-class Vinx {
-    rock :Rock
-    constructor(rock :Rock) {
-        this.rock = rock
-    }
-    async spin() {
-        // query info from rock
-        // vinx_it
-        // return
-    }
-}
-
 // context is set of ticks that contain ments being moved
 // do not worry about internal consistency of context at this step
 // returns total fees if ok
@@ -71,9 +59,11 @@ function vinx_tack(tock :Tock, tack :Tack) :Okay<Fees> {
 function vinx_tock(prev :Tock, tock :Tock) :Okay<Work> {
     // prev is well-formed
     // tock is well-formed
-    // tock.prev = prev (this defines the context)
+    // tock.prev == prev (this defines the context)
+    // tock.root not null sanity check (empty block not allowed)
+    // tock.time == prev.time + 57
     // work = tuff(hash(tock))
     // return pass(work)
-    return fail('todo')
+    return fail('todo vinx_tock')
 }
 

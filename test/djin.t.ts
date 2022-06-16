@@ -24,6 +24,9 @@ test('djin', t=>{
         h2b('00'.repeat(7)), // todo time
         h2b('ff'.repeat(7))
     ]
+    // give to djin
     out = okay(djin.turn(memo('say/tocks', [tock1])))
-    // apply to djin
+    // djin asks for tack
+    t.deepEqual(out, memo('ask/tacks', [mash(roll(tock1))]))
+
 })
