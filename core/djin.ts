@@ -89,42 +89,48 @@ class Djin {
         }
     }
 
-    turn(memo :Memo) :Okay<Memo> {
-        let [line, body] = memo
-
-        try { switch (line.toString()) {
-            case 'say/tocks': {
-                let tocks = body as Tock[]
-                // form_mail / form_tock
-                aver(_=> islist(tocks), `say/tocks arg must be a list`)
-                aver(_=> tocks.every(t=>form_tock(t)), `say/tocks arg must be tocks list`)
-                // vinx_tock
-                //   todo
-                for (let tock of tocks) {
-                    let [ok,val,errs] = vult_thin(this.tree, tock)
-                    toss(`todo djin vult_thin`)
+    turn(memo :Memo, skip : any = { 'skip_form': false, 'skip_vinx': false }) :Okay<Memo> {
+        try {
+            let [line, body] = memo
+            switch (memo[0].toString()) {
+                case 'say/tocks': {
+                    let tocks = body as Tock[]
+                    if (!skip.skip_form) {
+                        // form_tock
+                    }
+                    if (!skip.skip_vinx) {
+                        // vinx_tock
+                    }
+                    for (let tock of tocks) {
+                        let [ok,val,errs] = vult_thin(this.tree, tock)
+                        if (ok && val) {
+                            return pass(val)
+                        } else {
+                            toss(`djin panic: ${errs}`)
+                        }
+                    }
+                    toss(`todo say/tocks`)
                 }
-                return pass([])
+                case 'say/tacks': {
+                    // ...
+                    // tack_form
+                    // tack_vinx
+                    // rock.etch
+                    // outs << vult_part
+                    // outs << vult_full
+                    // send outs
+                }
+                case 'say/ticks': {
+                    // ...
+                    // tick_form
+                    // tick_vinx
+                    // rock.etch
+                    // later, do something smarter to know what vult to retry
+                    // for now, dumb sync will retry from ask/tocks
+                }
+                default: return fail(`unrecognized turn line: ${line}`)
             }
-            case 'say/tacks': {
-                // ...
-                // tack_form
-                // tack_vinx
-                // rock.etch
-                // outs << vult_part
-                // outs << vult_full
-                // send outs
-            }
-            case 'say/ticks': {
-                // ...
-                // tick_form
-                // tick_vinx
-                // rock.etch
-                // later, do something smarter to know what vult to retry
-                // for now, dumb sync will retry from ask/tocks
-            }
-            default: return fail(`unrecognized turn line: ${line}`)
-        } } catch(e) {
+        } catch(e) {
             toss(`engine panic: ${e.message}`)
         }
     }

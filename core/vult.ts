@@ -14,22 +14,14 @@ export {
 }
 
 function vult_thin(tree :Tree, tock :Tock) :Okay<Work> {
-    return fail(`todo`)
+    return fail(`todo vult_thin`)
 }
 
-// !warn returns [true, false, _] result when vult fails in case
-//      - missing info: returns needed mail
-//      - block invalidation: possibly_valid -> definitely_invalid
-//   - false result is an engine panic
 function vult_full(tree :Tree, tock :Tock) :Okay<Snap> {
-    return fail(`todo`)
+    return fail(`todo vult_full`)
 }
 
-function vult_tack(twig :Twig, tack :Tack) :Okay<Fees> {
-    return fail(`todo`)
+function vult_part(twig :Twig, tack :Tack) :Okay<Snap> {
+    return fail(`todo vult_part`)
 }
 
-// utxo use / new
-function vult_tick(twig :Twig, tick :Tick) :Okay<Fees> {
-    return fail(`todo`)
-}
