@@ -4,14 +4,14 @@ import {
     Roll, islist, isroll, roll, unroll, rmap,
     Hexs,
     Hash, hash,
-    Sign, sign,
+    Sign, Seck, sign,
     Pubk, scry
 } from 'coreword'
 
 export type {
     Okay,
     Bnum, Blob, Roll, Byte,
-    Sign, Pubk,
+    Sign, Pubk, Seck,
     Mash, Code, Cash,
     Tick, Tock, Tack,
     Move, Ment,

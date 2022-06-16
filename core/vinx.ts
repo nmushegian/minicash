@@ -16,11 +16,22 @@ export {
     vinx_tock,
 }
 
+class Vinx {
+    rock :Rock
+    constructor(rock :Rock) {
+        this.rock = rock
+    }
+    async spin() {
+        // query info from rock
+        // vinx_it
+        // return
+    }
+}
+
 // context is set of ticks that contain ments being moved
 // do not worry about internal consistency of context at this step
 // returns total fees if ok
-function vinx_tick(rock :Rock, tick :Tick) :Okay<Cash> {
-    // let conx = rock.read ...
+function vinx_tick(conx :Tick[], tick :Tick) :Okay<Fees> {
     // conx all are well-formed
     // tick is well-formed
     // let fees = 0
@@ -51,13 +62,13 @@ function vinx_tick(rock :Rock, tick :Tick) :Okay<Cash> {
 // with the other crypto-related checks.
 // We include tock explicitly as a separate argument as guidance for other systems.
 // Returns total fees for this tack.
-function vinx_tack(rock :Rock, tack :Tack) :Okay<Fees> {
+function vinx_tack(tock :Tock, tack :Tack) :Okay<Fees> {
     return fail(`todo vinx_tack`)
 }
 
 // context is previous tock
 // returns *marginal* work, the number you sum to get cumulative work
-function vinx_tock(rock :Rock, tock :Tock) :Okay<Work> {
+function vinx_tock(prev :Tock, tock :Tock) :Okay<Work> {
     // prev is well-formed
     // tock is well-formed
     // tock.prev = prev (this defines the context)
