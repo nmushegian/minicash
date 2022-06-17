@@ -36,6 +36,10 @@ function t2b(x :string) :Blob {
     return Buffer.from(x)
 }
 
+function b2t(x :Blob) :string {
+    return Buffer.toString()
+}
+
 function addr(x :Blob) :Code {
     return chop(hash(x), 20)
 }
@@ -164,7 +168,7 @@ type Tack = [
   , Mash[] // feet  tickhashes
 ]
 
-type Peer = Blob  // opaque peer ID
+type Peer = Blob  // opaque peer ID, could even be a roll
 
 type Mail = [
     Peer, // peer  from
@@ -172,9 +176,19 @@ type Mail = [
 ]
 
 type Memo = [
-    Blob, // line  type
+    Line, // line  type
     Roll  // body  data
 ]
+
+type Line = Blob
+type LineText
+  = 'ask/tocks'
+  | 'ask/tacks'
+  | 'ask/ticks'
+  | 'say/tocks'
+  | 'say/tacks'
+  | 'say/ticks'
+  | 'err'
 
 type Blob32 = Blob;
 type Blob20 = Blob;
