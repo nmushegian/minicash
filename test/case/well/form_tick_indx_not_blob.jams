@@ -1,0 +1,14 @@
+{
+  note "form_tick indx not a blob"
+  func form_tick
+  args [
+    [[
+      [ 00112233445566778899aabbccddeeff0011223344556677
+        [indxnotblob] 00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff ]
+    ][
+      [ 00112233445566778899aabbccddeeff00112233
+        0000ff00000000 ]
+    ]]
+  ]
+  want [ false "indx must be a blob" ]
+}
