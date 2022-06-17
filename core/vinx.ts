@@ -38,8 +38,7 @@ function _checksig(tick :Tick, i :number, lock :Code) :boolean {
     ])
     let pubk = scry(mask, sign)
     let code = addr(pubk)
-    need(bleq(code, lock), `bad code: ${code}, should match ${addr}`)
-    return true
+    return bleq(code, lock)
 }
 
 // context is set of ticks that contain ments being moved

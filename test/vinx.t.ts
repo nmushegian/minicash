@@ -13,7 +13,7 @@ import {
 } from '../core/vinx.js'
 
 console.log("VINX TEST LOAD")
-test('checksig', t=>{
+test('checksig', t=>{ try {
     let seck = h2b('00'.repeat(32))
     let pubk = h2b('ff'.repeat(32)) // todo keypair
     let code = addr(pubk) // in prev tick
@@ -33,6 +33,7 @@ test('checksig', t=>{
 
     tick[0][0][2] = sig
 
-    t.ok(_checksig(tick, 0, code))
-})
+    let ok = _checksig(tick, 0, code)
+    t.ok(ok, 'checksig failed')
+} catch (e) { t.ok(false, e.reason) }})
 
