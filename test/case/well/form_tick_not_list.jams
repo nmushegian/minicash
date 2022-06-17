@@ -2,7 +2,7 @@
   note "form_tick tick not a list"
   func form_tick
   args [
-    "tick"
+    00112233445566778899aabbccddeeff0011223344556677
   ]
   want [ false "must be a list" ]
 }

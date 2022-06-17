@@ -101,7 +101,6 @@ function form_tick(x :Roll) :Okay<Tick> {
             need((cash as Blob).length ==  7, `cash must have len 7`)
             const cashnum = BigInt('0x'+b2h(cash as Blob))
             totalcash += cashnum
-            need(cashnum > BigInt(0), `cash must be > 0`)
             need(cashnum <= MAX_CASH, `cash must be <= 2^53-1`)
         }
         need(totalcash <= MAX_CASH, `sum of all cash in ments must be <= 2^53-1`)
