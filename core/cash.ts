@@ -43,10 +43,9 @@ class TickMold {
         // todo assert max 7
         this._raw[1].push([code, cash])
     }
-    sign(keys :Seck[], indx?) {
+    sign(key :Seck, indx?) {
         // if index given, only sign that one
         // otherwise sign all
-        // try each key
         return this
     }
     mold() :Tick {
