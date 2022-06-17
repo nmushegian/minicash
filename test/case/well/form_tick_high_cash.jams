@@ -10,5 +10,5 @@
         20000000000000 ]
     ]]
   ]
-  want [ false "cash can't be greater than 2^53-1" ]
+  want [ false "cash must be <= 2^53-1" ]
 }

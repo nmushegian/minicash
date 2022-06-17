@@ -10,5 +10,5 @@
         [0000ff00000000] ]
     ]]
   ]
-  want [ false "cash not a blob" ]
+  want [ false "cash must be blob" ]
 }

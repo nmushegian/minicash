@@ -78,7 +78,7 @@ function form_tick(x :Roll) :Okay<Tick> {
             need(isblob(sign), `sign must be a blob`)
             need((txin as Blob).length == 24, `txin must be len 24`)
             need((indx as Blob).length ==  1, `indx must be len 1`)
-            need((sign as Blob).length == 32, `sign must be len 32, got ${sign.length}`)
+            need((sign as Blob).length == 32, `sign must be len 32`)
             moves.forEach((m, idx) =>
                 need(
                     idx == moveidx
@@ -101,10 +101,10 @@ function form_tick(x :Roll) :Okay<Tick> {
             need((cash as Blob).length ==  7, `cash must have len 7`)
             const cashnum = BigInt('0x'+b2h(cash as Blob))
             totalcash += cashnum
-            need(cashnum > BigInt(0), `cash must be <= 2^53-1`)
+            need(cashnum > BigInt(0), `cash must be > 0`)
             need(cashnum <= MAX_CASH, `cash must be <= 2^53-1`)
         }
-        need(totalcash <= MAX_CASH, `sum off all cash in ments must be <= 2^53-1`)
+        need(totalcash <= MAX_CASH, `sum of all cash in ments must be <= 2^53-1`)
         return pass(x as Tick)
     } catch (e) {
         return fail(e.message)

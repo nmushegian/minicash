@@ -12,5 +12,5 @@
         0000ff00000000 ]
     ]]
   ]
-  want [ false "" ]
+  want [ false "moves can't have duplicate entries" ]
 }

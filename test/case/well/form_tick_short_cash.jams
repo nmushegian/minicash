@@ -10,5 +10,5 @@
         00ff00000000 ]
     ]]
   ]
-  want [ false "cash" ]
+  want [ false "cash must have len 7" ]
 }

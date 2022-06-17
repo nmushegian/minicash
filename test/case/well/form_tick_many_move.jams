@@ -24,5 +24,5 @@
         0000ff00000000 ]
     ]]
   ]
-  want [ false "too many moves" ]
+  want [ false "moves must have len <= 7" ]
 }

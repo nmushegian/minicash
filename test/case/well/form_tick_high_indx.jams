@@ -10,5 +10,5 @@
         0000ff00000000 ]
     ]]
   ]
-  want [ false "indx max 6" ]
+  want [ false "indx must be <= 6" ]
 }

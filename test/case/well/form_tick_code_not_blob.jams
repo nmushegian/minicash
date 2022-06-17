@@ -10,5 +10,5 @@
         0000ff00000000 ]
     ]]
   ]
-  want [ false "code must be a blob" ]
+  want [ false "code must be blob" ]
 }

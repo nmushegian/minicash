@@ -12,5 +12,5 @@
         00000000000001 ]
     ]]
   ]
-  want [ false "sum of all cash in ments must be <= 2^53 - 1" ]
+  want [ false "sum of all cash in ments must be <= 2^53-1" ]
 }

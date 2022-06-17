@@ -10,5 +10,5 @@
         00000000000000 ]
     ]]
   ]
-  want [ false "cash can't be zero" ]
+  want [ false "cash must be > 0" ]
 }
