@@ -1,5 +1,5 @@
 {
-  note "form_tick duplicate code"
+  note "form_tick duplicate codes allowed"
   func form_tick
   args [
     [[
@@ -12,5 +12,5 @@
         0000fe00000000 ]
     ]]
   ]
-  want [ false "duplicate code" ]
+  want [ true "" ]
 }

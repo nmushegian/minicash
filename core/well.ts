@@ -90,7 +90,7 @@ function form_tick(x :Roll) :Okay<Tick> {
         }
         let totalcash = BigInt(0)
         let MAX_CASH  = BigInt(2) ** BigInt(53) - BigInt(1)
-        for (let [mentidx, ment] of ments.entries()) {
+        for (let ment of ments) {
             need(islist(ment), `ment must be a list`)
             ment = (ment as Blob[])
             need(ment.length == 2, `ment must have len 2`)
@@ -99,13 +99,6 @@ function form_tick(x :Roll) :Okay<Tick> {
             need(isblob(cash), `cash must be blob`)
             need((code as Blob).length == 20, `code must have len 20`)
             need((cash as Blob).length ==  7, `cash must have len 7`)
-            ments.forEach((m, idx) =>
-                need(
-                    idx == mentidx
-                    || (!bleq(code as Blob, m[0] as Blob)),
-                    'ments can\'t have duplicate codes'
-                )
-            )
             const cashnum = BigInt('0x'+b2h(cash as Blob))
             totalcash += cashnum
             need(cashnum > BigInt(0), `cash must be <= 2^53-1`)
