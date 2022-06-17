@@ -144,7 +144,7 @@ class Djin {
 
     async *spin(memo) {
         // split up memo into units
-        // turn/yield one at a time
+        // turn/reflect/yield one at a time
     }
 
 }

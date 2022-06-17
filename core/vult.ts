@@ -33,22 +33,22 @@ function vult_full(tree :Tree, tock :Tock) {
     //     if invalid, rock.etch ['know', head] false
     //   fees += part.fees
     // rock.etch ['know',head] true
-    // rock.etch ['fees',head,128] fees   // fees 128 is tock total
+    // last tack snap is tock snap
     return fail(`todo vult_full`)
 }
 
 function vult_part(twig :Twig, tack :Tack) {
     // let head,i,ribs,feet
-    // let fees = 0
+    // let tin, tout= 0
     // aver vinx_tack
-    // rock.etch 'tack',head,i feet
-    // for tick in tack
-    //   use move
-    //   put ment
-    //   add fees
-    //   etch 'hist' tickhash true
-    // rock.etch fees
-    // rock.etch head,i snap
+    // tree.grow
+    //   for tick in tack
+    //     use move
+    //     put ment
+    //     add tin,tout
+    //     grow 'hist' tickhash true
+    // rock.etch 'tack' head i tack
+    // rock.etch 'fold' snap in out
     // return
     return fail(`todo vult_part`)
 }
