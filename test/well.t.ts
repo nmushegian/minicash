@@ -52,12 +52,12 @@ test('cases', t=>{
             need($[data.func], `test func must be bound for ${data.func}`)
             let func = $[data.func]
             let args = rmap(data.args, h2b)
-            let [ok, val, errs] = func(...args)
+            let [ok, val, err] = func(...args)
             if (ok) {
                 t.ok(data.want[0] == "true", `must succeed`)
             } else {
                 t.equal(data.want[0], "false", `must fail`)
-                t.equal(data.want[1], errs[0], `error strings didn't match`)
+                t.equal(data.want[1], err.message, `error strings didn't match`)
             }
         })
     })
