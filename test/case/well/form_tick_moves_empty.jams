@@ -1,0 +1,12 @@
+{
+  note "form_tick moves empty"
+  func form_tick
+  args [
+    [[
+    ][
+      [ 00112233445566778899aabbccddeeff00112233
+        0000ff00000000 ]
+    ]]
+  ]
+  want [ true "" ]
+}

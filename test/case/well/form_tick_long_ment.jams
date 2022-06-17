@@ -1,0 +1,14 @@
+{
+  note "form_tick ment too long"
+  func form_tick
+  args [
+    [[
+      [ 00112233445566778899aabbccddeeff0011223344556677
+        01 00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff ]
+    ][
+      [ 00112233445566778899aabbccddeeff00112233
+        0000ff00000000 00 ]
+    ]]
+  ]
+  want [ false "ment must have len 2" ]
+}

@@ -1,0 +1,8 @@
+{
+  note "form_tick tick not a list"
+  func form_tick
+  args [
+    "tick"
+  ]
+  want [ false "must be a list" ]
+}
