@@ -64,7 +64,7 @@ function form_tick(x :Roll) :Okay<Tick> {
         let ments = (x[1] as Roll)
         need(islist(moves), `moves must be a list`)
         need(islist(ments), `ments must be a list`)
-        need(moves.length > 0 || moves.length > 0,
+        need(moves.length > 0 || ments.length > 0,
              `moves and ments must not both be empty`)
         need(moves.length <= 7, `moves must have len <= 7`)
         need(ments.length <= 7, `ments must have len <= 7`)
