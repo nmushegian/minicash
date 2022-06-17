@@ -56,15 +56,13 @@ class Tree {
         this._snaps = { "": immu.Map() } // todo, make it in lmdb
     }
 
-    read_rock(rkey :RKey) :Roll {
-        let key = roll(rkey)
-        return unroll(this.rock.read(key))
+    read_rock(k :RKey) :Roll {
+        return unroll(this.rock.read(k))
     }
 
-    etch_rock(rkey :Roll, rval :Roll) {
-        let key = roll(rkey)
-        let val = roll(rval)
-        this.rock.etch(key, val)
+    etch_rock(k :RKey, r :Roll) {
+        let val = roll(r)
+        this.rock.etch(k, val)
     }
 
     read_twig(copy :Snap, key :Blob) :Okay<Blob> {
