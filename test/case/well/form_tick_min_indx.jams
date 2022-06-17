@@ -1,0 +1,14 @@
+{
+  note "form_tick min indx"
+  func form_tick
+  args [
+    [[
+      [ 00112233445566778899aabbccddeeff0011223344556677
+        00 00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff ]
+    ][
+      [ 00112233445566778899aabbccddeeff00112233
+        0000ff00000000 ]
+    ]]
+  ]
+  want [ true "" ]
+}

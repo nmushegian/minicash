@@ -1,7 +1,7 @@
 import {
     Okay, okay, toss, pass, fail, need, aver,
     Blob, Roll, islist, isblob, isroll,
-    Tick, Tock, Tack, bleq, roll
+    Tick, Tock, Tack, bleq, roll, b2h
 } from './word.js'
 
 export {
@@ -86,8 +86,11 @@ function form_tick(x :Roll) :Okay<Tick> {
                     'moves can\'t have duplicate entries'
                 )
             )
+            need(Number(b2h(indx as Blob)) <= 6, `indx must be <= 6`)
         }
-        for (let ment of ments) {
+        let totalcash = BigInt(0)
+        let MAX_CASH  = BigInt(2) ** BigInt(53) - BigInt(1)
+        for (let [mentidx, ment] of ments.entries()) {
             need(islist(ment), `ment must be a list`)
             ment = (ment as Blob[])
             need(ment.length == 2, `ment must have len 2`)
@@ -96,7 +99,19 @@ function form_tick(x :Roll) :Okay<Tick> {
             need(isblob(cash), `cash must be blob`)
             need((code as Blob).length == 20, `code must have len 20`)
             need((cash as Blob).length ==  7, `cash must have len 7`)
+            ments.forEach((m, idx) =>
+                need(
+                    idx == mentidx
+                    || (!bleq(code as Blob, m[0] as Blob)),
+                    'ments can\'t have duplicate codes'
+                )
+            )
+            const cashnum = BigInt('0x'+b2h(cash as Blob))
+            totalcash += cashnum
+            need(cashnum > BigInt(0), `cash must be <= 2^53-1`)
+            need(cashnum <= MAX_CASH, `cash must be <= 2^53-1`)
         }
+        need(totalcash <= MAX_CASH, `sum off all cash in ments must be <= 2^53-1`)
         return pass(x as Tick)
     } catch (e) {
         return fail(e.message)

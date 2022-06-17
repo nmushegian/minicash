@@ -1,0 +1,16 @@
+{
+  note "form_tick high cash sum"
+  func form_tick
+  args [
+    [[
+      [ 00112233445566778899aabbccddeeff0011223344556677
+        01 00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff ]
+    ][
+      [ 00112233445566778899aabbccddeeff00112233
+        1fffffffffffff ]
+      [ 10112233445566778899aabbccddeeff00112233
+        00000000000001 ]
+    ]]
+  ]
+  want [ false "sum of all cash in ments must be <= 2^53 - 1" ]
+}
