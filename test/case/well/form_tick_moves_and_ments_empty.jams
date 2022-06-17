@@ -1,0 +1,10 @@
+{
+  note "form_tick moves and ments both empty"
+  func form_tick
+  args [
+    [[
+    ][
+    ]]
+  ]
+  want [ false "moves and ments must not both be empty" ]
+}

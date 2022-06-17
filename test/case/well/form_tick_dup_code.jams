@@ -1,5 +1,5 @@
 {
-  note "basic form_tick pass"
+  note "form_tick duplicate codes allowed"
   func form_tick
   args [
     [[
@@ -8,7 +8,9 @@
     ][
       [ 00112233445566778899aabbccddeeff00112233
         0000ff00000000 ]
+      [ 00112233445566778899aabbccddeeff00112233
+        0000fe00000000 ]
     ]]
   ]
-  want [ true "sign must be len 32" ]
+  want [ true "" ]
 }

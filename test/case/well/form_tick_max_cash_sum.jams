@@ -1,5 +1,5 @@
 {
-  note "basic form_tick pass"
+  note "form_tick max cash sum"
   func form_tick
   args [
     [[
@@ -7,8 +7,10 @@
         01 00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff ]
     ][
       [ 00112233445566778899aabbccddeeff00112233
-        0000ff00000000 ]
+        1ffffffffffffe ]
+      [ 10112233445566778899aabbccddeeff00112233
+        00000000000001 ]
     ]]
   ]
-  want [ true "sign must be len 32" ]
+  want [ true "" ]
 }

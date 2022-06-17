@@ -1,0 +1,13 @@
+{
+  note "form_tick moves not a list"
+  func form_tick
+  args [
+    [
+      00112233445566778899aabbccddeeff0011223344556677
+    [
+      [ 00112233445566778899aabbccddeeff00112233
+        0000ff00000000 ]
+    ]]
+  ]
+  want [ false "moves must be a list" ]
+}

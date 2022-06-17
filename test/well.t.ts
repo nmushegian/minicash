@@ -56,7 +56,8 @@ test('cases', t=>{
             if (ok) {
                 t.ok(data.want[0] == "true", `must succeed`)
             } else {
-                t.ok(data.want[0] == "false", `must fail`)
+                t.equal(data.want[0], "false", `must fail`)
+                t.equal(data.want[1], errs[0], `error strings didn't match`)
             }
         })
     })
