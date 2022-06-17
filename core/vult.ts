@@ -10,6 +10,7 @@ import { Tree, Twig } from './tree.js'
 
 export {
     vult_thin,
+    vult_part,
     vult_full
 }
 

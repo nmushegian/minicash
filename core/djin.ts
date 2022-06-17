@@ -53,11 +53,8 @@ class Djin {
             h2b('00'.repeat(7)),
         ]
     }
-    tail() {
-        return []
-    }
 
-    _ask_tocks(init :Mash) :Okay<Tock[]> {
+    _ask_tocks(init :Mash) :Okay<Memo> {
         // todo need init in history
         let best = this.tree.read_rock(rkey('best'))
         let lead = []
@@ -73,15 +70,33 @@ class Djin {
                 prev = tock[0] // tock.prev
             }
         } while( !bleq(prev, init)
-            && !bleq(prev, mash(roll(this.bang())))
-            && !bleq(prev, h2b('00'.repeat(24))) )
+              && !bleq(prev, mash(roll(this.bang())))
+              && !bleq(prev, h2b('00'.repeat(24))) )
         return pass([t2b('say/tocks'), lead])
+    }
+
+    // djin precondition is to split tocks across spin
+    // TODO be more consistent about all this
+    _say_tocks(tock :Tock) :Okay<Memo> {
+        if (true) { //!this.skip_form
+            okay(form_tock(tock))
+        }
+        if (true) { //!this.skip_vinc
+            let prevhash = tock[0]
+            let prevtock = this.tree.read_rock(rkey('tock', prevhash))
+            okay(vinx_tock(prevtock as Tock, tock))
+        }
+        vult_thin(this.tree, tock)
+        // ask/tocks from here if know valid
+        // ask/tacks for this tock if dont know valid
+        return fail(`todo _say_tocks`)
     }
 
     read(memo :Memo) :Okay<Memo> {
         let [line, body] = memo
         try { switch (line.toString()) {
             case 'ask/tocks': {
+                let tock = body[0] as Tock
                 return okay(this._ask_tocks(body as Mash))
             }
             case 'ask/tacks': {
@@ -100,22 +115,11 @@ class Djin {
         try {
             let [line, body] = memo
             switch (line.toString()) {
-
                 case 'say/tocks': {
                     // aver tocks len 1
                     // spin splits up messages into units
                     let tock = body[0] as Tock
-                    if (true) { //!this.skip_form
-                        okay(form_tock(tock))
-                    }
-                    if (true) { //!this.skip_vinc
-                        let prevhash = tock[0]
-                        let prevtock = this.tree.read_rock(rkey('tock', prevhash))
-                        okay(vinx_tock(prevtock as Tock, tock))
-                    }
-                    vult_thin(this.tree, tock)
-                    // ask/tocks from here if know valid
-                    // ask/tacks for this tock if dont know valid
+                    return this._say_tocks(tock)
                     toss(`todo say/tocks`)
                 }
 
