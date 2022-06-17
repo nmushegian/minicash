@@ -14,7 +14,7 @@ import {
 } from '../core/word.js'
 
 
-test('djin', t=>{
+test('djin', t=>{ try {
     let djin = new Djin('')
     let bang = djin.bang()
     let out
@@ -46,6 +46,6 @@ test('djin', t=>{
     // give to djin
     out = okay(djin.turn(memo('say/tocks', [tock1])))
     // djin asks for tack
-    t.deepEqual(out, memo('ask/tacks', [mash(roll(tock1))]))
 
-})
+    t.deepEqual(out, memo('ask/tacks', [mash(roll(tock1))]))
+} catch(e) { console.log(e); t.ok(false); }})

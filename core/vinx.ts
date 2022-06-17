@@ -4,6 +4,7 @@ export {
     vinx_tick,
     vinx_tack,
     vinx_tock,
+    _checksig, // prefer vinx_tick
 }
 
 import {
