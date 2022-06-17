@@ -36,6 +36,10 @@ function t2b(x :string) :Blob {
     return Buffer.from(x)
 }
 
+function b2t(x :Blob) :string {
+    return Buffer.toString()
+}
+
 function addr(x :Blob) :Code {
     return chop(hash(x), 20)
 }
@@ -164,7 +168,7 @@ type Tack = [
   , Mash[] // feet  tickhashes
 ]
 
-type Peer = Blob  // opaque peer ID
+type Peer = Blob  // opaque peer ID, could even be a roll
 
 type Mail = [
     Peer, // peer  from
@@ -172,9 +176,25 @@ type Mail = [
 ]
 
 type Memo = [
-    Blob, // line  type
+    Line, // line  type
     Roll  // body  data
 ]
+
+type Line = Blob
+type LineText   // body =
+  = 'ask/tocks' // Mash       // init tock hash to sync from to best
+  | 'ask/tacks' // Mash       // tockhash of tock you want tacks for
+  | 'ask/ticks' // Mash[]     // tickhashes you want ticks for
+  | 'say/tocks' // Tock[]     // chain of tocks, first to last
+  | 'say/tacks' // Tack       // a single tack object represents multiple chunks
+  | 'say/ticks' // Tick[]     // ticks you requested, topological order to give conx
+  | 'err'       // [Why,Roll] // typed reason, untyped subreason
+
+type Why
+  = 'malformed'   // well
+  | 'unavailable' // serv
+  | 'invalid'     // vinx
+  | 'unspendable' // vult
 
 type Blob32 = Blob;
 type Blob20 = Blob;

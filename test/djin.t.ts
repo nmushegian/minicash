@@ -46,6 +46,6 @@ test('djin', t=>{ try {
     // give to djin
     out = okay(djin.turn(memo('say/tocks', [tock1])))
     // djin asks for tack
-    t.deepEqual(out, memo('ask/tacks', [mash(roll(tock1))]))
 
-} catch (err) {t.fail(err)}})
+    t.deepEqual(out, memo('ask/tacks', [mash(roll(tock1))]))
+} catch(e) { console.log(e); t.ok(false, e.message); }})

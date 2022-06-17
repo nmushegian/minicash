@@ -4,12 +4,14 @@ export {
     vinx_tick,
     vinx_tack,
     vinx_tock,
+    _checksig, // prefer vinx_tick
 }
 
 import {
     Okay, okay, pass, fail, need, toss, aver,
-    Bnum, bnum, bleq, mash, roll,
-    Cash, Byte, Work, Fees, tuff,
+    Bnum, bnum, bleq, mash, roll, t2b,
+    Cash, Byte, Work, Fees, Code, Pubk, tuff,
+    scry, addr,
     Tick, Tock, Tack,
 } from './word.js'
 
@@ -24,28 +26,38 @@ import {
     form_tock,
 } from './well.js'
 
+function _checksig(tick :Tick, i :number, lock :Code) :boolean {
+    let [moves, ments] = tick
+    let move = moves[i] // just the ment that is signed
+    let sign = move[2]
+    move[2] = t2b('')   // replace sign with emptyblob
+    let mask = roll([
+        t2b("minicash movement"),
+        [ move ],  // blob[][]
+        ments      // blob[][]
+    ])
+    let pubk = scry(mask, sign)
+    let code = addr(pubk)
+    return bleq(code, lock)
+}
+
 // context is set of ticks that contain ments being moved
 // do not worry about internal consistency of context at this step
 // returns total fees if ok
 function vinx_tick(conx :Tick[], tick :Tick) :Okay<Fees> {
     // conx all are well-formed
     // tick is well-formed
-    // let fees = 0
+    // let [ticash, tocash] = [0, 0]
     // for each (i,move) in tick.moves
     //   let txin, indx, sign = move
-    //   let intx = find(x | mash(x) == txin)
+    //   let intx = find(x in conx | mash(x) == txin)
     //   let ment = intx.ments[indx]
-    //   let [code, cash] = ment
-    //   checksig(tick, i, code) for i in len(inputs):
-    //     let [ins, outs] = tick
-    //     let [intx, indx, sign] = ins[i]
-    //     let mask = [ [intx,indx,""], outs ]
-    //     let pubk = scry(mask, sign)
-    //     need code == addr(pubk)
-    //   fees += incash
+    //   let [code, icash] = ment
+    //   need _checksig(tick, i, code)
+    //   ticash += icash
     // for each (i,ment) in tick.ments
-    //   fees -= ment.cash
-    // return pass(fees)
+    //   tocash += ment.cash
+    // return pass(tocash - ticash)
     return fail('todo vinx_tick')
 }
 
@@ -58,6 +70,22 @@ function vinx_tick(conx :Tick[], tick :Tick) :Okay<Fees> {
 // with the other crypto-related checks.
 // We include tock explicitly as a separate argument as guidance for other systems.
 function vinx_tack(tock :Tock, tack :Tack) {
+    // let [head, eyes, ribs, feet] = tack
+    // aver head == tock      // defines the context
+    // aver len(ribs) <= 128  // well formed
+    // need len(eyes) == ceil(len(feet) / 1024)
+    // if len(ribs) == 0 {
+    //   need len(eyes) == 1
+    //   need eyes[0] == 0
+    //   need merk(feet) == tock.root
+    // } else { // ribs len > 0
+    //   for (let i = 0; i < eyes.length; i++) {
+    //      let ticks = feet.slice(i, i+1024)
+    //      need merk(ticks) == ribs[eyes[i]]
+    //      need merk(ribs) == tock.root
+    //   }
+    // }
+    // need tock.root == merk(tack.feet)
     return fail(`todo vinx_tack`)
 }
 

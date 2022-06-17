@@ -57,35 +57,38 @@ class Djin {
         return []
     }
 
+    _ask_tocks(init :Mash) :Okay<Tock[]> {
+        // todo need init in history
+        let best = this.tree.read_rock(rkey('best'))
+        let lead = []
+        aver(_=>isblob(best), `best in db must be a blob`)
+        let prev = best as unknown as Blob // mash
+        do {
+            let roll = this.tree.read_rock(rkey('tock', prev))
+            if (roll.length == 0) {
+                return fail(`no such tock: ${prev}`)
+            } else {
+                let tock = roll as Tock
+                lead.push(tock)
+                prev = tock[0] // tock.prev
+            }
+        } while( !bleq(prev, init)
+            && !bleq(prev, mash(roll(this.bang())))
+            && !bleq(prev, h2b('00'.repeat(24))) )
+        return pass([t2b('say/tocks'), lead])
+    }
+
     read(memo :Memo) :Okay<Memo> {
         let [line, body] = memo
         try { switch (line.toString()) {
             case 'ask/tocks': {
-                let init = body as Mash; // tockhash
-                // todo need init in history
-                let best = this.tree.read_rock(rkey('best'))
-                let lead = []
-                aver(_=>isblob(best), `best in db must be a blob`)
-                let prev = best as unknown as Blob // mash
-                do {
-                    let roll = this.tree.read_rock(rkey('tock', prev))
-                    if (roll.length == 0) {
-                        return fail(`no such tock: ${prev}`)
-                    } else {
-                        let tock = roll as Tock
-                        lead.push(tock)
-                        prev = tock[0] // tock.prev
-                    }
-                } while( !bleq(prev, init)
-                      && !bleq(prev, mash(roll(this.bang())))
-                      && !bleq(prev, h2b('00'.repeat(24))) )
-                return pass([t2b('say/tocks'), lead])
+                return okay(this._ask_tocks(body as Mash))
             }
             case 'ask/tacks': {
-                toss(`todo`)
+                toss(`todo djin read ask/tacks`)
             }
             case 'ask/ticks': {
-                toss(`todo`)
+                toss(`todo djin read ask/ticks`)
             }
             default: return fail(`panic/unrecognized memo line ${line}`)
         } } catch (e) {
@@ -124,6 +127,7 @@ class Djin {
                     //   ask/ticks if we need ticks
                     //   ask/tacks if we need next tack
                     //   ask/tocks if we can make progress
+                    toss(`todo turn say/tacks`)
                 }
 
                 case 'say/ticks': {
@@ -133,8 +137,8 @@ class Djin {
                     //   say/ticks to rebroadcast
                     // later, do something smarter to know what vult to retry
                     // for now, dumb sync will retry from ask/tocks
+                    toss(`todo turn say/ticks`)
                 }
-
                 default: return fail(`unrecognized turn line: ${line}`)
             }
         } catch(e) {

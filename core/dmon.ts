@@ -46,20 +46,17 @@ class Dmon {
         })
     }
 
-    sync(freq=5000) {
-        return setInterval(()=>{
-            // get the best possibly-valid tocks from peers, then make a
-            // request for the thing you need on each branch
-            let init = this.djin.tail()
-            this.plug.emit(memo('ask/tocks', init), async ([line, yarn]) => {
-                let miss
-                for await (miss of this.djin.spin(yarn))
-                { continue }
-                if (miss) {
-                    this.plug.emit(miss, fill => this.djin.spin(fill))
-                }
-            })
-        }, freq)
+    sync(tail = this.djin.bang()) {
+        // get the best possibly-valid tocks from peers, then make a
+        // request for the thing you need on each branch
+        this.plug.emit(memo('ask/tocks', tail), async ([line, yarn]) => {
+            let miss
+            for await (miss of this.djin.spin(yarn))
+            { continue }
+            if (miss) {
+                this.plug.emit(miss, fill => this.sync(tail))
+            }
+        })
     }
 
 }
