@@ -181,14 +181,20 @@ type Memo = [
 ]
 
 type Line = Blob
-type LineText
-  = 'ask/tocks'
-  | 'ask/tacks'
-  | 'ask/ticks'
-  | 'say/tocks'
-  | 'say/tacks'
-  | 'say/ticks'
-  | 'err'
+type LineText   // body =
+  = 'ask/tocks' // Mash       // init tock hash to sync from to best
+  | 'ask/tacks' // Mash       // tockhash of tock you want tacks for
+  | 'ask/ticks' // Mash[]     // tickhashes you want ticks for
+  | 'say/tocks' // Tock[]     // chain of tocks, first to last
+  | 'say/tacks' // Tack       // a single tack object represents multiple chunks
+  | 'say/ticks' // Tick[]     // ticks you requested, topological order to give conx
+  | 'err'       // [Why,Roll] // typed reason, untyped subreason
+
+type Why
+  = 'malformed'   // well
+  | 'unavailable' // serv
+  | 'invalid'     // vinx
+  | 'unspendable' // vult
 
 type Blob32 = Blob;
 type Blob20 = Blob;

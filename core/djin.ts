@@ -82,7 +82,7 @@ class Djin {
         let [line, body] = memo
         try { switch (line.toString()) {
             case 'ask/tocks': {
-                return _ask_tocks(body as Mash)
+                return okay(this._ask_tocks(body as Mash))
             }
             case 'ask/tacks': {
                 toss(`todo djin read ask/tacks`)
@@ -137,7 +137,7 @@ class Djin {
                     //   say/ticks to rebroadcast
                     // later, do something smarter to know what vult to retry
                     // for now, dumb sync will retry from ask/tocks
-                    todo(`turn say/ticks`)
+                    toss(`todo turn say/ticks`)
                 }
                 default: return fail(`unrecognized turn line: ${line}`)
             }
