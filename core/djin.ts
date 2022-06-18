@@ -151,6 +151,8 @@ class Djin {
     }
 
     async *spin(memo) {
+        // aver well-formed
+        // aver valid-in-context
         // split up memo into units
         // turn/reflect/yield one at a time
     }

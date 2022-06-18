@@ -32,6 +32,35 @@ export {
 // tree/part
 //   ['tree', snap] -> (mark     -> leaf) // utxo set
 
+class Crag {
+    _dbtx
+    _done
+    constructor(dbtx) {
+        this._dbtx = dbtx
+        this._done = false
+    }
+    etch(key :Blob, val :Blob) {
+        aver(_=> {
+            let pval = this.read(key)
+            if (pval.length > 0 && !bleq(val, pval)) {
+                toss(`panic: etch key with new value`)
+            }
+            return true
+        }, `etch preconditions`)
+        let skey = key.toString('binary')
+        this._dbtx.set(skey, val)
+        return val
+    }
+    read(key :Blob) {
+        let skey = key.toString('binary')
+        let val = this._dbtx.get(skey)
+        if (val) return val
+        else return h2b('')
+    }
+    _seal() {}
+    _bail() {}
+}
+
 class Rock {
     _db
 
@@ -39,31 +68,14 @@ class Rock {
         this._db = new Map()
     }
 
-    // emptyblob-initialized
-    _get(key :Blob) :Blob {
-        let skey = key.toString('binary')
-        let val = this._db.get(skey)
-        if (val) return val
-        else return h2b('')
-    }
-
-    _set(key :Blob, val :Blob) :Blob {
-        let skey = key.toString('binary')
-        this._db.set(skey, val)
-        return val
-    }
-
-    // insert-only
-    etch(k :Blob, v :Blob) {
-        let pv = this.read(k)
-        if (pv.length > 0 && !bleq(v, pv)) {
-            toss(`panic: etch key with new value`)
+    rite(f :((crag:Crag) => void)) {
+        let crag = new Crag(this._db)
+        try {
+            f(crag)
+            crag._seal()
+        } catch (e) {
+            toss(`panic rite throw`)
+            crag._bail()
         }
-        this._set(k, v)
     }
-
-    read(k :Blob) :Blob {
-        return this._get(k)
-    }
-
 }

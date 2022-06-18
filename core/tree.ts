@@ -18,8 +18,10 @@ export {
 
 // mutable handle
 class Twig {
+    _crag
     _mut
-    constructor(prev) {
+    constructor(prev, crag) {
+        this._crag = crag
         this._mut = prev.asMutable()
     }
     get(k :Blob) :Blob {
@@ -56,33 +58,36 @@ class Tree {
         this._snaps = { "": immu.Map() } // todo, make it in lmdb
     }
 
-    read_rock(k :RKey) :Roll {
-        return unroll(this.rock.read(k))
+    rock_rite(f) {
+        this.rock.rite(f)
     }
 
-    etch_rock(k :RKey, r :Roll) {
-        let val = roll(r)
-        this.rock.etch(k, val)
-    }
-
-    read_twig(copy :Snap, key :Blob) :Okay<Blob> {
+    twig_read(copy :Snap, key :Blob) :Okay<Blob> {
         let snap = this._snaps[b2h(copy)]
         if (!snap) return fail(`read_twig: no such snap: ${copy}`)
         else {
-            let twig = new Twig(snap) // todo, readonly
-            let val = twig.get(key)
-            return pass(val)
+            let ret
+            this.rock.rite(crag => {
+                let twig = new Twig(snap, crag) // todo, readonly
+                let val = twig.get(key)
+                ret = pass(val)
+            })
+            return ret
         }
     }
 
-    grow_twig(copy :Snap, grow :((Twig) => void)) :Okay<Snap> {
+    twig_grow(copy :Snap, grow :((Twig) => void)) :Okay<Snap> {
         let prev = this._snaps[b2h(copy)]
-        let twig = new Twig(prev)
-        grow(twig)
-        let next = twig.seal()
-        let snap = b2h(this._nextsnap())
-        this._snaps[snap] = next
-        return pass(h2b(snap))
+        let out
+        this.rock.rite(r => {
+            let twig = new Twig(prev, r)
+            grow(twig)
+            let next = twig.seal()
+            let snap = b2h(this._nextsnap())
+            this._snaps[snap] = next
+            out = pass(h2b(snap))
+        })
+        return out
     }
 
     _nextsnap() :Snap {
