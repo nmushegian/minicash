@@ -1,0 +1,13 @@
+{
+  note "form_tick move not a list (is a blob len 3)"
+  func form_tick
+  args [
+    [[
+      001122
+    ][
+      [ 00112233445566778899aabbccddeeff00112233
+        0000ff00000000 ]
+    ]]
+  ]
+  want [ false "move must be a list" ]
+}
