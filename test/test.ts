@@ -42,8 +42,6 @@ const testdir = (dir) => {
             if (!name.endsWith('.jams')) return
             let file = readFileSync(dir + '/' + name)
             let data = jams(file.toString())
-            console.log("KEVIN")
-            console.log(data.args)
             test(`\nfile ${name} -- ${data.note}`, t => {
                 need(data.func, 'must give test func')
                 need(data.args, 'must give test args')
