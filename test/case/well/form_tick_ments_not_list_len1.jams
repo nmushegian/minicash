@@ -1,0 +1,13 @@
+{
+  note "form_tick ments not a list (blob is len 1)"
+  func form_tick
+  args [
+    [[
+      [ 00112233445566778899aabbccddeeff0011223344556677
+        01 00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff ]
+    ]
+      00
+    ]
+  ]
+  want [ false "ments must be a list" ]
+}

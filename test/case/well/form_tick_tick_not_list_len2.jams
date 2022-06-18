@@ -1,0 +1,8 @@
+{
+  note "form_tick tick not a list (blob is len 2)"
+  func form_tick
+  args [
+      0011
+  ]
+  want [ false "must be a list" ]
+}
