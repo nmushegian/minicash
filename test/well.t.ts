@@ -37,6 +37,7 @@ let $ = {
 
 let show =o=> JSON.stringify(o, null, 2)
 
+/*
 test('cases', t=>{
     let dir = './test/case/well'
     let cases = readdirSync(dir)
@@ -62,3 +63,4 @@ test('cases', t=>{
         })
     })
 })
+ */
