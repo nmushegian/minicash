@@ -44,7 +44,7 @@ test('cases', t=>{
         if (!name.endsWith('.jams')) return
         let file = readFileSync(dir + '/' + name)
         let data = jams(file.toString())
-        test(`\nfile ${name} -- ${data.note}`, t=>{
+        test(`\n${name}\n  ${data.note}`, t=>{
             need(data.func, 'must give test func')
             need(data.args, 'must give test args')
             need(data.want, 'must give test want')
@@ -57,7 +57,7 @@ test('cases', t=>{
                 t.ok(data.want[0] == "true", `must succeed`)
             } else {
                 t.equal(data.want[0], "false", `must fail`)
-                t.equal(data.want[1], err.message, `error strings didn't match`)
+                t.equal(data.want[1], err.message, `error strings must match`)
             }
         })
     })
