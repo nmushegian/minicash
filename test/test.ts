@@ -12,7 +12,7 @@ import {readdirSync, readFileSync} from "fs";
 djintest
 rocktest
 treetest
-vinxtest
+//vinxtest
 welltest
 wordtest
 
@@ -23,7 +23,7 @@ import {
 } from '../core/well.js'
 import {
     vinx_tick
-} from "../core/vinx";
+} from "../core/vinx.js";
 import {
     Okay, okay, need,
     Blob, h2b, rmap,
@@ -42,6 +42,8 @@ const testdir = (dir) => {
             if (!name.endsWith('.jams')) return
             let file = readFileSync(dir + '/' + name)
             let data = jams(file.toString())
+            console.log("KEVIN")
+            console.log(data.args)
             test(`\nfile ${name} -- ${data.note}`, t => {
                 need(data.func, 'must give test func')
                 need(data.args, 'must give test args')
