@@ -37,7 +37,7 @@ function t2b(x :string) :Blob {
 }
 
 function b2t(x :Blob) :string {
-    return Buffer.toString()
+    return x.toString()
 }
 
 function addr(x :Blob) :Code {
