@@ -1,0 +1,28 @@
+{
+  note "basic vinx_tick fail"
+  func vinx_tick
+  args [
+    [   
+      [   
+        [   
+          [ 00112233445566778899aabbccddeeff0011223344556678
+            00 07bdfb85d74359c64f66498cb3bc4adf7c7ed8de99ba1d33d58dc79375bc23634b28b9b4a1c12f8ece6615d76911ac480ca7f3265e31809a8e52f4eddc2af40200] 
+        ][  
+          [ 07cb562f7d7a49dd178554057375d077be2a0a2f
+            0000ff00000000 ]
+        ]   
+      ]   
+    ]   
+
+    [[[ 9e6518024d07f708756dd4f3e35233b6b2c97e180bcd9cc0
+        01 e309c385dfef50d6f4ce828350dcd71e9e8ffcb89f157ce1e0488baa62e36ed01d6cc754b5c778a5253d1336a27dc5fbe308a2ab9761aef71e393efd0705ab3800 ]
+    ][
+      [ d5de996a3d6f2415db929a0b5864535744b6198c
+        0000ff00000000 ]
+    ]]
+
+
+  ]
+  want [ false "indx out of bounds" ]
+}
+
