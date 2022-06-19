@@ -112,17 +112,21 @@ function vinx_tack(tock :Tock, tack :Tack) {
 // context is previous tock
 // returns *marginal* work, the number you sum to get cumulative work
 function vinx_tock(prev :Tock, tock :Tock) :Okay<Work> {
-    aver(_=> {
-        okay(form_tock(prev))
-        okay(form_tock(tock))
-        need(bleq(tock[0], mash(roll(prev))), `panic, bad vinx_tock context`)
-        return true
-    }, `vinx_tock precondition`)
+    try {
+        aver(_ => {
+            okay(form_tock(prev))
+            okay(form_tock(tock))
+            need(bleq(tock[0], mash(roll(prev))), `panic, bad vinx_tock context`)
+            return true
+        }, `vinx_tock precondition`)
 
-    let thistime = bnum(tock[2])
-    let prevtime = bnum(prev[2])
-    need(BigInt(57) == thistime - prevtime, `bad header time`)
-    let work = tuff(mash(roll(tock)))
-    return pass(work)
+        let thistime = bnum(tock[2])
+        let prevtime = bnum(prev[2])
+        need(BigInt(57) == thistime - prevtime, `bad header time`)
+        let work = tuff(mash(roll(tock)))
+        return pass(work)
+    } catch (e) {
+        return fail(e.message)
+    }
 }
 
