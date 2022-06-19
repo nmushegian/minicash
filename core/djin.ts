@@ -59,18 +59,14 @@ class Djin {
     _ask_tocks(init :Mash) :Okay<Memo> {
         // todo need init in history
         let lead = []
-        let best
-        this.rock.rite(r => { best = r.read(rkey('best')) })
+        let best = this.rock.read_one(rkey('best'))
         let prev = best as unknown as Blob // mash
         do {
-            let roll
-            this.rock.rite(r=> {
-                roll = unroll(r.read(rkey('tock', prev)))
-            })
-            if (roll.length == 0) {
+            let blob = this.rock.read_one(rkey('tock', prev))
+            if (blob.length == 0) {
                 return fail(`no such tock: ${prev}`)
             } else {
-                let tock = roll as Tock
+                let tock = unroll(blob) as Tock
                 lead.push(tock)
                 prev = tock[0] // tock.prev
             }
@@ -88,10 +84,7 @@ class Djin {
         }
         if (true) { //!this.skip_vinc
             let prevhash = tock[0]
-            let prevtock
-            this.rock.rite(r => {
-                prevtock = r.read(rkey('tock', prevhash))
-            })
+            let prevtock = unroll(this.rock.read_one(rkey('tock', prevhash)))
             okay(vinx_tock(prevtock as Tock, tock))
         }
         vult_thin(this.tree, tock)

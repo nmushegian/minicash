@@ -68,7 +68,16 @@ class Rock {
         this._db = new Map()
     }
 
-    reed() { toss(`todo readonly`) }
+    etch_one(key :Blob, val :Blob) {
+        this.rite(r => r.etch(key, val))
+    }
+
+    read_one(key :Blob) :Blob {
+        let out
+        this.rite(r => { out = r.read(key) })
+        return out
+    }
+
     rite(f :((r:Rite) => void)) {
         let rite = new Rite(this._db)
         try {
