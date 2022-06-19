@@ -44,5 +44,9 @@ test('checksig', t=>{ try {
     form_tick(tick)
     let ok = _checksig(tick, 0, code)
     t.ok(ok, 'checksig must succeed')
+    sig[37] = ~sig[37]
+    tick[0][0][2] = sig
+    form_tick(tick)
+    ok = _checksig(tick, 0, code)
+    t.ok(!ok, 'checksig must fail')
 } catch (e) { t.ok(false, e.reason) }})
-
