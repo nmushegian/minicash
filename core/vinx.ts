@@ -1,5 +1,7 @@
 // valid-in-context
 
+import {b2t, Roll} from "coreword";
+
 export {
     vinx_tick,
     vinx_tack,
@@ -12,7 +14,7 @@ import {
     Bnum, bnum, bleq, mash, roll, t2b,
     Cash, Byte, Work, Fees, Code, Pubk, tuff,
     scry, addr,
-    Tick, Tock, Tack,
+    Tick, Tock, Tack, b2h,
 } from './word.js'
 
 import {
@@ -45,20 +47,33 @@ function _checksig(tick :Tick, i :number, lock :Code) :boolean {
 // do not worry about internal consistency of context at this step
 // returns total fees if ok
 function vinx_tick(conx :Tick[], tick :Tick) :Okay<Fees> {
-    // conx all are well-formed
-    // tick is well-formed
-    // let [ticash, tocash] = [0, 0]
-    // for each (i,move) in tick.moves
-    //   let txin, indx, sign = move
-    //   let intx = find(x in conx | mash(x) == txin)
-    //   let ment = intx.ments[indx]
-    //   let [code, icash] = ment
-    //   need _checksig(tick, i, code)
-    //   ticash += icash
-    // for each (i,ment) in tick.ments
-    //   tocash += ment.cash
-    // return pass(tocash - ticash)
-    return fail('todo vinx_tick')
+    try {
+        conx.forEach(x => form_tick(x as Roll))
+        form_tick(tick)
+
+        const moves = tick[0]
+        let ticash = BigInt(0)
+        moves.forEach((move, moveidx) => {
+            const [txin, indx, sign] = move
+            const intx = conx.find(x => mash(roll(x)) == txin) // stupid
+            need(intx != undefined, 'unmatched txin')
+            const iment = intx[1][Number('0x' + b2h(indx))]
+            const [icode, icash] = iment
+            need(_checksig(tick, moveidx, icode), 'bad signature')
+            ticash += BigInt('0x' + b2h(icash))
+        })
+
+        const ments = tick[1]
+        let tocash = BigInt(0)
+        ments.forEach((ment, mentidx) => {
+            const cash = ment[1]
+            tocash += BigInt('0x' + b2h(cash))
+        })
+        need(tocash <= ticash, 'input cash less than output cash')
+        return pass(tocash - ticash)
+    } catch (e) {
+        return fail(e.message)
+    }
 }
 
 // vinx_tack is technically a well-formed check, because all information
@@ -73,12 +88,10 @@ function vinx_tack(tock :Tock, tack :Tack) {
     // let [head, eyes, ribs, feet] = tack
     // aver head == tock      // defines the context
     // aver len(ribs) <= 128  // well formed
-    // aver len(feet) <= 2^17 // well formed
-
     // need len(eyes) == ceil(len(feet) / 1024)
-    // need len(eyes) == len(ribs)  // no ribs/eyes => tock has <1024 ticks
-
     // if len(ribs) == 0 {
+    //   need len(eyes) == 1
+    //   need eyes[0] == 0
     //   need merk(feet) == tock.root
     // } else { // ribs len > 0
     //   for (let i = 0; i < eyes.length; i++) {
@@ -88,7 +101,6 @@ function vinx_tack(tock :Tock, tack :Tack) {
     //   }
     // }
     // need tock.root == merk(tack.feet)
-
     return fail(`todo vinx_tack`)
 }
 

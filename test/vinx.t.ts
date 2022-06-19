@@ -1,10 +1,17 @@
 import { test } from 'tapzero'
+import { jams } from 'jams.js'
+import Debug from 'debug'
+const debug = Debug('vinx::test')
+const debugkeys = Debug('vinx::keys')
+const debugtxin = Debug('vinx::txin')
+
 
 import {
     roll, h2b,
     sign, scry,
     Tick,
-    addr, t2b
+    addr, t2b, need,
+    rmap, mash
 } from '../core/word.js'
 import {
     form_tick
@@ -15,6 +22,7 @@ import {
     vinx_tick,
 } from '../core/vinx.js'
 import elliptic from 'elliptic'
+import {readdirSync, readFileSync} from "fs";
 const ec = new elliptic.ec('secp256k1')
 
 test('checksig', t=>{ try {
@@ -50,3 +58,73 @@ test('checksig', t=>{ try {
     ok = _checksig(tick, 0, code)
     t.ok(!ok, 'checksig must fail')
 } catch (e) { t.ok(false, e.reason) }})
+
+let $ = {
+    vinx_tick,
+}
+
+const keys = {
+    ali: 'e4c90c881b372adf66e8f566de63f560f48ef16a31c2aef9b860023ff9ab634f',
+    bob: '9f092b266aec975d0d75fb1046ab8986262659fb88521a22500a92498780dce0',
+    cat: '1d4d8c560879214483c8645fe4b60d0fb72033c0591716c7af2df787823cf3b7',
+}
+
+test('cases', t=>{
+    let dir = './test/case/vinx'
+    let cases = readdirSync(dir)
+    cases.forEach(name => {
+        if (!name.endsWith('.jams')) return
+        let file = readFileSync(dir + '/' + name)
+        let data = jams(file.toString())
+        test(`\n${name}\n  ${data.note}`, t=>{
+            need(data.func, 'must give test func')
+            need(data.args, 'must give test args')
+            need(data.want, 'must give test want')
+            need(data.want.length == 2, 'want must be len 2, use result type')
+            need($[data.func], `test func must be bound for ${data.func}`)
+            let func = $[data.func]
+            let args = rmap(data.args, h2b)
+            let [ok, val, err] = func(...args)
+            if (ok) {
+                t.ok(data.want[0] == "true", `must succeed`)
+            } else {
+                t.equal(data.want[0], "false", `must fail`)
+                t.equal(data.want[1], err.message, `error strings must match`)
+                const ticks = [...args[0], args[1]]
+                ticks.forEach((tick, tickidx) => {
+                    try {
+                        form_tick(tick)
+                    } catch (err) {
+                        debugkeys('not well formed (', err, ')')
+                        return
+                    }
+                    const moves = tick[0]
+                    const ments = tick[1]
+                    debugtxin(`tick#${tickidx} txin (mash): ${mash(roll(tick)).toString('hex')}`)
+                    moves.forEach( (move, moveidx) => {
+                        debugkeys(moveidx)
+                        Object.entries(keys).forEach(entry => {
+                            const name = entry[0]
+                            const privkey = entry[1]
+                            const seck = Buffer.from(entry[1], 'hex')
+                            const mask = roll([
+                                t2b("minicash movement"),
+                                [ [ move[0], move[1], t2b('') ] ],
+                                ments
+                            ])
+                            const sig = sign(mask, seck)
+                            const keypair = ec.keyFromPrivate(seck)
+                            const pubkey = Buffer.from(keypair.getPublic().encodeCompressed())
+                            debugkeys(
+                                '  ', name,
+                                `code:${addr(pubkey).toString('hex')}`,
+                                `sign:${sig.toString('hex')}`
+                            )
+                        })
+                    })
+                })
+            }
+        })
+    })
+})
+
