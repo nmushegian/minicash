@@ -13,13 +13,13 @@ import {
 } from '../core/well.js'
 
 test('tick_form', t=>{
-    let blob32 = h2b('32'.repeat(32))
+    let blob65 = h2b('65'.repeat(65))
     let blob24 = h2b('24'.repeat(24))
     let blob20 = h2b('20'.repeat(20))
     let blob7 = h2b('07'.repeat(7))
     let blob1 = h2b('01'.repeat(1))
     let [ok, val, errs] = form_tick([
-        [ [blob24, blob1, blob32] ],
+        [ [blob24, blob1, blob65] ],
         [ [blob20, blob7] ]
     ])
     t.ok(ok, errs)
