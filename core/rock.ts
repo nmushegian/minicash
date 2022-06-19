@@ -19,7 +19,7 @@ export {
 
 // slab/thin
 //   ['work', tockhash]                  -> work // cumulative work
-//   ['next', tockhash, work, tockhash]  -> ()   // next tock by work
+//   ['fork', tockhash, work, tockhash]  -> ()   // next tock by work
 // slab/part
 //   ['tack', tockhash,i]    -> tack // set of 1024 ticks
 //   ['fold', tockhash,i]    -> fold // [snap, cash, cash]

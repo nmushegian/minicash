@@ -73,10 +73,12 @@ function vinx_tack(tock :Tock, tack :Tack) {
     // let [head, eyes, ribs, feet] = tack
     // aver head == tock      // defines the context
     // aver len(ribs) <= 128  // well formed
+    // aver len(feet) <= 2^17 // well formed
+
     // need len(eyes) == ceil(len(feet) / 1024)
+    // need len(eyes) == len(ribs)  // no ribs/eyes => tock has <1024 ticks
+
     // if len(ribs) == 0 {
-    //   need len(eyes) == 1
-    //   need eyes[0] == 0
     //   need merk(feet) == tock.root
     // } else { // ribs len > 0
     //   for (let i = 0; i < eyes.length; i++) {
@@ -86,6 +88,7 @@ function vinx_tack(tock :Tock, tack :Tack) {
     //   }
     // }
     // need tock.root == merk(tack.feet)
+
     return fail(`todo vinx_tack`)
 }
 
