@@ -26,7 +26,7 @@ export {
     okay, toss, pass, fail, need, aver,
     roll, unroll, rmap,
     bleq, blen, isblob, islist, isroll,
-    b2h, h2b, t2b,
+    b2h, h2b, t2b, b2t,
     mash, addr, merk,
     sign, scry,
     memo

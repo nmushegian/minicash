@@ -2,7 +2,7 @@
 
 import {
     Okay, okay, pass, fail, toss, aver,
-    b2h, h2b, t2b,
+    b2h, h2b, t2b, b2t,
     Blob, isblob,
     roll, unroll, bleq, islist,
     Tock,
@@ -56,15 +56,20 @@ class Djin {
         ]
     }
 
-    _ask_tocks(init :Mash) :Okay<Memo> {
+    // todo memo type param
+    // Mash -> Tock[]
+    _ask_tocks(memo :Memo) :Memo {
         // todo need init in history
+        let [line, body] = memo;
+        let init = body as Blob
+        aver(_=>line.toString() == 'ask/tocks', `ask/tocks line must match`)
         let lead = []
         let best = this.rock.read_one(rkey('best'))
         let prev = best as unknown as Blob // mash
         do {
             let blob = this.rock.read_one(rkey('tock', prev))
             if (blob.length == 0) {
-                return fail(`no such tock: ${prev}`)
+                toss(`no such tock: ${prev}`)
             } else {
                 let tock = unroll(blob) as Tock
                 lead.push(tock)
@@ -73,12 +78,15 @@ class Djin {
         } while( !bleq(prev, init)
               && !bleq(prev, mash(roll(this.bang())))
               && !bleq(prev, h2b('00'.repeat(24))) )
-        return pass([t2b('say/tocks'), lead])
+        return [t2b('say/tocks'), lead] as Memo
     }
 
     // djin precondition is to split tocks across spin
     // TODO be more consistent about all this
-    _say_tocks(tock :Tock) :Okay<Memo> {
+    _say_tocks(memo :Memo) :Memo {
+        let [line, body] = memo
+        let tock = body as Tock
+        aver(_=>b2t(line) == 'say/tocks', `say/tocks line must match`)
         if (true) { //!this.skip_form
             okay(form_tock(tock))
         }
@@ -90,15 +98,14 @@ class Djin {
         vult_thin(this.tree, tock)
         // ask/tocks from here if know valid
         // ask/tacks for this tock if dont know valid
-        return fail(`todo _say_tocks`)
+        throw new Error(`todo _say_tocks`)
     }
 
     read(memo :Memo) :Okay<Memo> {
         let [line, body] = memo
         try { switch (line.toString()) {
             case 'ask/tocks': {
-                let tock = body[0] as Tock
-                return okay(this._ask_tocks(body as Mash))
+                return pass(this._ask_tocks(memo))
             }
             case 'ask/tacks': {
                 toss(`todo djin read ask/tacks`)
@@ -119,9 +126,7 @@ class Djin {
                 case 'say/tocks': {
                     // aver tocks len 1
                     // spin splits up messages into units
-                    let tock = body[0] as Tock
-                    return this._say_tocks(tock)
-                    toss(`todo say/tocks`)
+                    return pass(this._say_tocks(memo))
                 }
 
                 case 'say/tacks': {

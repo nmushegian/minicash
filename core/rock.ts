@@ -2,8 +2,7 @@
 
 import {
     Okay, okay, pass, fail, toss, aver,
-    Blob, Roll, bleq, isblob, islist, roll, unroll,
-    Tick, Tack, Tock, Mash, mash, b2h, h2b
+    Blob, bleq, h2b
 } from './word.js'
 
 export {
