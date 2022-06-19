@@ -32,7 +32,7 @@ export {
 // tree/part
 //   ['tree', snap] -> (mark     -> leaf) // utxo set
 
-class Crag {
+class Rite {
     _dbtx
     _done
     constructor(dbtx) {
@@ -68,14 +68,15 @@ class Rock {
         this._db = new Map()
     }
 
-    rite(f :((crag:Crag) => void)) {
-        let crag = new Crag(this._db)
+    reed() { toss(`todo readonly`) }
+    rite(f :((r:Rite) => void)) {
+        let rite = new Rite(this._db)
         try {
-            f(crag)
-            crag._seal()
+            f(rite)
+            rite._seal()
         } catch (e) {
             toss(`panic rite throw`)
-            crag._bail()
+            rite._bail()
         }
     }
 }

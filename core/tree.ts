@@ -58,25 +58,19 @@ class Tree {
         this._snaps = { "": immu.Map() } // todo, make it in lmdb
     }
 
-    rock_rite(f) {
-        this.rock.rite(f)
-    }
-
-    twig_read(copy :Snap, key :Blob) :Okay<Blob> {
+    look(copy :Snap, look :((Twig) => void)) :Okay<Blob> {
         let snap = this._snaps[b2h(copy)]
         if (!snap) return fail(`read_twig: no such snap: ${copy}`)
         else {
             let ret
-            this.rock.rite(crag => {
-                let twig = new Twig(snap, crag) // todo, readonly
-                let val = twig.get(key)
-                ret = pass(val)
+            this.rock.rite(slab => {
+                let twig = new Twig(snap, slab) // todo, readonly
+                look(twig)
             })
-            return ret
         }
     }
 
-    twig_grow(copy :Snap, grow :((Twig) => void)) :Okay<Snap> {
+    grow(copy :Snap, grow :((Twig) => void)) :Okay<Snap> {
         let prev = this._snaps[b2h(copy)]
         let out
         this.rock.rite(r => {
