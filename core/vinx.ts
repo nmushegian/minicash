@@ -85,22 +85,26 @@ function vinx_tick(conx :Tick[], tick :Tick) :Okay<Fees> {
 // with the other crypto-related checks.
 // We include tock explicitly as a separate argument as guidance for other systems.
 function vinx_tack(tock :Tock, tack :Tack) {
-    // let [head, eyes, ribs, feet] = tack
+    // let [head, eye, ribs, feet] = tack
+
     // aver head == tock      // defines the context
     // aver len(ribs) <= 128  // well formed
-    // need len(eyes) == ceil(len(feet) / 1024)
+    // aver len(feet) <= 2^17 // well formed
+
     // if len(ribs) == 0 {
-    //   need len(eyes) == 1
-    //   need eyes[0] == 0
+    //   need eye == 0
+    //   need len(feet) < 1024
     //   need merk(feet) == tock.root
     // } else { // ribs len > 0
-    //   for (let i = 0; i < eyes.length; i++) {
+    //   need len(ribs) = ceil( len(feet) / 1024 )
+    //   for (let i = 0; i < len(ribs); i++) {
     //      let ticks = feet.slice(i, i+1024)
-    //      need merk(ticks) == ribs[eyes[i]]
-    //      need merk(ribs) == tock.root
+    //      need merk(ticks) == ribs[i + eye]
     //   }
+    //   need merk(ribs) == tock.root
     // }
     // need tock.root == merk(tack.feet)
+
     return fail(`todo vinx_tack`)
 }
 

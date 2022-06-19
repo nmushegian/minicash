@@ -19,21 +19,25 @@ function vult_thin(tree :Tree, tock :Tock) {
     // aver prev tock must exist
     let head = mash(roll(tock))
     let prev_head = tock[0]
-    let prev_tock = unroll(tree.rock.read_one(rkey('head', prev_head)))
+    let prev_tock = unroll(tree.rock.read_one(rkey('tock', prev_head)))
     let prev_work = tree.rock.read_one(rkey('work', prev_head))
     let this_work = bnum(prev_work) + tuff(head)
-    let [prev_snap,,] = unroll(tree.rock.read_one(rkey('snap', prev_head)))
+    let [prev_snap,,] = unroll(tree.rock.read_one(rkey('fold', prev_head)))
+    // todo prev_know
     tree.grow(prev_snap as Snap, head as Snap, twig => {
         twig.rite.etch(rkey('tock', head), roll(tock))
         twig.rite.etch(rkey('work', head), this_work)
         twig.rite.etch(rkey('fork', prev_head, n2b(this_work), head), true)
+        // todo propogate know invalid
         twig.set(rkey('hist', head), true)
     })
 }
 
-function vult_full(tree :Tree, tack :Tack, ticks :Tick[]) {
+function vult_full(tree :Tree, tock :Tock) {
     // aver well/vinx
 
+    // let tacks = collect all tacks
+    // let ticks = collect all ticks
     // for tack in ['tack', tockhash, i]
     //   twig.grow =>
 

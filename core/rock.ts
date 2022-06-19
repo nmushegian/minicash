@@ -9,27 +9,18 @@ export {
     Rock
 }
 
-// rock view: pure hash DB    hash(val)   -> val
-// slab view: insert-only     key  -> val
-// tree view: pure map        snap -> key -> val
 
-// rock:
-//   ['tick', tickhash]    -> tick
-//   ['tock', tockhash]    -> tock
+//  ['tick', tickhash]         -> tick
+//  ['tock', tockhash]         -> tock
+//  ['tack', tockhash,i]       -> tack // set of 1024 ticks
 
-// slab/thin
-//   ['work', tockhash]                  -> work // cumulative work
-//   ['fork', tockhash, work, tockhash]  -> ()   // next tock by work
-// slab/part
-//   ['tack', tockhash,i]    -> tack // set of 1024 ticks
-//   ['fold', tockhash,i]    -> fold // [snap, cash, cash]
-// slab/full
-//   ['know', tockhash]      -> know // validity state
+//  ['work', tockhash]         -> work // cumulative work
+//  ['fork', prev,work,next]   -> ()   // [tockhash,work,tockhash]  next tock by work
+//  ['fold', tockhash,i]       -> fold // [snap, cash, cash]  partial utxo / in / out
+//  ['know', tockhash]         -> know // validity state
 
-// tree/thin
-//   ['hist', snap] -> (tockhash -> ())          // fast common ancestor
-// tree/part
-//   ['tree', snap] -> (mark     -> leaf) // utxo set
+//  [(snap) 'hist', tockhash)  -> ()   // fast ancestor check per branch
+//  [(snap) 'leaf', mark       -> leaf // utxo set
 
 class Rite {
     _dbtx
