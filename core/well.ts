@@ -78,7 +78,7 @@ function form_tick(x :Roll) :Okay<Tick> {
             need(isblob(sign), `sign must be a blob`)
             need((txin as Blob).length == 24, `txin must be len 24`)
             need((indx as Blob).length ==  1, `indx must be len 1`)
-            need((sign as Blob).length == 32, `sign must be len 32`)
+            need((sign as Blob).length == 65, `sign must be len 65`)
             moves.forEach((m, idx) =>
                 need(
                     idx == moveidx
