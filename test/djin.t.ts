@@ -8,9 +8,7 @@ import {
     Tick,
     okay,
     roll, h2b,
-    mash,
-    memo,
-    merk,
+    mash, memo, merk,
 } from '../core/word.js'
 
 

@@ -2,11 +2,13 @@
 
 import {
     Okay, pass, fail,
-    Work, Snap, Fees, Know,
+    Work, Snap, Fees, Know, tuff,
+    mash, roll, unroll, bnum,
+    h2b, n2b,
     Tick, Tock, Tack,
 } from './word.js'
 
-import { Tree, Twig } from './tree.js'
+import { Tree, Twig, rkey } from './tree.js'
 
 export {
     vult_thin,
@@ -15,16 +17,18 @@ export {
 }
 
 function vult_thin(tree :Tree, tock :Tock) {
-    // get prev
-    // aver vinx_tock
-    // head = hash(tock)
-    // prev_work = rock.read ['work', prev]
-    // this_work = work(head) + prev_work
-    // rock.etch ['tock', head] tock
-    // rock.etch ['work', head] work
-    // rock.etch ['next', prev, this_work, head] true
-    // twig.grow ['hist', head] true
-    return fail(`todo vult_thin`)
+    let head = mash(roll(tock))
+    let prev_head = tock[0]
+    let prev_tock = unroll(tree.rock.read_one(rkey('head', prev_head)))
+    let prev_work = tree.rock.read_one(rkey('work', prev_head))
+    let this_work = bnum(prev_work) + tuff(head)
+    let [prev_snap,,] = unroll(tree.rock.read_one(rkey('snap', prev_head)))
+    tree.grow(prev_snap as Snap, head as Snap, twig => {
+        twig.rite.etch(rkey('tock', head), roll(tock))
+        twig.rite.etch(rkey('work', head), this_work)
+        twig.rite.etch(rkey('next', prev_head, n2b(this_work), head), true)
+        twig.set(rkey('hist', head), true)
+    })
 }
 
 function vult_full(tree :Tree, tock :Tock) {

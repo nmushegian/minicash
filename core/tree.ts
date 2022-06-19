@@ -18,10 +18,10 @@ export {
 
 // mutable handle
 class Twig {
-    _crag
+    rite
     _mut
-    constructor(prev, crag) {
-        this._crag = crag
+    constructor(prev, rite) {
+        this.rite = rite
         this._mut = prev.asMutable()
     }
     get(k :Blob) :Blob {
@@ -70,24 +70,14 @@ class Tree {
         }
     }
 
-    grow(copy :Snap, grow :((Twig) => void)) :Okay<Snap> {
+    grow(copy :Snap, next :Snap, grow :((Twig) => void)) {
         let prev = this._snaps[b2h(copy)]
-        let out
         this.rock.rite(r => {
             let twig = new Twig(prev, r)
             grow(twig)
-            let next = twig.seal()
-            let snap = b2h(this._nextsnap())
-            this._snaps[snap] = next
-            out = pass(h2b(snap))
+            let immu = twig.seal()
+            this._snaps[b2h(next)] = immu
         })
-        return out
-    }
-
-    _nextsnap() :Snap {
-        let hexnum = (++this._snapc).toString(16)
-        let hexblob = h2b(hexnum)
-        return hexblob
     }
 
 
