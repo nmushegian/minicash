@@ -86,18 +86,21 @@ class Djin {
     _say_tocks(memo :Memo) :Memo {
         let [line, body] = memo
         let tock = body as Tock
+
         aver(_=>b2t(line) == 'say/tocks', `say/tocks line must match`)
         if (true) { //!this.skip_form
             okay(form_tock(tock))
         }
-        if (true) { //!this.skip_vinc
+        if (true) { //!this.skip_vinx
             let prevhash = tock[0]
             let prevtock = unroll(this.rock.read_one(rkey('tock', prevhash)))
             okay(vinx_tock(prevtock as Tock, tock))
         }
+        // if full, require prev know is definitely-valid
         vult_thin(this.tree, tock)
-        // ask/tocks from here if know valid, or mood==thin
-        // ask/tacks for this tock if dont know valid
+        // ask/tocks from here if know valid
+        // vult_full(this.tree, tock)
+        // ask/tacks for this tock if dont know
         throw new Error(`todo _say_tocks`)
     }
 
@@ -127,13 +130,15 @@ class Djin {
                     // aver tocks len 1
                     // spin splits up messages into units
                     return pass(this._say_tocks(memo))
+                    // ret ask/tacks if we need tacks
+                    //     ask/tocks if we can proceed
                 }
 
                 case 'say/tacks': {
                     // ...
                     // tack_form
                     // tack_vinx
-                    // vult_part
+                    // vult_full
                     //   ask/ticks if we need ticks
                     //   ask/tacks if we need next tack
                     //   ask/tocks if we can make progress
@@ -144,9 +149,8 @@ class Djin {
                     // ...
                     // tick_form
                     // tick_vinx
+                    // rock etch
                     //   say/ticks to rebroadcast
-                    // later, do something smarter to know what vult to retry
-                    // for now, dumb sync will retry from ask/tocks
                     toss(`todo turn say/ticks`)
                 }
                 default: return fail(`unrecognized turn line: ${line}`)
