@@ -56,13 +56,12 @@ function vinx_tick(conx :Tick[], tick :Tick) :Okay<Fees> {
         moves.forEach((move, moveidx) => {
             const [txin, indx, sign] = move
             const intx = conx.find(x => mash(roll(x)).equals(txin)) // stupid
-            need(intx != undefined, 'unmatched txin')
             const indxnum = Number('0x'+b2h(indx))
             const iments  = intx[1]
             need(indxnum < iments.length, 'indx out of bounds')
             const iment = intx[1][Number(indxnum)]
             const [icode, icash] = iment
-            need(_checksig(tick, moveidx, icode), 'bad signature')
+            need(_checksig(tick, moveidx, icode), 'bad sign')
             ticash += BigInt('0x' + b2h(icash))
         })
 
