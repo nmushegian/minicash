@@ -4,6 +4,7 @@ import Debug from 'debug'
 const debug = Debug('vinx::test')
 const debugkeys = Debug('vinx::keys')
 const debugtxin = Debug('vinx::txin')
+const debugtock = Debug('vinx::tock')
 
 
 import {
@@ -20,6 +21,7 @@ import {
 import {
     _checksig,
     vinx_tick,
+    vinx_tock
 } from '../core/vinx.js'
 import elliptic from 'elliptic'
 import {readdirSync, readFileSync} from "fs";
@@ -61,6 +63,7 @@ test('checksig', t=>{ try {
 
 let $ = {
     vinx_tick,
+    vinx_tock
 }
 
 const keys = {
@@ -87,42 +90,48 @@ test('cases', t=>{
             let [ok, val, err] = func(...args)
             if (ok) {
                 t.ok(data.want[0] == "true", `must succeed`)
+                const res = val
             } else {
                 t.equal(data.want[0], "false", `must fail`)
                 t.equal(data.want[1], err.message, `error strings must match`)
-                const ticks = [...args[0], args[1]]
-                ticks.forEach((tick, tickidx) => {
-                    try {
-                        form_tick(tick)
-                    } catch (err) {
-                        debugkeys('not well formed (', err, ')')
-                        return
-                    }
-                    const moves = tick[0]
-                    const ments = tick[1]
-                    debugtxin(`tick#${tickidx} txin (mash): ${mash(roll(tick)).toString('hex')}`)
-                    moves.forEach( (move, moveidx) => {
-                        debugkeys(`tick#${tickidx}, move#${moveidx}`)
-                        Object.entries(keys).forEach(entry => {
-                            const name = entry[0]
-                            const privkey = entry[1]
-                            const seck = Buffer.from(entry[1], 'hex')
-                            const mask = roll([
-                                t2b("minicash movement"),
-                                [ [ move[0], move[1], t2b('') ] ],
-                                ments
-                            ])
-                            const sig = sign(mask, seck)
-                            const keypair = ec.keyFromPrivate(seck)
-                            const pubkey = Buffer.from(keypair.getPublic().encodeCompressed())
-                            debugkeys(
-                                '  ', name,
-                                `code:${addr(pubkey).toString('hex')}`,
-                                `sign:${sig.toString('hex')}`
-                            )
+                if (data.func == 'vinx_tick') {
+                    const ticks = [...args[0], args[1]]
+                    ticks.forEach((tick, tickidx) => {
+                        try {
+                            form_tick(tick)
+                        } catch (err) {
+                            debugkeys('not well formed (', err, ')')
+                            return
+                        }
+                        const moves = tick[0]
+                        const ments = tick[1]
+                        debugtxin(`tick#${tickidx} txin (mash): ${mash(roll(tick)).toString('hex')}`)
+                        moves.forEach((move, moveidx) => {
+                            debugkeys(`tick#${tickidx}, move#${moveidx}`)
+                            Object.entries(keys).forEach(entry => {
+                                const name = entry[0]
+                                const privkey = entry[1]
+                                const seck = Buffer.from(entry[1], 'hex')
+                                const mask = roll([
+                                    t2b("minicash movement"),
+                                    [[move[0], move[1], t2b('')]],
+                                    ments
+                                ])
+                                const sig = sign(mask, seck)
+                                const keypair = ec.keyFromPrivate(seck)
+                                const pubkey = Buffer.from(keypair.getPublic().encodeCompressed())
+                                debugkeys(
+                                    '  ', name,
+                                    `code:${addr(pubkey).toString('hex')}`,
+                                    `sign:${sig.toString('hex')}`
+                                )
+                            })
                         })
                     })
-                })
+                } else if (data.func == 'vinx_tock') {
+                    const prev = args[0]
+                    debugtock(`prev roll: ${mash(roll(prev)).toString('hex')}`)
+                }
             }
         })
     })
