@@ -72,7 +72,6 @@ function vinx_tick(conx :Tick[], tick :Tick) :Okay<Fees> {
             const cash = ment[1]
             tocash += BigInt('0x' + b2h(cash))
         })
-        need(tocash <= ticash, 'input cash less than output cash')
         return pass(tocash - ticash)
     } catch (e) {
         return fail(e.message)
