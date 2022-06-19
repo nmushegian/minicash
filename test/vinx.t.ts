@@ -102,7 +102,7 @@ test('cases', t=>{
                     const ments = tick[1]
                     debugtxin(`tick#${tickidx} txin (mash): ${mash(roll(tick)).toString('hex')}`)
                     moves.forEach( (move, moveidx) => {
-                        debugkeys(moveidx)
+                        debugkeys(`tick#${tickidx}, move#${moveidx}`)
                         Object.entries(keys).forEach(entry => {
                             const name = entry[0]
                             const privkey = entry[1]
