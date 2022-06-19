@@ -163,7 +163,7 @@ type Know
 
 type Tack = [
     Tock   // head  tock these ticks belong to
-  , Byte[] // eyes  which chunks are in this tack
+  , Byte   // eye   which chunk is the first chunk in this tack
   , Mash[] // ribs  chunk roots (merkle nodes at depth 7, empty if <1024 ticks in tock)
   , Mash[] // feet  tickhashes
 ]
