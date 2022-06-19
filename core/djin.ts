@@ -41,8 +41,10 @@ class Djin {
         this.rock = new Rock(path)
         this.tree = new Tree(this.rock)
         let banghash = mash(roll(this.bang()))
-        this.tree.etch_rock(rkey('best'), banghash)
-        this.tree.etch_rock(rkey('tock', banghash), this.bang())
+        this.rock.rite(r => {
+            r.etch(rkey('best'), banghash)
+            r.etch(rkey('tock', banghash),  roll(this.bang()))
+        })
     }
 
     bang() {
@@ -56,16 +58,15 @@ class Djin {
 
     _ask_tocks(init :Mash) :Okay<Memo> {
         // todo need init in history
-        let best = this.tree.read_rock(rkey('best'))
         let lead = []
-        aver(_=>isblob(best), `best in db must be a blob`)
+        let best = this.rock.read_one(rkey('best'))
         let prev = best as unknown as Blob // mash
         do {
-            let roll = this.tree.read_rock(rkey('tock', prev))
-            if (roll.length == 0) {
+            let blob = this.rock.read_one(rkey('tock', prev))
+            if (blob.length == 0) {
                 return fail(`no such tock: ${prev}`)
             } else {
-                let tock = roll as Tock
+                let tock = unroll(blob) as Tock
                 lead.push(tock)
                 prev = tock[0] // tock.prev
             }
@@ -83,7 +84,7 @@ class Djin {
         }
         if (true) { //!this.skip_vinc
             let prevhash = tock[0]
-            let prevtock = this.tree.read_rock(rkey('tock', prevhash))
+            let prevtock = unroll(this.rock.read_one(rkey('tock', prevhash)))
             okay(vinx_tock(prevtock as Tock, tock))
         }
         vult_thin(this.tree, tock)
@@ -151,6 +152,8 @@ class Djin {
     }
 
     async *spin(memo) {
+        // aver well-formed
+        // aver valid-in-context
         // split up memo into units
         // turn/reflect/yield one at a time
     }
