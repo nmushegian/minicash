@@ -96,7 +96,7 @@ class Djin {
             okay(vinx_tock(prevtock as Tock, tock))
         }
         vult_thin(this.tree, tock)
-        // ask/tocks from here if know valid
+        // ask/tocks from here if know valid, or mood==thin
         // ask/tacks for this tock if dont know valid
         throw new Error(`todo _say_tocks`)
     }

@@ -207,3 +207,7 @@ type Bnum   = bigint // not serialized
 export function bnum(b :Blob) :Bnum {
     return BigInt("0x" + b.toString('hex'))
 }
+
+export function n2b(bn :Bnum) :Blob {
+    return h2b(bn.toString(16))
+}
