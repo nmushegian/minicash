@@ -85,7 +85,9 @@ function form_tick(x :Roll) :Okay<Tick> {
                     'moves can\'t have duplicate entries'
                 )
             )
-            need(Number(b2h(indx as Blob)) <= 6, `indx must be <= 6`)
+            let indxnum = Number(b2h(indx as Blob))
+            need(indxnum <= 7, `indx must be <= 7`)
+            need(indxnum != 7 || moves.length == 1, `len(moves) must be 1 if indx == 7`)
         }
         let totalcash = BigInt(0)
         let MAX_CASH  = BigInt(2) ** BigInt(53) - BigInt(1)
