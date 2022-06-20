@@ -10,7 +10,7 @@ const debugtock = Debug('vinx::tock')
 import {
     roll, h2b,
     sign, scry,
-    Tick,
+    Tick, Tock,
     addr, t2b, need,
     rmap, mash
 } from '../core/word.js'
@@ -21,7 +21,8 @@ import {
 import {
     _checksig,
     vinx_tick,
-    vinx_tock
+    vinx_tock,
+    vinx_tack
 } from '../core/vinx.js'
 import elliptic from 'elliptic'
 import {readdirSync, readFileSync} from "fs";
@@ -60,6 +61,32 @@ test('checksig', t=>{ try {
     ok = _checksig(tick, 0, code)
     t.ok(!ok, 'checksig must fail')
 } catch (e) { t.ok(false, e.reason) }})
+
+test('vinx_tack', t=> {
+    const tock = [
+        '00'.repeat(24),
+        '3483dd0af3ccdf013b1e8bb189818abf010adcc696a91d5d',
+        '00'.repeat(6) + '39',
+        '00'.repeat(7)
+    ].map(h2b) as Tock
+    const eye = h2b('00')
+    const ribs = [
+        '6a049dff6bef245137abe0c8b513cb3d6f252a2ba1ab3135',
+        '6cf8ebd31e05445ea0ca76b7428ecfc669f92dc5d074e871'
+    ].map(h2b)
+
+    let feet = []
+    for (let i = 0; i < 1536; i++) {
+        let hex = Number(i).toString(16)
+        if (hex.length == 1) {
+            hex = '0' + hex
+        }
+        feet.push(mash(h2b(hex)))
+    }
+
+    const [ok, val, err] = vinx_tack(tock, [tock, eye, ribs, feet])
+    t.equal(ok, true, `vinx_tack ${err}`)
+})
 
 let $ = {
     vinx_tick,
