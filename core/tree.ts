@@ -24,13 +24,13 @@ class Twig {
         this.rite = rite
         this._mut = prev.asMutable()
     }
-    get(k :Blob) :Blob {
+    read(k :Blob) :Blob {
         let skey = b2h(k)
         let val = this._mut.get(skey)
         if (val) return val
         else return h2b('')
     }
-    set(k :Blob, v :Blob) {
+    etch(k :Blob, v :Blob) {
         let skey = b2h(k)
         this._mut.set(skey, v)
     }
@@ -58,23 +58,23 @@ class Tree {
         this._snaps = { "": immu.Map() } // todo, make it in lmdb
     }
 
-    look(copy :Snap, look :((Twig) => void)) :Okay<Blob> {
+    look(copy :Snap, look :((Rock,Twig) => void)) :Okay<Blob> {
         let snap = this._snaps[b2h(copy)]
         if (!snap) return fail(`read_twig: no such snap: ${copy}`)
         else {
             let ret
             this.rock.rite(slab => {
                 let twig = new Twig(snap, slab) // todo, readonly
-                look(twig)
+                look(this.rock, twig)
             })
         }
     }
 
-    grow(copy :Snap, next :Snap, grow :((Twig) => void)) {
+    grow(copy :Snap, next :Snap, grow :((Rock,Twig) => void)) {
         let prev = this._snaps[b2h(copy)]
         this.rock.rite(r => {
             let twig = new Twig(prev, r)
-            grow(twig)
+            grow(this.rock, twig)
             let immu = twig.seal()
             this._snaps[b2h(next)] = immu
         })

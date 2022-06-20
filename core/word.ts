@@ -25,7 +25,8 @@ export type {
 export {
     okay, toss, pass, fail, need, aver,
     roll, unroll, rmap,
-    bleq, blen, isblob, islist, isroll,
+    bleq, blen, bcat,
+    isblob, islist, isroll,
     b2h, h2b, t2b, b2t,
     mash, addr, merk,
     sign, scry,
@@ -38,6 +39,10 @@ function t2b(x :string) :Blob {
 
 function b2t(x :Blob) :string {
     return x.toString()
+}
+
+function bcat(...args :Blob[]) :Blob {
+    return Buffer.concat(args)
 }
 
 function addr(x :Blob) :Code {

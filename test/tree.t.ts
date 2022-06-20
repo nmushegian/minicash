@@ -13,12 +13,12 @@ test('leaf keys', t=>{
     let rock = new Rock('')
     let tree = new Tree(rock)
     let next = t2b('next')
-    tree.grow(h2b(''), next, twig => {
-        twig.set(h2b('ff'), h2b('ff'))
+    tree.grow(h2b(''), next, (rock,twig) => {
+        twig.etch(h2b('ff'), h2b('ff'))
     })
     let val
-    tree.look(next, twig => {
-        val = twig.get(h2b('ff'))
+    tree.look(next, (rock,twig) => {
+        val = twig.read(h2b('ff'))
     })
     t.ok(bleq(val, h2b('ff')), `must return same key as was set`)
 })

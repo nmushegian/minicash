@@ -15,13 +15,11 @@ export {
 //  ['tack', tockhash,i]       -> tack // set of 1024 ticks
 
 //  ['work', tockhash]         -> work // cumulative work
-//  ['fork', prev,work,next]   -> ()   // [tockhash,work,tockhash]  next tock by work
 //  ['fold', tockhash,i]       -> fold // [snap, cash]  partial utxo / fees
 //  ['know', tockhash]         -> know // validity state
 
-//  [(snap) 'hist', tockhash)  -> ()   // fast ancestor check per branch
-//  [(snap) 'ment', mark       -> ment // utxo set
-//  [(snap) 'pent', mark       -> pent // utxo set
+//  [(snap) 'ment', mark       -> ment // utxo set  (plus tock hist)
+//  [(snap) 'pent', mark       -> pent // utxo set  (plus tock next)
 //  [(snap) 'pyre', mark       -> time // expires
 
 class Rite {

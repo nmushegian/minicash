@@ -4,7 +4,7 @@ import {
     Okay, pass, fail,
     Work, Snap, Fees, Know, tuff,
     mash, roll, unroll, bnum,
-    h2b, n2b,
+    h2b, n2b, bcat,
     Tick, Tock, Tack,
 } from './word.js'
 
@@ -25,11 +25,11 @@ function vult_thin(tree :Tree, tock :Tock) {
     let prev_work = tree.rock.read_one(rkey('work', prev_head))
     let this_work = bnum(prev_work) + tuff(head)
     let [prev_snap,,] = unroll(tree.rock.read_one(rkey('fold', prev_head)))
-    tree.grow(prev_snap as Snap, head as Snap, twig => {
-        twig.rite.etch(rkey('tock', head), roll(tock))
-        twig.rite.etch(rkey('work', head), this_work)
-        twig.rite.etch(rkey('fork', prev_head, n2b(this_work), head), true)
-        twig.set(rkey('hist', head), true)
+    let next_mint = n2b(bnum(h2b('00')))
+    tree.grow(prev_snap as Snap, head as Snap, (rock,twig) => {
+        rock.etch(rkey('tock', head), roll(tock))
+        rock.etch(rkey('work', head), this_work)
+        twig.etch(rkey('ment', bcat(head, h2b('07')), roll([head, next_mint])))
     })
 }
 
