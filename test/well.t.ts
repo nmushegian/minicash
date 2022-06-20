@@ -5,11 +5,13 @@ import { readdirSync, readFileSync } from 'fs'
 import {
     Okay, okay, need,
     Blob, h2b, rmap,
+    mash
 } from '../core/word.js'
 
 import {
     form_tick,
-    form_tock
+    form_tock,
+    form_tack
 } from '../core/well.js'
 
 test('tick_form', t=>{
@@ -23,6 +25,37 @@ test('tick_form', t=>{
         [ [blob20, blob7] ]
     ])
     t.ok(ok, errs)
+})
+
+test('form_tack', t=> {
+    const tock = [
+        '00'.repeat(24),
+        '00'.repeat(24),
+        '00'.repeat(6) + '39',
+        '00'.repeat(7)
+    ].map(h2b)
+    const eye = h2b('00')
+    let ribs = []
+    for (let i = 0; i < 128; i++) {
+        let hex = Number(i).toString(16)
+        if (hex.length == 1) {
+            hex = '0' + hex
+        }
+        const rib = h2b('00'.repeat(23) + hex)
+        ribs.push(rib)
+    }
+
+    let feet = []
+    for (let i = 0; i < 1024; i++) {
+        let hex = Number(i).toString(16)
+        if (hex.length == 1) {
+            hex = '0' + hex
+        }
+        feet.push(mash(h2b(hex)))
+    }
+
+    const [ok, val, err] = form_tack([tock, eye, ribs, feet])
+    t.equal(ok, true, `form_tack ${err}`)
 })
 
 test('not both empty', t=>{
