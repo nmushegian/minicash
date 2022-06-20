@@ -29,7 +29,7 @@ function vult_thin(tree :Tree, tock :Tock) {
         rock.etch(rkey('tock', head), roll(tock))
         rock.etch(rkey('work', head), this_work)
         twig.etch(rkey('ment', head, h2b('07')), roll([head, snap]))
-        rock.etch(rkey('fold', head, h2b('00')), roll([next, h2b('00')]))
+        rock.etch(rkey('fold', head, h2b('00')), roll([snap, h2b('00')]))
     })
 }
 
