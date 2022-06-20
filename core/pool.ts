@@ -21,7 +21,8 @@ class Pool {
     plug :Plug
 
     bowl :Tick[]           // mempool
-    // each of these should be in per-candidate map
+
+    // each of these should be in per-candidate map, aka use a pure Tree
     sink :Tick[]           // tock template
     sunk :{string:boolean} // ticks in this sink back index
     root :Mash   // active merk root
@@ -55,23 +56,4 @@ class Pool {
         })
     }
 
-    // for reference only, use socket memo api to make a more efficient miner
-    work(job, runs) {
-        this.plug.emit(memo('ask/jobs', []), mem => {
-            let [line, tock] = mem
-            let best
-            for (let i = 0; i < runs; i++) {
-                let tock = [
-                    mash(roll(best)),
-                    this.root,
-                    h2b(''), // now
-                    h2b('')
-                ]
-                // if better work, save best
-            }
-            this.plug.emit(memo('say/work', best), memo => {
-                // memo is a minicash tick with cash for you
-            })
-        })
-    }
 }

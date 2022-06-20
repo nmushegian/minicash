@@ -8,6 +8,7 @@ import {
     okay, toss,
     Byte, Bnum,
     Blob, Roll,
+    bnum,
     roll, mash,
     Tick, Tock,
     Code, Cash,
@@ -78,25 +79,31 @@ class TockMold {
     root(b) { return this }
     time(b) { return this }
     fuzz(b) { return this }
-    // how many ms to work
+
+    // how many ms to work, will work at least 50ms if less
     async mine(time:number) {
-        let best = ''
+        let best = mash(roll(this._raw))
         let done = false
         return new Promise((resolve, reject) => {
             setTimeout(() => {
                 done = true
                 resolve(best)
             }, Math.floor(Date.now() + time));
-            for (let i = 0;; i++) {
-                if (done) {
-                    return best
-                } else {
-                    this.fuzz(h2b(i.toString(16)))
-                    let hash = mash(roll(this._raw))
-                    // if hash < best
-                    // best = hash
+            let fuzz = 0
+            setInterval(() => {
+                for (let i = 0; i < 1000; i++) {
+                    if (done) {
+                        return best
+                    } else {
+                        fuzz++
+                        this.fuzz(h2b(fuzz.toString(16)))
+                        let hash = mash(roll(this._raw))
+                        if (bnum(hash) < bnum(best)) {
+                            best = hash
+                        }
+                    }
                 }
-            }
+            }, 50)
         })
     }
 }

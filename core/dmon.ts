@@ -2,13 +2,11 @@ import {
     Roll, h2b,
     Memo, memo,
     Tock,
-    Mode,
-    okay,
+    okay, toss,
 } from './word.js'
 
 import { Djin } from './djin.js'
 import { Plug } from './plug.js'
-import { Chan } from './chan.js'
 
 class Dmon {
     djin :Djin
@@ -29,30 +27,32 @@ class Dmon {
     serv() {
         this.plug.when((memo :Memo, back:((_:Memo)=>void)) => {
             // mail = form_roll(mail)
-            // respond to requests immediately
-            // this will be read-only turn, except ann/* does rock.etch
-
             // assert line is ask
 
             // djin will give:
-            //   ask/tocks -> say/tocks back
-            //   ask/tacks -> say/tacks back
-            //   ask/ticks -> say/ticks back
-            //   * -> end/why reason    back  // disconnect
+            //   ask/* -> say/* back
+            //   *     -> err/why reason
 
+            // depending on error type,
+            // disconnect / backoff / just respond
             let out = okay(this.djin.read(memo))
             back(out)
-
+            toss(`todo dmon.serv`)
         })
     }
 
-    sync(tail = h2b('')) {
+    // resolves when self-sync is done and peer-sync has started
+    async sync(tail = h2b('')) {
+        // try to sync with yourself first
+        let [ty, yarn] = this.djin.read(memo('ask/tocks', tail))
+        // need todo ty not err
+        let head
+        for await (head of this.djin.spin(yarn)) {}
         // get the best possibly-valid tocks from peers, then make a
         // request for the thing you need on each branch
-        this.plug.emit(memo('ask/tocks', tail), async ([line, yarn]) => {
+        this.plug.emit(memo('ask/tocks', head), async ([line, yarn]) => {
             let miss
-            for await (miss of this.djin.spin(yarn))
-            { continue }
+            for await (miss of this.djin.spin(yarn)) {}
             if (miss) {
                 this.plug.emit(miss, fill => this.sync(tail))
             }

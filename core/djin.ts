@@ -2,27 +2,13 @@
 
 import {
     Okay, okay, pass, fail, toss, aver,
-    b2h, h2b, t2b, b2t,
+    h2b, t2b, b2t,
     Blob, isblob,
     roll, unroll, bleq, islist,
     Tock,
     Mash, mash,
     Memo
 } from './word.js'
-
-import {
-    Chan
-} from './chan.js'
-
-// todo well task
-import {
-    form_tock,
-} from './well.js'
-
-// todo vinx task
-import {
-    vinx_tock
-} from './vinx.js'
 
 import {
     vult_thin
