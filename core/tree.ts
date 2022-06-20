@@ -4,7 +4,7 @@ import * as immu from 'immutable'
 
 import {
     Okay, pass, fail,
-    Roll, Blob, roll, unroll, b2h, h2b, t2b,
+    Roll, Blob, roll, unroll, b2h, h2b, t2b, n2b,
     Snap,
 } from './word.js'
 
@@ -70,16 +70,21 @@ class Tree {
         }
     }
 
-    grow(copy :Snap, next :Snap, grow :((Rock,Twig) => void)) {
+    grow(copy :Snap, grow :((Rock,Twig,Snap) => void)) {
         let prev = this._snaps[b2h(copy)]
+        let next = this._aloc()
         this.rock.rite(r => {
             let twig = new Twig(prev, r)
-            grow(this.rock, twig)
+            grow(this.rock, twig, next)
             let immu = twig.seal()
             this._snaps[b2h(next)] = immu
         })
+        return next
     }
 
+    _aloc() :Snap {
+        return n2b(BigInt(this._snapc++))
+    }
 
 }
 

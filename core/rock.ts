@@ -18,9 +18,10 @@ export {
 //  ['fold', tockhash,i]       -> fold // [snap, cash]  partial utxo / fees
 //  ['know', tockhash]         -> know // validity state
 
-//  [(snap) 'ment', mark       -> ment // utxo set  (plus tock hist)
-//  [(snap) 'pent', mark       -> pent // utxo set  (plus tock next)
+//  [(snap) 'ment', mark       -> ment // utxo put  (plus tock hist)
+//  [(snap) 'pent', mark       -> pent // utxo use  (plus tock next)
 //  [(snap) 'pyre', mark       -> time // expires
+
 
 class Rite {
     _dbtx

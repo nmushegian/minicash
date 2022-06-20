@@ -26,24 +26,20 @@ function vult_thin(tree :Tree, tock :Tock) {
     let this_work = bnum(prev_work) + tuff(head)
     let [prev_snap,,] = unroll(tree.rock.read_one(rkey('fold', prev_head)))
     let next_mint = n2b(bnum(h2b('00')))
-    tree.grow(prev_snap as Snap, head as Snap, (rock,twig) => {
+    tree.grow(prev_snap as Snap, (rock,twig,next) => {
         rock.etch(rkey('tock', head), roll(tock))
         rock.etch(rkey('work', head), this_work)
-        twig.etch(rkey('ment', bcat(head, h2b('07')), roll([head, next_mint])))
+        twig.etch(rkey('ment', head, h2b('07')), roll([head, next_mint]))
+        rock.etch(rkey('fold', head, h2b('00')), roll([next, h2b('00')]))
     })
 }
 
 // vult_full grows definitely-valid state tree
 //   (could also invalidate tock)
 function vult_full(tree :Tree, tock :Tock) {
-    // aver well/vinx
-
     /*
-      aver valid/invalid propogated by vult_thin
-      determine last applied tack
-          ['fold,tockhash,i]  max i in rock
-
-    let tack = rock.read ...
+    let last = rock.read ... last applied tack
+    let tack = rock.read ... this tack
     let ticks = rock.read ...
     let [head,i,ribs,feet] = tack
     let fees = 0
