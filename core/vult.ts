@@ -46,9 +46,9 @@ function vult_full(tree :Tree, tock :Tock) {
     let tack = rock.read ...
     let ticks = rock.read ...
     let [head,i,ribs,feet] = tack
-    let [tin, tout] = [0,0]
+    let fees = 0
 
-    let [snap, pin, pout] = r.read([ 'fold', tockhash, i ])
+    let [snap, pfees] = r.read([ 'fold', tockhash, i ])
     let next = snapkey(['fold', tockhash, i])
 
     let valid
@@ -60,23 +60,24 @@ function vult_full(tree :Tree, tock :Tock) {
           need not pent
           need not pyred
           put pent
-          tin +=
+          fees +=
         for ment in ments:
           aver not exists
           put ment
           put pyre
-          tout +=
+          fees -=
       catch:
         twig.bail err
         valid = false
       valid = true
     })
     if (valid) {
-        rock.etch ['fold head i] [snap tin tout]
+        let fees = pfees + fees
+        rock.etch ['fold head i] [next fees]
         rock.etch ['tack head i] tack
         if last tack:
-          need net fee+subsidy
-          rock.etch ['know head] 'DV
+          need fees == mint // net fee is just the subsidy
+          rock.etch ['know head] 'DV // definitely-valid
     } else {
         rock.etch ['know head] 'DN  // definitely-not-valid
     }

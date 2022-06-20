@@ -131,8 +131,7 @@ type Pent = [
 
 type Fold = [
     Snap, // partial utxo
-    Cash, // total in
-    Cash, // total out
+    Cash, // net fees
 ]
 
 type Work = Bnum

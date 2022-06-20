@@ -16,7 +16,7 @@ export {
 
 //  ['work', tockhash]         -> work // cumulative work
 //  ['fork', prev,work,next]   -> ()   // [tockhash,work,tockhash]  next tock by work
-//  ['fold', tockhash,i]       -> fold // [snap, cash, cash]  partial utxo / in / out
+//  ['fold', tockhash,i]       -> fold // [snap, cash]  partial utxo / fees
 //  ['know', tockhash]         -> know // validity state
 
 //  [(snap) 'hist', tockhash)  -> ()   // fast ancestor check per branch
