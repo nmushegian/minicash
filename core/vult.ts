@@ -36,27 +36,51 @@ function vult_thin(tree :Tree, tock :Tock) {
 function vult_full(tree :Tree, tock :Tock) {
     // aver well/vinx
 
-    // let tacks = collect all tacks
-    // let ticks = collect all ticks
-    // for tack in ['tack', tockhash, i]
-    //   twig.grow =>
+    /*
+      aver valid/invalid propogated by vult_thin
+      determine last applied tack
+          ['fold,tockhash,i]  max i in rock
 
-    // let head,i,ribs,feet
-    // let tin, tout= 0
-    // tree.grow
-    //   for tick in tack
-    //     use move
-    //     put ment
-    //     add tin,tout
-    //     grow 'hist' tickhash true
-    // rock.etch 'tack' head i tack
-    // rock.etch 'fold' snap in out
-    // return
+    let tack = rock.read ...
+    let ticks = rock.read ...
+    let [head,i,ribs,feet] = tack
+    let [tin, tout] = [0,0]
 
-    //     if invalid, rock.etch ['know', head] false
-    //   fees += part.fees
-    // rock.etch ['know',head] true
-    // last tack snap is tock snap
+    let [snap, pin, pout] = r.read([ 'fold', tockhash, i ])
+    let next = snapkey(['fold', tockhash, i])
+
+    let valid
+    tree.grow(snap, next, twig => {
+      try {
+      for tick in ticks:
+        for move in moves:
+          need ment
+          need not pent
+          need not pyred
+          put pent
+          tin +=
+        for ment in ments:
+          aver not exists
+          put ment
+          put pyre
+          tout +=
+       } catch (e) {
+          valid = false
+          throw e // abort tx, set knowstate after
+       }
+    })
+    if (valid) {
+        rock.etch ['fold head i] [snap tin tout]
+        rock.etch ['tack head i] tack
+        if last tack:
+          need net fee+subsidy
+          rock.etch ['know head] 'DV
+    } else {
+        rock.etch ['know head] 'DN  // definitely-not-valid
+    }
+    // if invalid, rock.etch ['know', head] false
+
+    */
     return fail(`todo vult_full`)
 
 }

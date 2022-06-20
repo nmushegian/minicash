@@ -62,7 +62,6 @@ class Djin {
         // todo need init in history
         let [line, body] = memo;
         let init = body as Blob
-        aver(_=>line.toString() == 'ask/tocks', `ask/tocks line must match`)
         let lead = []
         let best = this.rock.read_one(rkey('best'))
         let prev = best as unknown as Blob // mash
@@ -96,7 +95,8 @@ class Djin {
             let prevtock = unroll(this.rock.read_one(rkey('tock', prevhash)))
             okay(vinx_tock(prevtock as Tock, tock))
         }
-        // if full, require prev know is definitely-valid
+
+        // if fullmode, require prev know is definitely-valid
         vult_thin(this.tree, tock)
         // ask/tocks from here if know valid
         // vult_full(this.tree, tock)

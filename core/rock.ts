@@ -20,7 +20,9 @@ export {
 //  ['know', tockhash]         -> know // validity state
 
 //  [(snap) 'hist', tockhash)  -> ()   // fast ancestor check per branch
-//  [(snap) 'leaf', mark       -> leaf // utxo set
+//  [(snap) 'ment', mark       -> ment // utxo set
+//  [(snap) 'pent', mark       -> pent // utxo set
+//  [(snap) 'pyre', mark       -> time // expires
 
 class Rite {
     _dbtx

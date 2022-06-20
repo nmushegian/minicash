@@ -130,10 +130,7 @@ type Mode
  | 'pool'
  | 'stat'
 
-type Leaf = [
-    Code, // address
-    Cash, // amount
-    Time, // expiry
+type Pent = [
     Mash, // spent by tick
     Mash  // spent in tock
 ]
