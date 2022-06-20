@@ -1,6 +1,8 @@
 // valid-in-context
 
 import {b2t, Roll} from "coreword";
+import Debug from 'debug'
+const debug = Debug('vinx::test')
 
 export {
     vinx_tick,
