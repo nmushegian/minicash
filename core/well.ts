@@ -34,21 +34,20 @@ function form_tack(x :Roll) :Okay<Tack> {
     try {
         need(islist(x), `must be a list`)
         need(x.length == 4, `must be len 4`)
-        need(x.every(i=>islist(i)), `tack items must all be lists`)
         let tock = x[0] as Roll
-        let eyes = x[1] as Roll
+        let eye  = x[1] as Roll
         let ribs = x[2] as Roll
         let feet = x[3] as Roll
         need(okay(form_tock(tock)), `tack.tock is not well-formed`)
-        need(eyes.length == ribs.length, `len(tack.eyes) must equal len(tack.ribs)`)
-        need(eyes.every(isblob), `eyes must be blobs`)
-        need(eyes.every(b=>b.length == 1), `eyes must be blobs of len 1`)
+        need(isblob(eye), `eye must be a blob`)
+        need(eye.length == 1, `eye must be a blob of len 1`)
         need(ribs.length <= 2**7, `ribs must have len <= 2^7`)
         need(ribs.every(isblob), `ribs must be a list of blobs`)
         need(ribs.every(b=>b.length == 24), `ribs must be list of hashes`)
         need(feet.every(isblob), `feet must be a list of blobs`)
         need(feet.every(b=>b.length == 24), `feet must be list of hashes`)
         need(feet.length <= 2**17, `feet must have len <= 2^17`)
+        return pass(x)
         // merkle root checked in vinx_tack
     } catch (e) {
         return fail(e.message)
