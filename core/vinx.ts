@@ -14,7 +14,7 @@ import {
     Bnum, bnum, bleq, mash, roll, t2b,
     Cash, Byte, Work, Fees, Code, Pubk, tuff,
     scry, addr,
-    Tick, Tock, Tack, b2h,
+    Tick, Tock, Tack, b2h, merk
 } from './word.js'
 
 import {
@@ -85,28 +85,37 @@ function vinx_tick(conx :Tick[], tick :Tick) :Okay<Fees> {
 // Second, it is a crypto-heavy operation that makes sense to group conceptually
 // with the other crypto-related checks.
 // We include tock explicitly as a separate argument as guidance for other systems.
-function vinx_tack(tock :Tock, tack :Tack) {
-    // let [head, eye, ribs, feet] = tack
+function vinx_tack(tock :Tock, tack :Tack) :Okay<void> {
+    try {
+        let [head, eye, ribs, feet] = tack
+        let [prev, root, time, fuzz] = tock
 
-    // aver head == tock      // defines the context
-    // aver len(ribs) <= 128  // well formed
-    // aver len(feet) <= 2^17 // well formed
+        aver(_ => bleq(roll(head), roll(tock)), 'panic: vinx_tack precondition - head tock mismatch')
+        aver(_ => ribs.length <= 128, 'panic: vinx_tack precondition - len(ribs) must be <= 128')
+        aver(_ => feet.length <= 2 ** 17, 'panic: vinx_tack precondition - feet.length must be <= 2^17')
 
-    // if len(ribs) == 0 {
-    //   need eye == 0
-    //   need len(feet) < 1024
-    //   need merk(feet) == tock.root
-    // } else { // ribs len > 0
-    //   need len(ribs) = ceil( len(feet) / 1024 )
-    //   for (let i = 0; i < len(ribs); i++) {
-    //      let ticks = feet.slice(i, i+1024)
-    //      need merk(ticks) == ribs[i + eye]
-    //   }
-    //   need merk(ribs) == tock.root
-    // }
-    // need tock.root == merk(tack.feet)
-
-    return fail(`todo vinx_tack`)
+        if (ribs.length == 0) {
+            need(bnum(eye) == BigInt(0), `eye must be 0 if ribs empty`)
+            need(feet.length < 512, `len(feet) must be <512 if ribs empty`)
+            need(bleq(merk(feet), root), 'merkelization failed')
+        } else { // ribs len > 0
+            need(
+                ribs.length == Math.ceil((feet.length - 512) / 1024),
+                `len(ribs) must be ceil(len(feet)/1024) if ribs not empty len(ribs)=${ribs.length} len(feet)=${feet.length}`
+            )
+            for (let i = 0; i < ribs.length; i++) {
+                let chunk = feet.slice(i, i + 1024)
+                const eyenum = Number('0x' + eye.toString('hex'))
+                console.log(merk(chunk).toString('hex'))
+                console.log(ribs[i + eyenum].toString('hex'))
+                need(bleq(merk(chunk), ribs[i + eyenum]), 'bad merkelization')
+            }
+        }
+        need(bleq(merk(ribs), root), 'bad rib merkelization')
+        return pass(undefined)
+    } catch (e) {
+        return fail(e.message)
+    }
 }
 
 // context is previous tock
