@@ -25,11 +25,10 @@ function vult_thin(tree :Tree, tock :Tock) {
     let prev_work = tree.rock.read_one(rkey('work', prev_head))
     let this_work = bnum(prev_work) + tuff(head)
     let [prev_snap,,] = unroll(tree.rock.read_one(rkey('fold', prev_head)))
-    let next_mint = n2b(bnum(h2b('00')))
-    tree.grow(prev_snap as Snap, (rock,twig,next) => {
+    tree.grow(prev_snap as Snap, (rock,twig,snap) => {
         rock.etch(rkey('tock', head), roll(tock))
         rock.etch(rkey('work', head), this_work)
-        twig.etch(rkey('ment', head, h2b('07')), roll([head, next_mint]))
+        twig.etch(rkey('ment', head, h2b('07')), roll([head, snap]))
         rock.etch(rkey('fold', head, h2b('00')), roll([next, h2b('00')]))
     })
 }
@@ -58,14 +57,14 @@ function vult_full(tree :Tree, tock :Tock) {
           put pent
           fees +=
         for ment in ments:
-          aver not exists
+          need not ment
           put ment
           put pyre
           fees -=
-      catch:
-        twig.bail err
+        valid = true
+      catch err:
         valid = false
-      valid = true
+        throw err
     })
     if (valid) {
         let fees = pfees + fees

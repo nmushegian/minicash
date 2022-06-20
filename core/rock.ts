@@ -18,9 +18,9 @@ export {
 //  ['fold', tockhash,i]       -> fold // [snap, cash]  partial utxo / fees
 //  ['know', tockhash]         -> know // validity state
 
-//  [(snap) 'ment', mark       -> ment // utxo put  (plus tock hist)
-//  [(snap) 'pent', mark       -> pent // utxo use  (plus tock next)
-//  [(snap) 'pyre', mark       -> time // expires
+//  [(snap) 'ment', mark       -> ment // utxo put [code, cash]
+//  [(snap) 'pent', mark       -> pent // utxo use [tish, tosh] (spent by tick, in tock)
+//  [(snap) 'pyre', mark       -> time // utxo expires
 
 
 class Rite {
@@ -48,6 +48,12 @@ class Rite {
         if (val) return val
         else return h2b('')
     }
+    // lmdb.cursor.goToRange(key)
+    // get the first key with a given prefix
+    scan(key :Blob) :Blob {
+        throw new Error('todo rock_scan')
+    }
+
     _seal() {}
     _bail() {}
 }
