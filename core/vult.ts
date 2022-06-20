@@ -17,7 +17,7 @@ export {
 
 // vult_thin grows possibly-valid state tree
 //   (could also invalidate tock)
-function vult_thin(tree :Tree, tock :Tock) {
+function vult_thin(tree :Tree, tock :Tock) { // :Memo
     // aver prev tock must exist
     let head = mash(roll(tock))
     let prev_head = tock[0]
@@ -31,50 +31,62 @@ function vult_thin(tree :Tree, tock :Tock) {
         twig.etch(rkey('ment', head, h2b('07')), roll([head, snap]))
         rock.etch(rkey('fold', head, h2b('00')), roll([snap, h2b('00')]))
     })
+    // return ask/tacks | ask/tocks | err
 }
 
 // vult_full grows definitely-valid state tree
 //   (could also invalidate tock)
-function vult_full(tree :Tree, tock :Tock) {
+function vult_full(tree :Tree, tock :Tock) { // :Memo
     /*
     let last = rock.read ... last applied tack
     let tack = rock.read ... this tack
     let ticks = rock.read ...
     let [head,i,ribs,feet] = tack
+
+    let [prev_snap, prev_fees] = r.read([ 'fold', tockhash, i ])
+
+    let time = tock.time
     let fees = 0
-
-    let [snap, pfees] = r.read([ 'fold', tockhash, i ])
-    let next = snapkey(['fold', tockhash, i])
-
     let valid
-    tree.grow(snap, next, twig => {
-      try:
-      for tick in ticks:
-        for move in moves:
-          need ment
-          need not pent
-          need not pyred
-          put pent
-          fees +=
-        for ment in ments:
-          need not ment
-          put ment
-          put pyre
-          fees -=
-        valid = true
-      catch err:
+    let next_snap = tree.grow(prev_snap, twig => {
+      try {
+        for tick in ticks {
+          for move in moves {
+            need twig.has ['ment' move.mark]   // move exists
+            need !twig.has ['pent' move.mark]  // not spent
+            need time < pyre                   // not expired
+            let [_code,cash] = twig.read(move.mark)
+            put pent                           // mark it spent
+            fees += cash
+          }
+          for ment in ments {
+            need !twig.has 'ment' ment         // not exists
+            put ment                           // put utxo
+            put pyre = time + 17y              // put expiry
+            fees -= ment.cash
+          }
+          valid = true
+        }
+      } catch err {
         valid = false
         throw err
+      }
     })
-    if (valid) {
-        let fees = pfees + fees
-        rock.etch ['fold head i] [next fees]
-        rock.etch ['tack head i] tack
-        if last tack:
-          need fees == mint // net fee is just the subsidy
-          rock.etch ['know head] 'DV // definitely-valid
-    } else {
+
+    if (!valid) {
         rock.etch ['know head] 'DN  // definitely-not-valid
+        return memo( err / ... )
+    }
+
+    let fees = pfees + fees
+    rock.etch ['fold head i] [next fees]
+    rock.etch ['tack head i] tack
+    if last tack {
+        need fees == mint // net fee is just the subsidy
+        rock.etch ['know head] 'DV // definitely-valid
+        return memo( ask/tock ... )
+    } else {
+        return memo( ask/tack ... )
     }
     */
     return fail(`todo vult_full`)
