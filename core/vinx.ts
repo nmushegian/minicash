@@ -48,7 +48,7 @@ function _checksig(tick :Tick, i :number, lock :Code) :boolean {
 // context is set of ticks that contain ments being moved
 // do not worry about internal consistency of context at this step
 // returns total fees if ok
-function vinx_tick(conx :Tick[], tick :Tick) :Okay<Fees> {
+function vinx_tick(conx :Tick[], tick :Tick, tock? :Tock) :Okay<Fees> {
     try {
         conx.forEach(x => form_tick(x as Roll))
         form_tick(tick)
@@ -57,8 +57,14 @@ function vinx_tick(conx :Tick[], tick :Tick) :Okay<Fees> {
         let ticash = BigInt(0)
         moves.forEach((move, moveidx) => {
             const [txin, indx, sign] = move
-            const intx = conx.find(x => mash(roll(x)).equals(txin)) // stupid
             const indxnum = Number('0x'+b2h(indx))
+            if (indxnum == 7) {
+                const prev = txin
+                aver(_ => tock != undefined, 'panic: vinx_tick - indx 7 but tock undefined')
+                need(bleq(prev, mash(roll(tock))), 'bad prev tock hash')
+                return
+            }
+            const intx = conx.find(x => mash(roll(x)).equals(txin)) // stupid
             const iments  = intx[1]
             need(indxnum < iments.length, 'indx out of bounds')
             const iment = intx[1][Number(indxnum)]
