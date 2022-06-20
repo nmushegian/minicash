@@ -67,11 +67,11 @@ function _merk(x :Mash[]) :Mash {
     if (x.length % 2 == 1) {
         x.push(h2b('00'.repeat(24)))
     }
+    let hops = []
     for (let i = 0; i < x.length; i += 2) { // ! +2
-        x[i] = mash(Buffer.concat([x[i], x[i+1]]))
+        hops.push(mash(Buffer.concat([x[i], x[i+1]])))
     }
-    x = x.slice(x.length/2)
-    return _merk(x)
+    return _merk(hops)
 }
 
 function merk(x :Mash[]) :Mash {
@@ -82,7 +82,7 @@ function merk(x :Mash[]) :Mash {
         x.every(y => isblob(y), `merk arg item is not a blob`)
         return true
     }, `merk preconditions`)
-    return _merk(x.map(mash))
+    return _merk(x)
 }
 
 type Tick = [
