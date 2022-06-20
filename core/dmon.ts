@@ -46,7 +46,7 @@ class Dmon {
         })
     }
 
-    sync(tail = this.djin.bang()) {
+    sync(tail = h2b('')) {
         // get the best possibly-valid tocks from peers, then make a
         // request for the thing you need on each branch
         this.plug.emit(memo('ask/tocks', tail), async ([line, yarn]) => {

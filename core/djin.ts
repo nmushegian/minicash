@@ -40,24 +40,13 @@ class Djin {
     constructor(path :string) {
         this.rock = new Rock(path)
         this.tree = new Tree(this.rock)
-        let banghash = mash(roll(this.bang()))
         this.rock.rite(r => {
-            r.etch(rkey('best'), banghash)
-            r.etch(rkey('tock', banghash),  roll(this.bang()))
+            r.etch(rkey('best'), h2b('00'.repeat(24)))
+            r.etch(rkey('tock', h2b('00'.repeat(24))), h2b(''))
         })
     }
 
-    bang() {
-        return [
-            h2b('00'.repeat(24)),
-            h2b('00'.repeat(24)),
-            h2b('00'.repeat(7)),
-            h2b('00'.repeat(7)),
-        ]
-    }
-
-    // todo memo type param
-    // Mash -> Tock[]
+    // 'ask/tocks Tosh[]  ->  'say/tocks Tock[]
     _ask_tocks(memo :Memo) :Memo {
         // todo need init in history
         let [line, body] = memo;
@@ -75,86 +64,63 @@ class Djin {
                 prev = tock[0] // tock.prev
             }
         } while( !bleq(prev, init)
-              && !bleq(prev, mash(roll(this.bang())))
-              && !bleq(prev, h2b('00'.repeat(24))) )
+              && !bleq(prev, h2b('')) )
         return [t2b('say/tocks'), lead] as Memo
     }
 
-    // djin precondition is to split tocks across spin
-    // TODO be more consistent about all this
+    // 'say/tocks Tock[]  ->  'ask/tocks tock
+    //                    ->  'ask/tacks tock,i
     _say_tocks(memo :Memo) :Memo {
         let [line, body] = memo
         let tock = body as Tock
-
-        aver(_=>b2t(line) == 'say/tocks', `say/tocks line must match`)
-        if (true) { //!this.skip_form
-            okay(form_tock(tock))
-        }
-        if (true) { //!this.skip_vinx
-            let prevhash = tock[0]
-            let prevtock = unroll(this.rock.read_one(rkey('tock', prevhash)))
-            okay(vinx_tock(prevtock as Tock, tock))
-        }
-
-        // if fullmode, require prev know is definitely-valid
-        vult_thin(this.tree, tock)
-        // ask/tocks from here if know valid
-        // vult_full(this.tree, tock)
-        // ask/tacks for this tock if dont know
+        let thinmemo = vult_thin(this.tree, tock)
+//        let fullmemo = vult_full(this.tree, tock)
         throw new Error(`todo _say_tocks`)
     }
 
     read(memo :Memo) :Okay<Memo> {
-        let [line, body] = memo
-        try { switch (line.toString()) {
-            case 'ask/tocks': {
+        try {
+            let line = b2t(memo[0])
+            if ('ask/tocks' == line) {
+                // -> say/tocks | err
                 return pass(this._ask_tocks(memo))
             }
-            case 'ask/tacks': {
+            if ('ask/tacks' == line) {
+                // -> say/tacks | err
                 toss(`todo djin read ask/tacks`)
             }
-            case 'ask/ticks': {
+            if ('ask/ticks' == line) {
+                // -> say/ticks | err
                 toss(`todo djin read ask/ticks`)
             }
-            default: return fail(`panic/unrecognized memo line ${line}`)
-        } } catch (e) {
+            return fail(`panic/unrecognized memo line ${line}`)
+        } catch (e) {
             toss(`engine panic: ${e.message}`)
         }
     }
 
     turn(memo :Memo) :Okay<Memo> {
         try {
-            let [line, body] = memo
-            switch (line.toString()) {
-                case 'say/tocks': {
-                    // aver tocks len 1
-                    // spin splits up messages into units
-                    return pass(this._say_tocks(memo))
-                    // ret ask/tacks if we need tacks
-                    //     ask/tocks if we can proceed
-                }
-
-                case 'say/tacks': {
-                    // ...
-                    // tack_form
-                    // tack_vinx
-                    // vult_full
-                    //   ask/ticks if we need ticks
-                    //   ask/tacks if we need next tack
-                    //   ask/tocks if we can make progress
-                    toss(`todo turn say/tacks`)
-                }
-
-                case 'say/ticks': {
-                    // ...
-                    // tick_form
-                    // tick_vinx
-                    // rock etch
-                    //   say/ticks to rebroadcast
-                    toss(`todo turn say/ticks`)
-                }
-                default: return fail(`unrecognized turn line: ${line}`)
+            let line = b2t(memo[0])
+            if ('say/tocks' == line) {
+                // -> ask/tocks    proceed
+                // -> ask/tacks    need tacks
+                // -> err
+                return pass(this._say_tocks(memo))
             }
+            if ('say/tocks' == line) {
+                // -> ask/tocks    proceed
+                // -> ask/tacks    proceed
+                // -> ask/ticks    need ticks
+                // return pass(this._say_tacks(memo)
+                toss(`todo turn say/tacks`)
+            }
+            if ('say/tocks' == line) {
+                // -> say/ticks    accept/rebroadcast
+                // -> err
+                toss(`todo turn say/ticks`)
+            }
+            return fail(`unrecognized turn line: ${line}`)
         } catch(e) {
             toss(`engine panic: ${e.message}`)
         }

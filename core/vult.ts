@@ -15,6 +15,8 @@ export {
     vult_full
 }
 
+// vult_thin grows possibly-valid state tree
+//   (could also invalidate tock)
 function vult_thin(tree :Tree, tock :Tock) {
     // aver prev tock must exist
     let head = mash(roll(tock))
@@ -23,16 +25,16 @@ function vult_thin(tree :Tree, tock :Tock) {
     let prev_work = tree.rock.read_one(rkey('work', prev_head))
     let this_work = bnum(prev_work) + tuff(head)
     let [prev_snap,,] = unroll(tree.rock.read_one(rkey('fold', prev_head)))
-    // todo prev_know
     tree.grow(prev_snap as Snap, head as Snap, twig => {
         twig.rite.etch(rkey('tock', head), roll(tock))
         twig.rite.etch(rkey('work', head), this_work)
         twig.rite.etch(rkey('fork', prev_head, n2b(this_work), head), true)
-        // todo propogate know invalid
         twig.set(rkey('hist', head), true)
     })
 }
 
+// vult_full grows definitely-valid state tree
+//   (could also invalidate tock)
 function vult_full(tree :Tree, tock :Tock) {
     // aver well/vinx
 
@@ -51,7 +53,7 @@ function vult_full(tree :Tree, tock :Tock) {
 
     let valid
     tree.grow(snap, next, twig => {
-      try {
+      try:
       for tick in ticks:
         for move in moves:
           need ment
@@ -64,10 +66,10 @@ function vult_full(tree :Tree, tock :Tock) {
           put ment
           put pyre
           tout +=
-       } catch (e) {
-          valid = false
-          throw e // abort tx, set knowstate after
-       }
+      catch:
+        twig.bail err
+        valid = false
+      valid = true
     })
     if (valid) {
         rock.etch ['fold head i] [snap tin tout]
@@ -78,8 +80,6 @@ function vult_full(tree :Tree, tock :Tock) {
     } else {
         rock.etch ['know head] 'DN  // definitely-not-valid
     }
-    // if invalid, rock.etch ['know', head] false
-
     */
     return fail(`todo vult_full`)
 
