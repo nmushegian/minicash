@@ -100,14 +100,12 @@ function vinx_tack(tock :Tock, tack :Tack) :Okay<void> {
             need(bleq(merk(feet), root), 'merkelization failed')
         } else { // ribs len > 0
             need(
-                ribs.length == Math.ceil((feet.length - 512) / 1024),
-                `len(ribs) must be ceil(len(feet)/1024) if ribs not empty len(ribs)=${ribs.length} len(feet)=${feet.length}`
+                ribs.length == Math.ceil(feet.length / 1024),
+                `len(ribs) must be ceil(len(feet)/1024) if ribs not empty`
             )
             for (let i = 0; i < ribs.length; i++) {
                 let chunk = feet.slice(i, i + 1024)
                 const eyenum = Number('0x' + eye.toString('hex'))
-                console.log(merk(chunk).toString('hex'))
-                console.log(ribs[i + eyenum].toString('hex'))
                 need(bleq(merk(chunk), ribs[i + eyenum]), 'bad merkelization')
             }
         }

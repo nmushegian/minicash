@@ -65,12 +65,15 @@ test('checksig', t=>{ try {
 test('vinx_tack', t=> {
     const tock = [
         '00'.repeat(24),
-        'a30dc5e479c881e77ff703af85f8b8849e903a6065ac35b4',
+        '3483dd0af3ccdf013b1e8bb189818abf010adcc696a91d5d',
         '00'.repeat(6) + '39',
         '00'.repeat(7)
     ].map(h2b) as Tock
     const eye = h2b('00')
-    const ribs = [h2b('6a049dff6bef245137abe0c8b513cb3d6f252a2ba1ab3135')]
+    const ribs = [
+        '6a049dff6bef245137abe0c8b513cb3d6f252a2ba1ab3135',
+        '6cf8ebd31e05445ea0ca76b7428ecfc669f92dc5d074e871'
+    ].map(h2b)
 
     let feet = []
     for (let i = 0; i < 1536; i++) {
@@ -84,7 +87,6 @@ test('vinx_tack', t=> {
     const [ok, val, err] = vinx_tack(tock, [tock, eye, ribs, feet])
     t.equal(ok, true, `vinx_tack ${err}`)
 })
-
 
 let $ = {
     vinx_tick,
