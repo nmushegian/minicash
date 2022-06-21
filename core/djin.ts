@@ -19,6 +19,9 @@ import { Tree, rkey } from './tree.js'
 
 export { Djin }
 
+let zero
+let zerohash
+
 class Djin {
     rock :Rock   // content-addressed values
     tree :Tree   // per-tock view of state
@@ -26,8 +29,8 @@ class Djin {
     constructor(path :string) {
         this.rock = new Rock(path)
         this.tree = new Tree(this.rock)
-        let zero = roll(this.tree.bang)
-        let zerohash = h2b('00'.repeat(24))
+        zero = roll(this.tree.bang)
+        zerohash = h2b('00'.repeat(24))
         this.tree.grow(h2b(''), (rock,twig,snap) => {
             rock.etch(rkey('best'), zerohash)
             rock.etch(rkey('tock', zerohash), zero)
@@ -36,11 +39,12 @@ class Djin {
         })
     }
 
-    // 'ask/tocks Tosh[]  ->  'say/tocks Tock[]
+    // ['ask/tocks tailhash ]  ->  'say/tocks tocks
+    // ['ask/tocks Mash     ]  ->  'say/tocks Tock[]
     _ask_tocks(memo :Memo) :Memo {
-        // todo need init in history
+        // todo need tail in history
         let [line, body] = memo;
-        let init = body as Blob
+        let tail = body as Blob
         let lead = []
         let best = this.rock.read_one(rkey('best'))
         let prev = best as unknown as Blob // mash
@@ -53,17 +57,17 @@ class Djin {
                 lead.push(tock)
                 prev = tock[0] // tock.prev
             }
-        } while( !bleq(prev, init)
-              && !bleq(prev, h2b('00'.repeat(24))) )
+        } while( !bleq(prev, tail) && !bleq(prev, zerohash) )
         return [t2b('say/tocks'), lead] as Memo
     }
 
-    // 'say/tocks Tock[]  ->  'ask/tocks tock
-    //                    ->  'ask/tacks tock,i
+    // 'say/tocks Tock[]  ->  'ask/tocks tock:Mash
+    //                    ->  'ask/tacks tock:Mash,i:num
     _say_tocks(memo :Memo) :Memo {
         let [line, body] = memo
         aver(_=>body.length == 1, `panic, djin memo is not split into units`)
         let tocks = body as Tock[]
+        // aver prev is possibly-valid
         let thinmemo = vult_thin(this.tree, tocks[0])
 //        let fullmemo = vult_full(this.tree, tock)
         return thinmemo
