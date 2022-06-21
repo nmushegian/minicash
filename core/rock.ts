@@ -9,19 +9,24 @@ export {
     Rock
 }
 
+// This level of abstraction deals with blob keys and values,
+// but we can still `aver` that the keys and values have one of
+// a small set of types from minicash.
+
 //  ['tick', tickhash]         -> tick
-//  ['tack', tockhash,i]       -> tack // set of 1024 ticks
+//  ['tack', tockhash,i]       -> tack
 //  ['tock', tockhash]         -> tock
 
 //  ['work', tockhash]         -> work // cumulative work
 //  ['fold', tockhash,i]       -> fold // [snap, fees]  partial utxo / fees
 //  ['know', tockhash]         -> know // validity state
 
+//  ['best']                   -> tock
+
 //  [(snap) 'ment', mark       -> ment // utxo put [code, cash]
-//  [(snap) 'pent', mark       -> pent // utxo use [tish, tosh] (spent by tick, in tock)
+//  [(snap) 'pent', mark       -> pent // utxo use [tish, tosh] (by tick, in tock)
 //  [(snap) 'pyre', mark       -> time // utxo expires
 
-//  ['best']                   -> tock
 
 class Rite {
     _dbtx
