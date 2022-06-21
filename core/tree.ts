@@ -80,13 +80,10 @@ class Tree {
     grow(copy :Snap, grow :((Rock,Twig,Snap) => void)) {
         let prev = this._snaps[b2h(copy)]
         let next = this._aloc()
-        console.log('prev,next', prev, next)
         let err
         this.rock.rite(rite => {
-            console.log('grow/rite')
             try {
                 let twig = new Twig(prev, rite)
-                console.log('got a twig')
                 grow(rite, twig, next)
                 let immu = twig.seal()
                 this._snaps[b2h(next)] = immu

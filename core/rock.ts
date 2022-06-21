@@ -48,17 +48,14 @@ class Rite {
         return val
     }
     read(key :Blob) {
-        console.log('read')
         aver(_=> key != undefined, `read key must be defined`)
         aver(_=> key.length > 0, `read key must not be empty`)
         let skey = key.toString('binary')
         let val = this._dbtx.get(skey)
         if (val) {
-            console.log('reading val', val)
             return val
         }
         else {
-            console.log('default val')
             return h2b('')
         }
     }
@@ -84,7 +81,6 @@ class Rock {
     }
 
     read_one(key :Blob) :Blob {
-        console.log('read_one')
         let out
         this.rite(r => { out = r.read(key) })
         return out
