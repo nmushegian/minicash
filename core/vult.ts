@@ -1,10 +1,11 @@
 // state transition critical path
 
 import {
-    Okay, pass, fail,
+    Okay, pass, fail, aver,
     Work, Snap, Fees, Know, tuff,
     mash, roll, unroll, bnum,
     h2b, n2b, bcat,
+    Memo, memo,
     Tick, Tock, Tack,
 } from './word.js'
 
@@ -17,21 +18,32 @@ export {
 
 // vult_thin grows possibly-valid state tree
 //   (could also invalidate tock)
-function vult_thin(tree :Tree, tock :Tock) { // :Memo
+function vult_thin(tree :Tree, tock :Tock) :Memo {
     // aver prev tock must exist
+    // aver well/vinx
+    console.log('vulting tock', tock)
     let head = mash(roll(tock))
     let prev_head = tock[0]
+    console.log('prev head', prev_head)
     let prev_tock = unroll(tree.rock.read_one(rkey('tock', prev_head)))
     let prev_work = tree.rock.read_one(rkey('work', prev_head))
+    console.log('prev work', prev_work)
+    console.log('tuff head', tuff(head))
     let this_work = bnum(prev_work) + tuff(head)
-    let [prev_snap,,] = unroll(tree.rock.read_one(rkey('fold', prev_head)))
-    tree.grow(prev_snap as Snap, (rock,twig,snap) => {
-        rock.etch(rkey('tock', head), roll(tock))
-        rock.etch(rkey('work', head), this_work)
+    console.log('this_work', this_work)
+    console.log('prev_head', prev_head)
+    let prev_fold = tree.rock.read_one(rkey('fold', prev_head, n2b(BigInt(0))))
+    console.log('prev_fold', prev_fold)
+    aver(_=> prev_fold.length > 0, `prev fold must exist`)
+    let [prev_snap,,] = unroll(prev_fold)
+    console.log('prev_snap', prev_snap)
+    tree.grow(prev_snap as Snap, (rite,twig,snap) => {
+        rite.etch(rkey('tock', head), roll(tock))
+        rite.etch(rkey('work', head), this_work)
+        rite.etch(rkey('fold', head, h2b('00')), roll([snap, h2b('00')]))
         twig.etch(rkey('ment', head, h2b('07')), roll([head, snap]))
-        rock.etch(rkey('fold', head, h2b('00')), roll([snap, h2b('00')]))
     })
-    // return ask/tacks | ask/tocks | err
+    return memo('ask/tocks', head)
 }
 
 // vult_full grows definitely-valid state tree

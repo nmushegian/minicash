@@ -5,7 +5,7 @@ import {
     h2b, t2b, b2t,
     Blob, isblob,
     roll, unroll, bleq, islist,
-    Tock,
+    Tock, tuff, n2b,
     Mash, mash,
     Memo
 } from './word.js'
@@ -26,9 +26,13 @@ class Djin {
     constructor(path :string) {
         this.rock = new Rock(path)
         this.tree = new Tree(this.rock)
-        this.rock.rite(r => {
-            r.etch(rkey('best'), h2b('00'.repeat(24)))
-            r.etch(rkey('tock', h2b('00'.repeat(24))), h2b(''))
+        let zero = roll(this.tree.bang)
+        let zerohash = h2b('00'.repeat(24))
+        this.tree.grow(h2b(''), (rock,twig,snap) => {
+            rock.etch(rkey('best'), zerohash)
+            rock.etch(rkey('tock', zerohash), zero)
+            rock.etch(rkey('work', zerohash), n2b(tuff(zero)))
+            rock.etch(rkey('fold', zerohash, n2b(BigInt(0))), roll([snap, n2b(BigInt(0))]))
         })
     }
 
@@ -50,7 +54,7 @@ class Djin {
                 prev = tock[0] // tock.prev
             }
         } while( !bleq(prev, init)
-              && !bleq(prev, h2b('')) )
+              && !bleq(prev, h2b('00'.repeat(24))) )
         return [t2b('say/tocks'), lead] as Memo
     }
 
@@ -58,10 +62,11 @@ class Djin {
     //                    ->  'ask/tacks tock,i
     _say_tocks(memo :Memo) :Memo {
         let [line, body] = memo
-        let tock = body as Tock
-        let thinmemo = vult_thin(this.tree, tock)
+        aver(_=>body.length == 1, `panic, djin memo is not split into units`)
+        let tocks = body as Tock[]
+        let thinmemo = vult_thin(this.tree, tocks[0])
 //        let fullmemo = vult_full(this.tree, tock)
-        throw new Error(`todo _say_tocks`)
+        return thinmemo
     }
 
     read(memo :Memo) :Okay<Memo> {

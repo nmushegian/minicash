@@ -5,7 +5,7 @@ import * as immu from 'immutable'
 import {
     Okay, pass, fail,
     Roll, Blob, roll, unroll, b2h, h2b, t2b, n2b,
-    Snap,
+    Snap, Tock,
 } from './word.js'
 
 import {
@@ -48,12 +48,19 @@ function rkey(s :string, ...args :Blob[]) :RKey {
 
 class Tree {
     rock :Rock
+    bang :Tock
     _snapc
     _snaps
 
     // tree grows on a rock, but we try not to think about that
     constructor(rock :Rock) {
         this.rock = rock
+        this.bang = [
+            h2b('00'.repeat(24)),
+            h2b('00'.repeat(24)),
+            h2b('00'.repeat(7)),
+            h2b('00'.repeat(7)),
+        ]
         this._snapc = 0
         this._snaps = { "": immu.Map() } // todo, make it in lmdb
     }
@@ -73,13 +80,25 @@ class Tree {
     grow(copy :Snap, grow :((Rock,Twig,Snap) => void)) {
         let prev = this._snaps[b2h(copy)]
         let next = this._aloc()
-        this.rock.rite(r => {
-            let twig = new Twig(prev, r)
-            grow(this.rock, twig, next)
-            let immu = twig.seal()
-            this._snaps[b2h(next)] = immu
+        console.log('prev,next', prev, next)
+        let err
+        this.rock.rite(rite => {
+            console.log('grow/rite')
+            try {
+                let twig = new Twig(prev, rite)
+                console.log('got a twig')
+                grow(rite, twig, next)
+                let immu = twig.seal()
+                this._snaps[b2h(next)] = immu
+            } catch (e) {
+                err = e
+            }
         })
-        return next
+        if (err) {
+            throw err
+        } else {
+            return next
+        }
     }
 
     _aloc() :Snap {

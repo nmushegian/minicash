@@ -15,8 +15,8 @@ import {
 test('djin', t=>{ try {
     let djin = new Djin('')
     let out
-    out = okay(djin.read(memo('ask/tocks', [h2b('')])))
-    t.deepEqual(out, memo('say/tocks', [h2b('')]))
+    out = okay(djin.read(memo('ask/tocks', [h2b('00'.repeat(24))])))
+    t.deepEqual(out, memo('say/tocks', [djin.tree.bang]))
 
     let tick1 = [[
         [] // no moves

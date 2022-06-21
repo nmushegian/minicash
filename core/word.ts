@@ -200,9 +200,11 @@ type Blob1  = Blob;
 type Bnum   = bigint // not serialized
 
 export function bnum(b :Blob) :Bnum {
+    need(b.length > 0, `bnum arg must be len > 0`)
     return BigInt("0x" + b.toString('hex'))
 }
 
 export function n2b(bn :Bnum) :Blob {
+    need(bn !== undefined, `bnum arg must be defined`)
     return h2b(bn.toString(16))
 }

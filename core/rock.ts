@@ -10,9 +10,11 @@ export {
 }
 
 
+
+
 //  ['tick', tickhash]         -> tick
-//  ['tock', tockhash]         -> tock
 //  ['tack', tockhash,i]       -> tack // set of 1024 ticks
+//  ['tock', tockhash]         -> tock
 
 //  ['work', tockhash]         -> work // cumulative work
 //  ['fold', tockhash,i]       -> fold // [snap, cash]  partial utxo / fees
@@ -22,6 +24,7 @@ export {
 //  [(snap) 'pent', mark       -> pent // utxo use [tish, tosh] (spent by tick, in tock)
 //  [(snap) 'pyre', mark       -> time // utxo expires
 
+//  ['best']                   -> tock
 
 class Rite {
     _dbtx
@@ -31,6 +34,8 @@ class Rite {
         this._done = false
     }
     etch(key :Blob, val :Blob) {
+        aver(_=> key != undefined, `etch key must be defined`)
+        aver(_=> key.length > 0, `etch key is empty`)
         aver(_=> {
             let pval = this.read(key)
             if (pval.length > 0 && !bleq(val, pval)) {
@@ -43,10 +48,19 @@ class Rite {
         return val
     }
     read(key :Blob) {
+        console.log('read')
+        aver(_=> key != undefined, `read key must be defined`)
+        aver(_=> key.length > 0, `read key must not be empty`)
         let skey = key.toString('binary')
         let val = this._dbtx.get(skey)
-        if (val) return val
-        else return h2b('')
+        if (val) {
+            console.log('reading val', val)
+            return val
+        }
+        else {
+            console.log('default val')
+            return h2b('')
+        }
     }
     // lmdb.cursor.goToRange(key)
     // get the first key with a given prefix
@@ -70,6 +84,7 @@ class Rock {
     }
 
     read_one(key :Blob) :Blob {
+        console.log('read_one')
         let out
         this.rite(r => { out = r.read(key) })
         return out
@@ -81,8 +96,8 @@ class Rock {
             f(rite)
             rite._seal()
         } catch (e) {
-            toss(`panic rite throw`)
             rite._bail()
+            toss(`panic rite throw ${e.message}`)
         }
     }
 }
