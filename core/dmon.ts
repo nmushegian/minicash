@@ -35,7 +35,7 @@ class Dmon {
 
             // depending on error type,
             // disconnect / backoff / just respond
-            let out = okay(this.djin.read(memo))
+            let out = okay(this.djin.turn(memo))
             back(out)
             toss(`todo dmon.serv`)
         })
@@ -44,7 +44,7 @@ class Dmon {
     // resolves when self-sync is done and peer-sync has started
     async sync(tail = h2b('')) {
         // try to sync with yourself first
-        let [ty, yarn] = this.djin.read(memo('ask/tocks', tail))
+        let [ty, yarn] = this.djin.turn(memo('ask/tocks', tail))
         // need todo ty not err
         let head
         for await (head of this.djin.spin(yarn)) {}

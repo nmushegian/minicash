@@ -31,6 +31,7 @@ function vult_thin(tree :Tree, tock :Tock) :Memo {
     let [prev_snap,,] = unroll(prev_fold)
     tree.grow(prev_snap as Snap, (rite,twig,snap) => {
         rite.etch(rkey('tock', head), roll(tock))
+        console.log('vult_thin oetched tock', head)
         rite.etch(rkey('work', head), this_work)
         rite.etch(rkey('fold', head, h2b('00')), roll([snap, h2b('00')])) // [snap, fees]
         twig.etch(rkey('ment', head, h2b('07')), roll([head, h2b('00')])) // [code, cash]

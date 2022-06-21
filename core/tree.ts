@@ -16,6 +16,29 @@ export {
     Tree, Twig, rkey
 }
 
+// This level of abstraction deals with the user's view of
+// both a direct map (`rock.rite(=>)`) and a pure map (`tree.grow(=>)`)
+// It provides typed interfaces for all of these records,
+// and translates them into blob keys/values to put in Rock. In the case
+// of the pure map (accessed via `twig`), it does some internal logic
+// to translate a single read/write into log(k) read/writes of the
+// pure map internal structure.
+
+//  ['tick', tickhash]         -> tick
+//  ['tack', tockhash,i]       -> tack
+//  ['tock', tockhash]         -> tock
+
+//  ['work', tockhash]         -> work // cumulative work
+//  ['fold', tockhash,i]       -> fold // [snap, fees]  partial utxo / fees
+//  ['know', tockhash]         -> know // validity state
+
+//  ['best']                   -> tock
+
+//  [(snap) 'ment', mark       -> ment // utxo put [code, cash]
+//  [(snap) 'pent', mark       -> pent // utxo use [tish, tosh] (by tick, in tock)
+//  [(snap) 'pyre', mark       -> time // utxo expires
+
+
 // mutable handle
 class Twig {
     rite
@@ -55,12 +78,7 @@ class Tree {
     // tree grows on a rock, but we try not to think about that
     constructor(rock :Rock) {
         this.rock = rock
-        this.bang = [
-            h2b('00'.repeat(24)),
-            h2b('00'.repeat(24)),
-            h2b('00'.repeat(7)),
-            h2b('00'.repeat(7)),
-        ]
+
         this._snapc = 0
         this._snaps = { "": immu.Map() } // todo, make it in lmdb
     }
@@ -80,22 +98,12 @@ class Tree {
     grow(copy :Snap, grow :((Rock,Twig,Snap) => void)) {
         let prev = this._snaps[b2h(copy)]
         let next = this._aloc()
-        let err
         this.rock.rite(rite => {
-            try {
-                let twig = new Twig(prev, rite)
-                grow(rite, twig, next)
-                let immu = twig.seal()
-                this._snaps[b2h(next)] = immu
-            } catch (e) {
-                err = e
-            }
+            let twig = new Twig(prev, rite)
+            grow(rite, twig, next)
+            let immu = twig.seal()
+            this._snaps[b2h(next)] = immu
         })
-        if (err) {
-            throw err
-        } else {
-            return next
-        }
     }
 
     _aloc() :Snap {

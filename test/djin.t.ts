@@ -15,8 +15,8 @@ import {
 test('djin', t=>{ try {
     let djin = new Djin('')
     let out
-    out = okay(djin.read(memo('ask/tocks', [h2b('00'.repeat(24))])))
-    t.deepEqual(out, memo('say/tocks', [djin.tree.bang]))
+    out = okay(djin.turn(memo('ask/tocks', mash(roll(djin.bang)))))
+    t.deepEqual(out, memo('say/tocks', [djin.bang]))
 
     let tick1 = [[
         [] // no moves
@@ -25,14 +25,14 @@ test('djin', t=>{ try {
     ]]
 
     let tack1 = [
-        [], // head
+        undefined, // head
         [], // eyes
         [merk([mash(roll(tick1 as Tick))])],
         [tick1],
     ]
 
     let tock1 = [
-        h2b('00'.repeat(24)),
+        mash(roll(djin.bang)),
         merk([mash(roll(tick1 as Tick))]),
         h2b('00'.repeat(6) + '39'), // 57 in hex
         h2b('ff'.repeat(7))
