@@ -12,8 +12,10 @@ import { Tree } from '../core/tree.js'
 test('leaf keys', t=>{
     let rock = new Rock('')
     let tree = new Tree(rock)
-    let next = tree.grow(h2b(''), (rock,twig) => {
+    let next
+    tree.grow(h2b(''), (rock,twig,next_) => {
         twig.etch(h2b('ff'), h2b('ff'))
+        next = next_
     })
     let val
     tree.look(next, (rock,twig) => {

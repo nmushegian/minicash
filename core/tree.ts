@@ -55,12 +55,7 @@ class Tree {
     // tree grows on a rock, but we try not to think about that
     constructor(rock :Rock) {
         this.rock = rock
-        this.bang = [
-            h2b('00'.repeat(24)),
-            h2b('00'.repeat(24)),
-            h2b('00'.repeat(7)),
-            h2b('00'.repeat(7)),
-        ]
+
         this._snapc = 0
         this._snaps = { "": immu.Map() } // todo, make it in lmdb
     }
@@ -80,22 +75,12 @@ class Tree {
     grow(copy :Snap, grow :((Rock,Twig,Snap) => void)) {
         let prev = this._snaps[b2h(copy)]
         let next = this._aloc()
-        let err
         this.rock.rite(rite => {
-            try {
-                let twig = new Twig(prev, rite)
-                grow(rite, twig, next)
-                let immu = twig.seal()
-                this._snaps[b2h(next)] = immu
-            } catch (e) {
-                err = e
-            }
+            let twig = new Twig(prev, rite)
+            grow(rite, twig, next)
+            let immu = twig.seal()
+            this._snaps[b2h(next)] = immu
         })
-        if (err) {
-            throw err
-        } else {
-            return next
-        }
     }
 
     _aloc() :Snap {

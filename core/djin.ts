@@ -19,23 +19,28 @@ import { Tree, rkey } from './tree.js'
 
 export { Djin }
 
-let zero
-let zerohash
-
 class Djin {
     rock :Rock   // content-addressed values
     tree :Tree   // per-tock view of state
+    bang :Tock   // tock zero
 
     constructor(path :string) {
         this.rock = new Rock(path)
         this.tree = new Tree(this.rock)
-        zero = roll(this.tree.bang)
-        zerohash = h2b('00'.repeat(24))
-        this.tree.grow(h2b(''), (rock,twig,snap) => {
-            rock.etch(rkey('best'), zerohash)
-            rock.etch(rkey('tock', zerohash), zero)
-            rock.etch(rkey('work', zerohash), n2b(tuff(zero)))
-            rock.etch(rkey('fold', zerohash, n2b(BigInt(0))), roll([snap, n2b(BigInt(0))]))
+        this.bang = [
+            h2b('00'.repeat(24)),
+            h2b('00'.repeat(24)),
+            h2b('00'.repeat(7)),
+            h2b('00'.repeat(7)),
+        ]
+        let bangroll = roll(this.bang)
+        let banghash = mash(bangroll)
+        this.tree.grow(h2b(''), (rite,twig,snap) => {
+            rite.etch(rkey('best'), banghash)
+            rite.etch(rkey('tock', banghash), bangroll)
+            console.log('djin init etch tock', banghash, bangroll)
+            rite.etch(rkey('work', banghash), n2b(tuff(bangroll)))
+            rite.etch(rkey('fold', banghash, n2b(BigInt(0))), roll([snap, n2b(BigInt(0))]))
         })
     }
 
@@ -48,7 +53,11 @@ class Djin {
         let lead = []
         let best = this.rock.read_one(rkey('best'))
         let prev = best as unknown as Blob // mash
+        console.log('prev', prev)
+        let banghash = mash(roll(this.bang))
         do {
+            console.log('reading prev', prev)
+            console.log(this.rock._db)
             let blob = this.rock.read_one(rkey('tock', prev))
             if (blob.length == 0) {
                 toss(`no such tock: ${prev}`)
@@ -57,7 +66,7 @@ class Djin {
                 lead.push(tock)
                 prev = tock[0] // tock.prev
             }
-        } while( !bleq(prev, tail) && !bleq(prev, zerohash) )
+        } while( !bleq(prev, tail) && !bleq(prev, banghash) && !bleq(prev, h2b('00'.repeat(24))) )
         return [t2b('say/tocks'), lead] as Memo
     }
 
