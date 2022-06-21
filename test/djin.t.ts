@@ -15,7 +15,7 @@ import {
 test('djin', t=>{ try {
     let djin = new Djin('')
     let out
-    out = okay(djin.read(memo('ask/tocks', mash(roll(djin.bang)))))
+    out = okay(djin.turn(memo('ask/tocks', mash(roll(djin.bang)))))
     t.deepEqual(out, memo('say/tocks', [djin.bang]))
 
     let tick1 = [[

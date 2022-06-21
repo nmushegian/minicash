@@ -66,7 +66,7 @@ class Djin {
 
     }
 
-    read(memo :Memo) :Okay<Memo> {
+    turn(memo :Memo) :Okay<Memo> {
         try {
             let line = b2t(memo[0])
             if ('ask/tocks' == line) {
@@ -81,15 +81,6 @@ class Djin {
                 // -> say/ticks | err
                 toss(`todo djin read ask/ticks`)
             }
-            return fail(`panic/unrecognized memo line ${line}`)
-        } catch (e) {
-            toss(`engine panic: ${e.message}`)
-        }
-    }
-
-    turn(memo :Memo) :Okay<Memo> {
-        try {
-            let line = b2t(memo[0])
             if ('say/tocks' == line) {
                 // -> ask/tocks    proceed
                 // -> ask/tacks    need tacks
