@@ -70,8 +70,8 @@ class Tree {
         if (!snap) return fail(`read_twig: no such snap: ${copy}`)
         else {
             let ret
-            this.rock.rite(slab => {
-                let twig = new Twig(snap, slab) // todo, readonly
+            this.rock.rite(rite => {
+                let twig = new Twig(snap, rite) // todo, readonly
                 look(this.rock, twig)
             })
         }

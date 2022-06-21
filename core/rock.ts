@@ -56,10 +56,14 @@ class Rite {
             return h2b('')
         }
     }
-    // lmdb.cursor.goToRange(key)
-    // get the first key with a given prefix
-    scan(key :Blob) :Blob {
-        throw new Error('todo rock_scan')
+
+    // get first [key,val] with prefix(key) == fix
+    find_min(fix :Blob) :[Blob, Blob] {
+        throw new Error('todo rock.find_min')
+    }
+    // get last [key,val] with prefix(key) == fix
+    find_max(fix :Blob) :[Blob, Blob] {
+        throw new Error('todo rock.find_max')
     }
 
     _seal() {}
