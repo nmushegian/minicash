@@ -32,8 +32,10 @@ function vult_thin(tree :Tree, tock :Tock) :Memo {
     tree.grow(prev_snap as Snap, (rite,twig,snap) => {
         rite.etch(rkey('tock', head), roll(tock))
         rite.etch(rkey('work', head), this_work)
-        rite.etch(rkey('fold', head, h2b('00')), roll([snap, h2b('00')]))
-        twig.etch(rkey('ment', head, h2b('07')), roll([head, snap]))
+        rite.etch(rkey('fold', head, h2b('00')), roll([snap, h2b('00')])) // [snap, fees]
+        twig.etch(rkey('ment', head, h2b('07')), roll([head, h2b('00')])) // [code, cash]
+        // pent only set by vult_full, where we will know the foot tick
+        //twig.etch(rkey('pent', prev_head, h2b('07')), roll([head, foot])
     })
     return memo('ask/tocks', head)
 }

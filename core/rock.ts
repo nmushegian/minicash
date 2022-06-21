@@ -9,15 +9,12 @@ export {
     Rock
 }
 
-
-
-
 //  ['tick', tickhash]         -> tick
 //  ['tack', tockhash,i]       -> tack // set of 1024 ticks
 //  ['tock', tockhash]         -> tock
 
 //  ['work', tockhash]         -> work // cumulative work
-//  ['fold', tockhash,i]       -> fold // [snap, cash]  partial utxo / fees
+//  ['fold', tockhash,i]       -> fold // [snap, fees]  partial utxo / fees
 //  ['know', tockhash]         -> know // validity state
 
 //  [(snap) 'ment', mark       -> ment // utxo put [code, cash]
