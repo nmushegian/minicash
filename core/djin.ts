@@ -7,7 +7,7 @@ import {
     roll, unroll, bleq, islist,
     Tock, tuff, n2b,
     Mash, mash,
-    Memo, MemoT,
+    Memo, OpenMemo,
     MemoSayTocks,
     MemoAskTocks,
 } from './word.js'

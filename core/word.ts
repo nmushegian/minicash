@@ -18,9 +18,9 @@ export type {
     Know,
     Snap, Fees, Work,
     Peer, Mail, Memo,
-    MemoT,
-    MemoSayTocks,
-    MemoAskTocks,
+    OpenMemo, MemoErr,
+    MemoAskTicks, MemoAskTacks, MemoAskTocks,
+    MemoSayTicks, MemoSayTacks, MemoSayTocks,
     Mode,
     Hexs
 }
@@ -178,7 +178,7 @@ type Memo = [
     Roll  // body  data
 ]
 
-type MemoT
+type OpenMemo
   = MemoAskTocks
   | MemoAskTacks
   | MemoAskTicks
