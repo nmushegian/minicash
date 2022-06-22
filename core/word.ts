@@ -33,7 +33,8 @@ export {
     b2h, h2b, t2b, b2t,
     mash, addr, merk,
     sign, scry,
-    memo
+    memo,
+    MemoType,// enum export as value not type
 }
 
 function t2b(x :string) :Blob {
@@ -187,20 +188,30 @@ type OpenMemo
   | MemoSayTicks
   | MemoErr
 
-type MemoSayTocks
-  = ['say/tocks', Tock[]]  // chain of tocks, first to last
-type MemoSayTacks
-  = ['say/tacks', Tack[]]  // set of tacks for a tock
-type MemoSayTicks
-  = ['say/ticks', Tick[]]  // ticks you requested, in topological order
+enum MemoType {  // mnemonic
+    AskTocks = 0xa0,  // Ask t0cks
+    AskTacks = 0xaa,  // Ask tAcks
+    AskTicks = 0xa1,  // Ask t1cks
+    SayTocks = 0xc0,  //~Say t0cks
+    SayTacks = 0xca,  //~Say tAcks
+    SayTicks = 0xc1,  //~Say t1cks
+    Err      = 0xee,  // Err
+}
+
 type MemoAskTacks
-  = ['ask/tacks', Mash]    // head: get tacks for this head
+  =  [MemoType.AskTacks, Mash]    // head: get tacks for this head
 type MemoAskTicks
-  = ['ask/ticks', Mash[]]  // tickhashes you want ticks for
+  =  [MemoType.AskTicks, Mash[]]  // tickhashes you want ticks for
 type MemoAskTocks
-  = ['ask/tocks', Mash]    // tail: get tocks from this tock forward to best
+  =  [MemoType.AskTocks, Mash]    // tail: get tocks from this tock forward to best
+type MemoSayTocks
+  =  [MemoType.SayTocks, Tock[]]  // chain of tocks, first to last
+type MemoSayTacks
+  =  [MemoType.SayTacks, Tack[]]  // set of tacks for a tock
+type MemoSayTicks
+  =  [MemoType.SayTicks, Tick[]]  // ticks you requested, in topological order
 type MemoErr
-  = ['err', [Why, Roll]]   // typed reason, untyped subreason / info
+  =  [MemoType.Err, [Why, Roll]]   // typed reason, untyped subreason / info
 
 type Why
   = 'malformed'   // well
