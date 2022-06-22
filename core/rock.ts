@@ -2,7 +2,7 @@
 
 import {
     Okay, okay, pass, fail, toss, aver,
-    Blob, bleq, h2b
+    Blob, bleq, h2b, b2h
 } from './word.js'
 
 export {
@@ -45,14 +45,14 @@ class Rite {
             }
             return true
         }, `etch preconditions`)
-        let skey = key.toString('binary')
+        let skey = b2h(key)
         this._dbtx.set(skey, val)
         return val
     }
     read(key :Blob) {
         aver(_=> key != undefined, `read key must be defined`)
         aver(_=> key.length > 0, `read key must not be empty`)
-        let skey = key.toString('binary')
+        let skey = b2h(key)
         let val = this._dbtx.get(skey)
         if (val) {
             return val
@@ -64,7 +64,9 @@ class Rite {
 
     // get first [key,val] with prefix(key) == fix
     find_min(fix :Blob) :[Blob, Blob] {
-        throw new Error('todo rock.find_min')
+        let keys = [...this._dbtx.keys()]
+        let minkey = keys.find(key => key.startsWith(b2h(fix)))
+        return [h2b(minkey), this._dbtx.get(minkey)]
     }
     // get last [key,val] with prefix(key) == fix
     find_max(fix :Blob) :[Blob, Blob] {
@@ -99,7 +101,7 @@ class Rock {
             rite._seal()
         } catch (e) {
             rite._bail()
-            toss(`panic rite throw ${e.message}`)
+            toss(e)
         }
     }
 }

@@ -1,7 +1,7 @@
 import { test } from 'tapzero'
 
 import {
-    h2b, isblob
+    h2b, isblob, bleq
 } from '../core/word.js'
 import { Rock } from '../core/rock.js'
 
@@ -38,4 +38,19 @@ test('rock', t=>{
         })
     }, 'must not modify same key with new value')
 
+})
+
+test('rock find_min', t=> {
+    let rock = new Rock('')
+    rock.rite(r => {
+        r.etch(h2b('aa00'), h2b('0000'))
+        r.etch(h2b('aa11'), h2b('0001'))
+        r.etch(h2b('bb00'), h2b('0002'))
+        r.etch(h2b('bb11'), h2b('0003'))
+    })
+    let min
+    rock.rite(r => { // reed
+        min = r.find_min(h2b('bb'))
+    })
+    t.deepEqual(min, [h2b('bb00'), h2b('0002')])
 })

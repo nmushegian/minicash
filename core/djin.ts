@@ -38,7 +38,6 @@ class Djin {
         this.tree.grow(h2b(''), (rite,twig,snap) => {
             rite.etch(rkey('best'), banghash)
             rite.etch(rkey('tock', banghash), bangroll)
-            console.log('djin init etch tock', banghash, bangroll)
             rite.etch(rkey('work', banghash), n2b(tuff(bangroll)))
             rite.etch(rkey('fold', banghash, n2b(BigInt(0))), roll([snap, n2b(BigInt(0))]))
         })
@@ -114,11 +113,8 @@ class Djin {
         let lead = []
         let best = this.rock.read_one(rkey('best'))
         let prev = best as unknown as Blob // mash
-        console.log('prev', prev)
         let banghash = mash(roll(this.bang))
         do {
-            console.log('reading prev', prev)
-            console.log(this.rock._db)
             let blob = this.rock.read_one(rkey('tock', prev))
             if (blob.length == 0) {
                 toss(`no such tock: ${prev}`)
