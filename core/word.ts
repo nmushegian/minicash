@@ -180,17 +180,27 @@ type Memo = [
 
 type MemoT
   = MemoAskTocks
-  | ['ask/tacks', Mash]    // head: get tacks for this head
-  | ['ask/ticks', Mash[]]  // tickhashes you want ticks for
+  | MemoAskTacks
+  | MemoAskTicks
   | MemoSayTocks
-  | ['say/tacks', Tack[]]  // wire formats can invent a more efficient memo to not send ribs so much
-  | ['say/ticks', Tick[]]  // ticks you requested, in topological order
-  | ['err', [Why, Roll]]   // typed reason, untyped subreason / info
+  | MemoSayTacks
+  | MemoSayTicks
+  | MemoErr
 
 type MemoSayTocks
   = ['say/tocks', Tock[]]  // chain of tocks, first to last
+type MemoSayTacks
+  = ['say/tacks', Tack[]]  // set of tacks for a tock
+type MemoSayTicks
+  = ['say/ticks', Tick[]]  // ticks you requested, in topological order
+type MemoAskTacks
+  = ['ask/tacks', Mash]    // head: get tacks for this head
+type MemoAskTicks
+  = ['ask/ticks', Mash[]]  // tickhashes you want ticks for
 type MemoAskTocks
   = ['ask/tocks', Mash]    // tail: get tocks from this tock forward to best
+type MemoErr
+  = ['err', [Why, Roll]]   // typed reason, untyped subreason / info
 
 type Why
   = 'malformed'   // well
