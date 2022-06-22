@@ -7,9 +7,9 @@ import {
     roll, unroll, bleq, islist,
     Tock, tuff, n2b,
     Mash, mash,
-    Memo, OpenMemo,
-    MemoSayTocks,
-    MemoAskTocks,
+    Memo, OpenMemo, MemoType,
+    MemoSayTocks, MemoSayTacks, MemoSayTicks,
+    MemoAskTocks, MemoAskTacks, MemoAskTicks,
 } from './word.js'
 
 import {
@@ -75,7 +75,7 @@ class Djin {
                 // -> say/tocks | err
                 let memot = copy as unknown as MemoAskTocks // todo form_memo
                 let out = this._ask_tocks(memot)
-                let typed = [t2b(out[0]), out[1]]
+                let typed = [Buffer.from([out[0]]), out[1]]
                 return pass(typed)
             }
             if ('ask/tacks' == line) {
@@ -92,7 +92,7 @@ class Djin {
                 // -> err
                 let memot = memo as unknown as MemoSayTocks // todo form_memo
                 let out = this._say_tocks(memot)
-                let typed = [t2b(out[0]), out[1]]
+                let typed = [Buffer.from([out[0]]), out[1]]
                 return pass(typed)
             }
             if ('say/tocks' == line) {
@@ -133,18 +133,18 @@ class Djin {
                 prev = tock[0] // tock.prev
             }
         } while( !bleq(prev, tail) && !bleq(prev, banghash) && !bleq(prev, h2b('00'.repeat(24))) )
-        return ['say/tocks', lead] as MemoSayTocks
+        return [MemoType.SayTocks, lead] as MemoSayTocks
     }
 
     // 'say/tocks Tock[]  ->  'ask/tocks tock:Mash
     //                    ->  'ask/tacks tock:Mash,i:num
-    _say_tocks(memo :MemoSayTocks) :MemoAskTocks { // | MemoAskTacks
+    _say_tocks(memo :MemoSayTocks) :(MemoAskTocks|MemoAskTacks) {
         let [line, body] = memo
         aver(_=>body.length == 1, `panic, djin memo is not split into units`)
         let tocks = body as Tock[]
         // aver prev is possibly-valid
         let thinmemo = vult_thin(this.tree, tocks[0])// as MemoAskTocks
-        let typed = [b2t(thinmemo[0]), thinmemo[1]] as MemoAskTocks
+        let typed = thinmemo as (MemoAskTocks | MemoAskTacks)
 //        let fullmemo = vult_full(this.tree, tock)
         return typed
     }
