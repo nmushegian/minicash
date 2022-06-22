@@ -1,13 +1,38 @@
 import {
     Okay, okay, toss, pass, fail, need, aver,
     Blob, Roll, islist, isblob, isroll,
-    Tick, Tock, Tack, bleq, roll, b2h
+    Tick, Tock, Tack, bleq, roll, b2h, b2t,
+    Memo, OpenMemo,
 } from './word.js'
 
 export {
     form_tick,
     form_tack,
     form_tock,
+}
+
+function form_memo(x :Roll) :Okay<OpenMemo> {
+    // is a memo:
+    //   need len 2
+    //   need item 0 is blob
+    //   need item 1 is roll
+    // has one of these types:
+    let memo = x as Memo
+    let [line, body] = memo
+    let text = b2t(line) // <- need success
+    if (text == 'ask/ticks') {
+        let ticks = body.map(t => okay(form_tick(t))) as Tick[]
+        return pass([line, ticks])
+    }
+    if (text == 'ask/tacks') {
+        return fail(`todo form_memo`)
+    }
+    // ask/tocks
+    // say/ticks
+    // say/tacks
+    // say/tocks
+    // err
+    return fail(`unrecognized line text: ${text}`)
 }
 
 function form_tock(x :Roll) :Okay<Tock> {
