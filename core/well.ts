@@ -12,27 +12,62 @@ export {
 }
 
 function form_memo(x :Roll) :Okay<OpenMemo> {
-    // is a memo:
-    //   need len 2
-    //   need item 0 is blob
-    //   need item 1 is roll
-    // has one of these types:
-    let memo = x as Memo
-    let [line, body] = memo
-    let text = b2t(line) // <- need success
-    if (text == 'ask/ticks') {
-        let ticks = body.map(t => okay(form_tick(t))) as Tick[]
-        return pass([line, ticks])
+    try {
+        // is a memo:
+        //   need len 2
+        //   need item 0 is blob
+        //   need item 1 is roll
+        // has one of these types:
+        let memo = x as Memo
+        need(memo.length == 2, 'memo must be len 2')
+        need(isblob(memo[0]), 'first memo element must be a blob')
+        need(isroll(memo[1]), 'body must be a roll')
+
+        let [line, body] = memo
+        let text = b2t(line) // <- need success
+        switch (text) {
+            case 'ask/ticks': {
+                const tickhashes = body
+                tickhashes.forEach(t => {
+                    need(isblob(t), 'tick hash must be a blob')
+                    need(isblob(t), 'tick hash must be length 24')
+                })
+                return pass([line, tickhashes])
+            }
+            case 'ask/tacks': {
+                const tackhashes = body
+                tackhashes.forEach(t => {
+                    need(isblob(t), 'tack hash must be a blob')
+                    need(isblob(t), 'tack hash must be length 24')
+                })
+                return pass([line, tackhashes])
+            }
+            case 'ask/tocks': {
+                const tockhashes = body
+                tockhashes.forEach(t => {
+                    need(isblob(t), 'tock hash must be a blob')
+                    need(t.length == 24, 'tock hash must be len 24')
+                })
+                return pass([line, tockhashes])
+            }
+            case 'say/ticks': {
+                let ticks = body.map(t => okay(form_tick(t))) as Tick[]
+                return pass([line, ticks])
+            }
+            case 'say/tacks': {
+                let tacks = body.map(t => okay(form_tack(t))) as Tack[]
+                return pass([line, tacks])
+            }
+            case 'say/tocks': {
+                let tocks = body.map(t => okay(form_tock(t))) as Tock[]
+                return pass([line, tocks])
+            }
+            default:
+                return fail(`unrecognized line text ${text}`)
+        }
+    } catch (e) {
+        return fail(`form_memo: ${e.message}`)
     }
-    if (text == 'ask/tacks') {
-        return fail(`todo form_memo`)
-    }
-    // ask/tocks
-    // say/ticks
-    // say/tacks
-    // say/tocks
-    // err
-    return fail(`unrecognized line text: ${text}`)
 }
 
 function form_tock(x :Roll) :Okay<Tock> {
