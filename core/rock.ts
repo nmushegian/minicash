@@ -53,7 +53,7 @@ class Rite {
         this._dbtx.set(skey, val)
         return val
     }
-    read(key :Blob) {
+    read(key :Blob) :Blob {
         aver(_=> key != undefined, `read key must be defined`)
         aver(_=> key.length > 0, `read key must not be empty`)
         let skey = b2h(key)

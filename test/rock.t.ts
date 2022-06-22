@@ -54,3 +54,12 @@ test('rock find_min', t=> {
     })
     t.deepEqual(min, [h2b('bb00'), h2b('0002')])
 })
+
+import { LmdbRock } from '../core/lmdbrock.js'
+
+test('lmdb', t=>{
+    let rock = new LmdbRock('test/db')
+    rock.rite(r=>{
+        r.etch(h2b('ff'), h2b('00'))
+    })
+})
