@@ -28,6 +28,10 @@ export {
 //  [(snap) 'pyre', mark       -> time // utxo expires
 
 
+// A rite is a database transaction over Rock.
+// We say "database transaction" or just "rite" to emphasize
+// that this is not 1:1 with a minicash transaction (called a "tick").
+
 class Rite {
     _dbtx
     _done
