@@ -18,6 +18,9 @@ export type {
     Know,
     Snap, Fees, Work,
     Peer, Mail, Memo,
+    OpenMemo, MemoErr,
+    MemoAskTicks, MemoAskTacks, MemoAskTocks,
+    MemoSayTicks, MemoSayTacks, MemoSayTocks,
     Mode,
     Hexs
 }
@@ -163,32 +166,46 @@ type Tack = [
   , Mash[] // feet  tickhashes
 ]
 
-type Peer = Blob  // opaque peer ID, could even be a roll
-
+type Peer = Roll  // opaque peer ID, can be just a blob, or can carry more info
 type Mail = [
     Peer, // peer  from
     Memo  // memo  [line, body]  (type, data)
 ]
 
+type Line = Blob  // message type
 type Memo = [
     Line, // line  type
     Roll  // body  data
 ]
 
-type Line = Blob
-type LineText   // body =
-  = 'ask/tocks' // Mash       // init tock hash to sync from to best
-  | 'ask/tacks' // Mash       // tockhash of tock you want tacks for
-  | 'ask/ticks' // Mash[]     // tickhashes you want ticks for
-  | 'say/tocks' // Tock[]     // chain of tocks, first to last
-  | 'say/tacks' // Tack       // a single tack object represents multiple chunks
-  | 'say/ticks' // Tick[]     // ticks you requested, topological order to give conx
-  | 'err'       // [Why,Roll] // typed reason, untyped subreason
+type OpenMemo
+  = MemoAskTocks
+  | MemoAskTacks
+  | MemoAskTicks
+  | MemoSayTocks
+  | MemoSayTacks
+  | MemoSayTicks
+  | MemoErr
+
+type MemoSayTocks
+  = ['say/tocks', Tock[]]  // chain of tocks, first to last
+type MemoSayTacks
+  = ['say/tacks', Tack[]]  // set of tacks for a tock
+type MemoSayTicks
+  = ['say/ticks', Tick[]]  // ticks you requested, in topological order
+type MemoAskTacks
+  = ['ask/tacks', Mash]    // head: get tacks for this head
+type MemoAskTicks
+  = ['ask/ticks', Mash[]]  // tickhashes you want ticks for
+type MemoAskTocks
+  = ['ask/tocks', Mash]    // tail: get tocks from this tock forward to best
+type MemoErr
+  = ['err', [Why, Roll]]   // typed reason, untyped subreason / info
 
 type Why
   = 'malformed'   // well
-  | 'unavailable' // serv
-  | 'invalid'     // vinx
+  | 'unavailable' // vinx
+  | 'invalid'     // vinx/vult
   | 'unspendable' // vult
 
 type Blob32 = Blob;

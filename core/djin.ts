@@ -7,7 +7,9 @@ import {
     roll, unroll, bleq, islist,
     Tock, tuff, n2b,
     Mash, mash,
-    Memo
+    Memo, OpenMemo,
+    MemoSayTocks,
+    MemoAskTocks,
 } from './word.js'
 
 import {
@@ -68,9 +70,13 @@ class Djin {
     turn(memo :Memo) :Okay<Memo> {
         try {
             let line = b2t(memo[0])
+            let copy = [line, memo[1]]
             if ('ask/tocks' == line) {
                 // -> say/tocks | err
-                return pass(this._ask_tocks(memo))
+                let memot = copy as unknown as MemoAskTocks // todo form_memo
+                let out = this._ask_tocks(memot)
+                let typed = [t2b(out[0]), out[1]]
+                return pass(typed)
             }
             if ('ask/tacks' == line) {
                 // -> say/tacks | err
@@ -84,7 +90,10 @@ class Djin {
                 // -> ask/tocks    proceed
                 // -> ask/tacks    need tacks
                 // -> err
-                return pass(this._say_tocks(memo))
+                let memot = memo as unknown as MemoSayTocks // todo form_memo
+                let out = this._say_tocks(memot)
+                let typed = [t2b(out[0]), out[1]]
+                return pass(typed)
             }
             if ('say/tocks' == line) {
                 // -> ask/tocks    proceed
@@ -106,7 +115,7 @@ class Djin {
 
     // ['ask/tocks tailhash ]  ->  'say/tocks tocks
     // ['ask/tocks Mash     ]  ->  'say/tocks Tock[]
-    _ask_tocks(memo :Memo) :Memo {
+    _ask_tocks(memo :MemoAskTocks) :MemoSayTocks { // | MemoSayTacks  todo
         // todo need tail in history
         let [line, body] = memo;
         let tail = body as Blob
@@ -124,19 +133,20 @@ class Djin {
                 prev = tock[0] // tock.prev
             }
         } while( !bleq(prev, tail) && !bleq(prev, banghash) && !bleq(prev, h2b('00'.repeat(24))) )
-        return [t2b('say/tocks'), lead] as Memo
+        return ['say/tocks', lead] as MemoSayTocks
     }
 
     // 'say/tocks Tock[]  ->  'ask/tocks tock:Mash
     //                    ->  'ask/tacks tock:Mash,i:num
-    _say_tocks(memo :Memo) :Memo {
+    _say_tocks(memo :MemoSayTocks) :MemoAskTocks { // | MemoAskTacks
         let [line, body] = memo
         aver(_=>body.length == 1, `panic, djin memo is not split into units`)
         let tocks = body as Tock[]
         // aver prev is possibly-valid
-        let thinmemo = vult_thin(this.tree, tocks[0])
+        let thinmemo = vult_thin(this.tree, tocks[0])// as MemoAskTocks
+        let typed = [b2t(thinmemo[0]), thinmemo[1]] as MemoAskTocks
 //        let fullmemo = vult_full(this.tree, tock)
-        return thinmemo
+        return typed
     }
 
 }
