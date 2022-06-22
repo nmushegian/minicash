@@ -7,7 +7,9 @@ import {
     roll, unroll, bleq, islist,
     Tock, tuff, n2b,
     Mash, mash,
-    Memo, need
+    need, Memo, OpenMemo, MemoType,
+    MemoSayTocks, MemoSayTacks, MemoSayTicks,
+    MemoAskTocks, MemoAskTacks, MemoAskTicks, bnum, memo_open,
 } from './word.js'
 
 import {
@@ -68,33 +70,40 @@ class Djin {
 
     turn(memo :Memo) :Okay<Memo> {
         try {
-            let line = b2t(memo[0])
-            if ('ask/tocks' == line) {
+            let copy = memo_open(memo)
+            let line = copy[0]
+            if (MemoType.AskTocks == line) {
                 // -> say/tocks | err
-                return pass(this._ask_tocks(memo))
+                let memot = copy as unknown as MemoAskTocks // todo form_memo
+                let out = this._ask_tocks(memot)
+                let typed = [Buffer.from([out[0]]), out[1]]
+                return pass(typed)
             }
-            if ('ask/tacks' == line) {
+            if (MemoType.AskTacks == line) {
                 // -> say/tacks | err
                 toss(`todo djin read ask/tacks`)
             }
-            if ('ask/ticks' == line) {
+            if (MemoType.AskTicks == line) {
                 // -> say/ticks | err
                 toss(`todo djin read ask/ticks`)
             }
-            if ('say/tocks' == line) {
+            if (MemoType.SayTocks == line) {
                 // -> ask/tocks    proceed
                 // -> ask/tacks    need tacks
                 // -> err
-                return pass(this._say_tocks(memo))
+                let memot = memo as unknown as MemoSayTocks // todo form_memo
+                let out = this._say_tocks(memot)
+                let typed = [Buffer.from([out[0]]), out[1]]
+                return pass(typed)
             }
-            if ('say/tocks' == line) {
+            if (MemoType.SayTacks == line) {
                 // -> ask/tocks    proceed
                 // -> ask/tacks    proceed
                 // -> ask/ticks    need ticks
                 // return pass(this._say_tacks(memo)
                 toss(`todo turn say/tacks`)
             }
-            if ('say/ticks' == line) {
+            if (MemoType.SayTicks == line) {
                 // -> say/ticks    accept/rebroadcast
                 // -> err
                 return pass(this._say_ticks(memo))
@@ -108,7 +117,7 @@ class Djin {
 
     // ['ask/tocks tailhash ]  ->  'say/tocks tocks
     // ['ask/tocks Mash     ]  ->  'say/tocks Tock[]
-    _ask_tocks(memo :Memo) :Memo {
+    _ask_tocks(memo :MemoAskTocks) :MemoSayTocks { // | MemoSayTacks  todo
         // todo need tail in history
         let [line, body] = memo;
         let tail = body as Blob
@@ -126,19 +135,20 @@ class Djin {
                 prev = tock[0] // tock.prev
             }
         } while( !bleq(prev, tail) && !bleq(prev, banghash) && !bleq(prev, h2b('00'.repeat(24))) )
-        return [t2b('say/tocks'), lead] as Memo
+        return [MemoType.SayTocks, lead] as MemoSayTocks
     }
 
     // 'say/tocks Tock[]  ->  'ask/tocks tock:Mash
     //                    ->  'ask/tacks tock:Mash,i:num
-    _say_tocks(memo :Memo) :Memo {
+    _say_tocks(memo :MemoSayTocks) :(MemoAskTocks|MemoAskTacks) {
         let [line, body] = memo
         aver(_=>body.length == 1, `panic, djin memo is not split into units`)
         let tocks = body as Tock[]
         // aver prev is possibly-valid
-        let thinmemo = vult_thin(this.tree, tocks[0])
+        let thinmemo = vult_thin(this.tree, tocks[0])// as MemoAskTocks
+        let typed = thinmemo as (MemoAskTocks | MemoAskTacks)
 //        let fullmemo = vult_full(this.tree, tock)
-        return thinmemo
+        return typed
     }
 
     _say_ticks(memo :Memo) :Memo {

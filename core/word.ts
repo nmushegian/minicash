@@ -18,6 +18,9 @@ export type {
     Know,
     Snap, Fees, Work,
     Peer, Mail, Memo,
+    OpenMemo, MemoErr,
+    MemoAskTicks, MemoAskTacks, MemoAskTocks,
+    MemoSayTicks, MemoSayTacks, MemoSayTocks,
     Mode,
     Hexs
 }
@@ -30,7 +33,9 @@ export {
     b2h, h2b, t2b, b2t,
     mash, addr, merk,
     sign, scry,
-    memo
+    memo,
+    MemoType,// enum export as value not type
+    memo_open
 }
 
 function t2b(x :string) :Blob {
@@ -52,9 +57,14 @@ function mash(x :Blob) :Mash {
     return chop(hash(x), 24)
 }
 
-function memo(line :string, body :Roll) :Memo {
-    return [Buffer.from(line), body]
+function memo_open(m :Memo) :OpenMemo {
+    return [m[0][0], m[1]] as OpenMemo
 }
+
+function memo(line :MemoType, body :Roll) :Memo {
+    return [Buffer.from([line]), body]
+}
+
 
 function _merk(x :Mash[]) :Mash {
     aver(_=> isroll(x), `_merk arg must be a roll`)
@@ -163,32 +173,68 @@ type Tack = [
   , Mash[] // feet  tickhashes
 ]
 
-type Peer = Blob  // opaque peer ID, could even be a roll
-
+type Peer = Roll  // opaque peer ID, can be just a blob, or can carry more info
 type Mail = [
     Peer, // peer  from
     Memo  // memo  [line, body]  (type, data)
 ]
 
+type Line = Blob  // message type
 type Memo = [
     Line, // line  type
     Roll  // body  data
 ]
 
-type Line = Blob
-type LineText   // body =
-  = 'ask/tocks' // Mash       // init tock hash to sync from to best
-  | 'ask/tacks' // Mash       // tockhash of tock you want tacks for
-  | 'ask/ticks' // Mash[]     // tickhashes you want ticks for
-  | 'say/tocks' // Tock[]     // chain of tocks, first to last
-  | 'say/tacks' // Tack       // a single tack object represents multiple chunks
-  | 'say/ticks' // Tick[]     // ticks you requested, topological order to give conx
-  | 'err'       // [Why,Roll] // typed reason, untyped subreason
+type OpenMemo
+  = MemoAskTocks
+  | MemoAskTacks
+  | MemoAskTicks
+  | MemoSayTocks
+  | MemoSayTacks
+  | MemoSayTicks
+  | MemoErr
+
+
+// MemoType is a typescript-level enum definition whose values
+// are js `number` types. This is not the representation in the protocol,
+// where these values are one-byte `Blob`s. The reason we define this enum
+// is that it lets us use typescript's type system with concrete value cases,
+// which is only supported for `string` and `number`.
+// Remember that `MemoType` (with numbers) and `OpenMemo` are implementation details,
+// whereas `Memo` (a roll, that means only blobs as leafs) is part of the core wire format.
+// In javascript, converting a MemoType to a Memo's `line` (item 0), which is a blob,bbbbbb
+// is done with `Buffer.from( [ tag ] )`,  notice the argument is a list of bytes (length 1).
+// Your well-formed check should check the *actual concrete byte values*, do not use your
+// type system until after you check your form.
+enum MemoType {  // mnemonic
+    AskTocks = 0xa0,  // Ask t0cks
+    AskTacks = 0xaa,  // Ask tAcks
+    AskTicks = 0xa1,  // Ask t1cks
+    SayTocks = 0xc0,  //~Say t0cks
+    SayTacks = 0xca,  //~Say tAcks
+    SayTicks = 0xc1,  //~Say t1cks
+    Err      = 0xee,  // Err
+}
+
+type MemoAskTacks
+  =  [MemoType.AskTacks, Mash]    // head: get tacks for this head
+type MemoAskTicks
+  =  [MemoType.AskTicks, Mash[]]  // tickhashes you want ticks for
+type MemoAskTocks
+  =  [MemoType.AskTocks, Mash]    // tail: get tocks from this tock forward to best
+type MemoSayTocks
+  =  [MemoType.SayTocks, Tock[]]  // chain of tocks, first to last
+type MemoSayTacks
+  =  [MemoType.SayTacks, Tack[]]  // set of tacks for a tock
+type MemoSayTicks
+  =  [MemoType.SayTicks, Tick[]]  // ticks you requested, in topological order
+type MemoErr
+  =  [MemoType.Err, [Why, Roll]]   // typed reason, untyped subreason / info
 
 type Why
   = 'malformed'   // well
-  | 'unavailable' // serv
-  | 'invalid'     // vinx
+  | 'unavailable' // vinx
+  | 'invalid'     // vinx/vult
   | 'unspendable' // vult
 
 type Blob32 = Blob;

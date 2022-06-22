@@ -1,12 +1,7 @@
-import {
-    Roll, h2b,
-    Memo, memo,
-    Tock,
-    okay, toss,
-} from './word.js'
+import {h2b, Memo, memo, MemoType, okay, toss,} from './word.js'
 
-import { Djin } from './djin.js'
-import { Plug } from './plug.js'
+import {Djin} from './djin.js'
+import {Plug} from './plug.js'
 
 class Dmon {
     djin :Djin
@@ -44,13 +39,13 @@ class Dmon {
     // resolves when self-sync is done and peer-sync has started
     async sync(tail = h2b('')) {
         // try to sync with yourself first
-        let [ty, yarn] = this.djin.turn(memo('ask/tocks', tail))
+        let [ty, yarn] = this.djin.turn(memo(MemoType.AskTocks, tail))
         // need todo ty not err
         let head
         for await (head of this.djin.spin(yarn)) {}
         // get the best possibly-valid tocks from peers, then make a
         // request for the thing you need on each branch
-        this.plug.emit(memo('ask/tocks', head), async ([line, yarn]) => {
+        this.plug.emit(memo(MemoType.AskTocks, head), async ([line, yarn]) => {
             let miss
             for await (miss of this.djin.spin(yarn)) {}
             if (miss) {

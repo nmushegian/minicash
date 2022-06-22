@@ -6,6 +6,7 @@ import {
     mash, roll, unroll, bnum,
     h2b, n2b, bcat,
     Memo, memo,
+    MemoType, OpenMemo,
     Tick, Tock, Tack,
 } from './word.js'
 
@@ -18,7 +19,7 @@ export {
 
 // vult_thin grows possibly-valid state tree
 //   (could also invalidate tock)
-function vult_thin(tree :Tree, tock :Tock) :Memo {
+function vult_thin(tree :Tree, tock :Tock) :OpenMemo {
     // aver prev tock must exist
     // aver well/vinx
     let head = mash(roll(tock))
@@ -38,7 +39,7 @@ function vult_thin(tree :Tree, tock :Tock) :Memo {
         // pent only set by vult_full, where we will know the foot tick
         //twig.etch(rkey('pent', prev_head, h2b('07')), roll([head, foot])
     })
-    return memo('ask/tocks', head)
+    return [MemoType.AskTocks, head]
 }
 
 // vult_full grows definitely-valid state tree

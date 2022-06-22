@@ -39,7 +39,15 @@ export {
 //  [(snap) 'pyre', mark       -> time // utxo expires
 
 
-// mutable handle
+// A twig is a database transaction over Tree, similar to how
+// rite is a database transaction over Rock. In both cases, they
+// are distinct concepts from a minicash transaction, called a tick.
+// A twig is distinct from a rite because it manages a "virtual" mutable view
+// of an underlying immutable map. A tree is a layer of abstraction over a rock
+// for some parts of the databse. A twig uses a single rite, but a single
+// twig.grow(...) generates multiple rite.read(...) and rite.etch(...)
+// because it traverses and updates the trie used to represent the tree.
+
 class Twig {
     rite
     _mut

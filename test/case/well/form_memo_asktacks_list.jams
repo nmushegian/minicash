@@ -1,0 +1,10 @@
+{
+  note "form_memo ask/tacks list, long hash"
+  func form_memo
+  args [
+    [ aa
+      [00112233445566778899aabbccddeeff001122334455667700]
+    ]
+  ]
+  want [ false "tack hash must be a blob" ]
+}

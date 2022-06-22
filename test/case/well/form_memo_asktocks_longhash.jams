@@ -1,0 +1,10 @@
+{
+  note "form_memo ask/tocks long hash"
+  func form_memo
+  args [
+    [ a0
+      00112233445566778899aabbccddeeff001122334455667700
+    ]
+  ]
+  want [ false "tock hash must be len 24" ]
+}
