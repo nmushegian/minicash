@@ -18,6 +18,9 @@ export type {
     Know,
     Snap, Fees, Work,
     Peer, Mail, Memo,
+    MemoT,
+    MemoSayTocks,
+    MemoAskTocks,
     Mode,
     Hexs
 }
@@ -163,32 +166,36 @@ type Tack = [
   , Mash[] // feet  tickhashes
 ]
 
-type Peer = Blob  // opaque peer ID, could even be a roll
-
+type Peer = Roll  // opaque peer ID, can be just a blob, or can carry more info
 type Mail = [
     Peer, // peer  from
     Memo  // memo  [line, body]  (type, data)
 ]
 
+type Line = Blob  // message type
 type Memo = [
     Line, // line  type
     Roll  // body  data
 ]
 
-type Line = Blob
-type LineText   // body =
-  = 'ask/tocks' // Mash       // init tock hash to sync from to best
-  | 'ask/tacks' // Mash       // tockhash of tock you want tacks for
-  | 'ask/ticks' // Mash[]     // tickhashes you want ticks for
-  | 'say/tocks' // Tock[]     // chain of tocks, first to last
-  | 'say/tacks' // Tack       // a single tack object represents multiple chunks
-  | 'say/ticks' // Tick[]     // ticks you requested, topological order to give conx
-  | 'err'       // [Why,Roll] // typed reason, untyped subreason
+type MemoT
+  = MemoAskTocks
+  | ['ask/tacks', Mash]    // head: get tacks for this head
+  | ['ask/ticks', Mash[]]  // tickhashes you want ticks for
+  | MemoSayTocks
+  | ['say/tacks', Tack[]]  // wire formats can invent a more efficient memo to not send ribs so much
+  | ['say/ticks', Tick[]]  // ticks you requested, in topological order
+  | ['err', [Why, Roll]]   // typed reason, untyped subreason / info
+
+type MemoSayTocks
+  = ['say/tocks', Tock[]]  // chain of tocks, first to last
+type MemoAskTocks
+  = ['ask/tocks', Mash]    // tail: get tocks from this tock forward to best
 
 type Why
   = 'malformed'   // well
-  | 'unavailable' // serv
-  | 'invalid'     // vinx
+  | 'unavailable' // vinx
+  | 'invalid'     // vinx/vult
   | 'unspendable' // vult
 
 type Blob32 = Blob;
