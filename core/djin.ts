@@ -9,7 +9,7 @@ import {
     Mash, mash,
     Memo, OpenMemo, MemoType,
     MemoSayTocks, MemoSayTacks, MemoSayTicks,
-    MemoAskTocks, MemoAskTacks, MemoAskTicks,
+    MemoAskTocks, MemoAskTacks, MemoAskTicks, bnum, memo_open,
 } from './word.js'
 
 import {
@@ -69,24 +69,24 @@ class Djin {
 
     turn(memo :Memo) :Okay<Memo> {
         try {
-            let line = b2t(memo[0])
-            let copy = [line, memo[1]]
-            if ('ask/tocks' == line) {
+            let copy = memo_open(memo)
+            let line = copy[0]
+            if (MemoType.AskTocks == line) {
                 // -> say/tocks | err
                 let memot = copy as unknown as MemoAskTocks // todo form_memo
                 let out = this._ask_tocks(memot)
                 let typed = [Buffer.from([out[0]]), out[1]]
                 return pass(typed)
             }
-            if ('ask/tacks' == line) {
+            if (MemoType.AskTacks == line) {
                 // -> say/tacks | err
                 toss(`todo djin read ask/tacks`)
             }
-            if ('ask/ticks' == line) {
+            if (MemoType.AskTicks == line) {
                 // -> say/ticks | err
                 toss(`todo djin read ask/ticks`)
             }
-            if ('say/tocks' == line) {
+            if (MemoType.SayTocks == line) {
                 // -> ask/tocks    proceed
                 // -> ask/tacks    need tacks
                 // -> err
@@ -95,14 +95,14 @@ class Djin {
                 let typed = [Buffer.from([out[0]]), out[1]]
                 return pass(typed)
             }
-            if ('say/tocks' == line) {
+            if (MemoType.SayTacks == line) {
                 // -> ask/tocks    proceed
                 // -> ask/tacks    proceed
                 // -> ask/ticks    need ticks
                 // return pass(this._say_tacks(memo)
                 toss(`todo turn say/tacks`)
             }
-            if ('say/tocks' == line) {
+            if (MemoType.SayTicks == line) {
                 // -> say/ticks    accept/rebroadcast
                 // -> err
                 toss(`todo turn say/ticks`)

@@ -1,0 +1,8 @@
+{
+  note "form_memo blob"
+  func form_memo
+  args [
+    [a0]
+  ]
+  want [ false "memo must be len 2" ]
+}

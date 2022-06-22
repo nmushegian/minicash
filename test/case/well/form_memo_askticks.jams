@@ -1,0 +1,11 @@
+{
+  note "form_memo ask/ticks pass"
+  func form_memo
+  args [
+    [ a1
+      [00112233445566778899aabbccddeeff0011223344556677
+       00112233445566778899aabbccddeeff0011223344556677]
+    ]
+  ]
+  want [ true "" ]
+}

@@ -1,22 +1,17 @@
-import { test } from 'tapzero'
+import {test} from 'tapzero'
 
 //import { tick } from '../core/cash.js'
-import { Djin } from '../core/djin.js'
+import {Djin} from '../core/djin.js'
 
 
-import {
-    Tick,
-    okay,
-    roll, h2b,
-    mash, memo, merk,
-} from '../core/word.js'
+import {h2b, mash, memo, MemoType, merk, okay, roll, Tick,} from '../core/word.js'
 
 
 test('djin', t=>{ try {
     let djin = new Djin('')
     let out
-    out = okay(djin.turn(memo('ask/tocks', mash(roll(djin.bang)))))
-    t.deepEqual(out, memo('say/tocks', [djin.bang]))
+    out = okay(djin.turn(memo(MemoType.AskTocks, mash(roll(djin.bang)))))
+    t.deepEqual(out, memo(MemoType.SayTocks, [djin.bang]))
 
     let tick1 = [[
         [] // no moves
@@ -41,8 +36,8 @@ test('djin', t=>{ try {
     tack1[0] = tock1
 
     // give to djin
-    out = okay(djin.turn(memo('say/tocks', [tock1])))
+    out = okay(djin.turn(memo(MemoType.SayTocks, [tock1])))
     // djin asks for tack
 
-    t.deepEqual(out, memo('ask/tocks', mash(roll(tock1))))
+    t.deepEqual(out, memo(MemoType.AskTocks, mash(roll(tock1))))
 } catch(e) { console.log(e); t.ok(false, e.message); }})

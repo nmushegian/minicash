@@ -1,0 +1,10 @@
+{
+  note "form_memo ask/tocks one tock blob"
+  func form_memo
+  args [
+    [ a0
+      00112233445566778899aabbccddeeff0011223344556677
+    ]
+  ]
+  want [ true "" ]
+}

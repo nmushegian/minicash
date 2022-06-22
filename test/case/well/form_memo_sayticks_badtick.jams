@@ -1,0 +1,13 @@
+{
+  note "form_memo say/ticks bad tick"
+  func form_memo
+  args [
+    [ c1
+      [[[[ 00112233445566778899aabbccddeeff0011223344556677
+          01 00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff112233445566778899001122334455667788990011223344556677889900112233 ]
+      ][[ 00112233445566778899aabbccddeeff00112233
+          0000ff00000000 ]] 10]]
+    ]
+  ]
+  want [ false "must be len 2" ]
+}
