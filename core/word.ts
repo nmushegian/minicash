@@ -216,8 +216,6 @@ enum MemoType {  // mnemonic
     Err      = 0xee,  // Err
 }
 
-type MemoBody = Mash | Mash[] | Tock[] | Tack[] | Tick[] | [Blob, Roll]
-
 type MemoAskTacks
   =  [MemoType.AskTacks, Mash]    // head: get tacks for this head
 type MemoAskTicks
