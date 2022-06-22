@@ -188,6 +188,18 @@ type OpenMemo
   | MemoSayTicks
   | MemoErr
 
+
+// MemoType is a typescript-level enum definition whose values
+// are js `number` types. This is not the representation in the protocol,
+// where these values are one-byte `Blob`s. The reason we define this enum
+// is that it lets us use typescript's type system with concrete value cases,
+// which is only supported for `string` and `number`.
+// Remember that `MemoType` (with numbers) and `OpenMemo` are implementation details,
+// whereas `Memo` (a roll, that means only blobs as leafs) is part of the core wire format.
+// In javascript, converting a MemoType to a Memo's `line` (item 0), which is a blob,bbbbbb
+// is done with `Buffer.from( [ tag ] )`,  notice the argument is a list of bytes (length 1).
+// Your well-formed check should check the *actual concrete byte values*, do not use your
+// type system until after you check your form.
 enum MemoType {  // mnemonic
     AskTocks = 0xa0,  // Ask t0cks
     AskTacks = 0xaa,  // Ask tAcks
