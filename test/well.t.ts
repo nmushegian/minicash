@@ -5,13 +5,14 @@ import { readdirSync, readFileSync } from 'fs'
 import {
     Okay, okay, need,
     Blob, h2b, rmap,
-    mash
+    mash, b2t, t2b, b2h, MemoType, memo, fail
 } from '../core/word.js'
 
 import {
     form_tick,
     form_tock,
-    form_tack
+    form_tack,
+    form_memo
 } from '../core/well.js'
 
 test('tick_form', t=>{
@@ -54,8 +55,21 @@ test('form_tack', t=> {
         feet.push(mash(h2b(hex)))
     }
 
-    const [ok, val, err] = form_tack([tock, eye, ribs, feet])
+    const tack = [tock, eye, ribs, feet]
+    let [ok, val, err] :any[] = form_tack([tock, eye, ribs, feet])
     t.equal(ok, true, `form_tack ${err}`)
+
+    let m = memo(MemoType.SayTacks, [tack])
+    ;[ok, val, err] = form_memo(m)
+    t.equal(ok, true, 'memo is well-formed')
+    if (!ok) console.error(err.message)
+
+    m[1][0][1] = h2b('0000') // eye
+    ;[ok, val, err] = form_memo(m)
+    t.equal(ok, false, 'should fail')
+    if (!ok) {
+        t.equal(err.message, 'eye must be a blob of len 1', 'err strings not equal')
+    }
 })
 
 test('not both empty', t=>{
@@ -65,7 +79,8 @@ test('not both empty', t=>{
 
 let $ = {
     form_tick,
-    form_tock
+    form_tock,
+    form_memo
 }
 
 let show =o=> JSON.stringify(o, null, 2)

@@ -1,38 +1,80 @@
 import {
-    Okay, okay, toss, pass, fail, need, aver,
-    Blob, Roll, islist, isblob, isroll,
-    Tick, Tock, Tack, bleq, roll, b2h, b2t,
-    Memo, OpenMemo,
+    aver,
+    b2h,
+    bleq,
+    Blob, bnum,
+    fail,
+    isblob,
+    islist,
+    isroll,
+    Memo,
+    MemoType,
+    need,
+    Okay,
+    okay,
+    OpenMemo,
+    pass,
+    Roll,
+    Tack,
+    Tick,
+    Tock,
+    memo_open
 } from './word.js'
 
 export {
     form_tick,
     form_tack,
     form_tock,
+    form_memo
 }
 
-function form_memo(x :Roll) :Okay<OpenMemo> {
-    // is a memo:
-    //   need len 2
-    //   need item 0 is blob
-    //   need item 1 is roll
-    // has one of these types:
-    let memo = x as Memo
-    let [line, body] = memo
-    let text = b2t(line) // <- need success
-    if (text == 'ask/ticks') {
-        let ticks = body.map(t => okay(form_tick(t))) as Tick[]
-        return pass([line, ticks])
+function form_memo(x :Roll) :Okay<Memo> {
+    try {
+        need(!isblob(x), 'memo must be a list')
+        let memo = x as Memo
+        need(memo.length == 2, 'memo must be len 2')
+        need(isblob(memo[0]), 'first memo element must be a blob')
+        need(memo[0].length == 1, 'memo line must be len 1')
+        need(isroll(memo[1]), 'memo body must be a roll')
+
+        let [line, body] = memo_open(memo)
+        if (line == MemoType.AskTocks) {
+            let tockhash = body
+            need(isblob(tockhash), 'tock hash must be a blob')
+            need(tockhash.length == 24, 'tock hash must be len 24')
+            return pass(x)
+        }
+        if (line == MemoType.AskTacks) {
+            let tackhash = body
+            need(isblob(tackhash), 'tack hash must be a blob')
+            need(tackhash.length == 24, 'tack hash must be len 24')
+            return pass(x)
+        }
+        if (line == MemoType.AskTicks) {
+            let tickhashes = body
+            need(!isblob(tickhashes), 'tick hashes must be a list')
+            tickhashes.forEach(t => {
+                need(isblob(t), 'tick hash must be a blob')
+                need(t.length == 24, 'tick hash must be len 24')
+            })
+            return pass(x)
+        }
+        if (line == MemoType.SayTocks) {
+            let tocks = body.map(t => okay(form_tock(t))) as Tock[]
+            return pass(x)
+        }
+        if (line == MemoType.SayTacks) {
+            let tacks = body.map(t => okay(form_tack(t))) as Tack[]
+            return pass(x)
+        }
+        if (line == MemoType.SayTicks) {
+            let ticks = body.map(t => okay(form_tick(t))) as Tick[]
+            return pass(x)
+        }
+        return fail(`unrecognized line ${Number(line).toString(16)}`)
+    } catch (e) {
+        return fail(e.message)
     }
-    if (text == 'ask/tacks') {
-        return fail(`todo form_memo`)
-    }
-    // ask/tocks
-    // say/ticks
-    // say/tacks
-    // say/tocks
-    // err
-    return fail(`unrecognized line text: ${text}`)
 }
 
 function form_tock(x :Roll) :Okay<Tock> {

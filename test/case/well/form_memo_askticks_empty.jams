@@ -1,0 +1,10 @@
+{
+  note "form_memo ask/ticks empty"
+  func form_memo
+  args [
+    [ a1
+      []
+    ]
+  ]
+  want [ true "" ]
+}

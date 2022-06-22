@@ -1,0 +1,10 @@
+{
+  note "form_memo ask/ticks one tick blob, long hash"
+  func form_memo
+  args [
+    [ a1
+      00112233445566778899aabbccddeeff001122334455667700
+    ]
+  ]
+  want [ false "tick hashes must be a list" ]
+}

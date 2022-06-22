@@ -35,6 +35,7 @@ export {
     sign, scry,
     memo,
     MemoType,// enum export as value not type
+    memo_open
 }
 
 function t2b(x :string) :Blob {
@@ -56,9 +57,14 @@ function mash(x :Blob) :Mash {
     return chop(hash(x), 24)
 }
 
-function memo(line :string, body :Roll) :Memo {
-    return [Buffer.from(line), body]
+function memo_open(m :Memo) :OpenMemo {
+    return [m[0][0], m[1]] as OpenMemo
 }
+
+function memo(line :MemoType, body :Roll) :Memo {
+    return [Buffer.from([line]), body]
+}
+
 
 function _merk(x :Mash[]) :Mash {
     aver(_=> isroll(x), `_merk arg must be a roll`)
