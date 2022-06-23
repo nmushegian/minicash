@@ -9,10 +9,10 @@ import {
     okay,
     roll, h2b,
     mash, memo, merk,MemoType,
-    need, rmap
+    need, rmap, memo_open
 } from '../core/word.js'
 import {readdirSync, readFileSync} from "fs";
-import {dbgtick} from "./helpers.js";
+import {dbgtick, dbgtock} from "./helpers.js";
 
 
 test('djin', t=>{ try {
@@ -58,38 +58,11 @@ test('djin jams', t=>{
     if (!name.endsWith('.jams')) return
     let file = readFileSync(path)
     let data = jams(file.toString())
-    need(data.mail, 'must give test mail')
-    need(data.want, 'must give test want')
-    need(data.want.length == 2, 'want must be len 2, use result type')
-
-    data.mail.forEach((memo, idx) => {
-        let djin = new Djin('')
-        let type = memo[0]
-        let body = memo[1]
-        let [ok, val, err] = djin.turn([memo[0], rmap(memo[1], h2b)])
-        if (ok) {
-            t.ok(data.want[0] == "true", `must succeed`)
-            const res = val
-        } else {
-            t.equal(data.want[0], "false", `must fail`)
-            t.equal(data.want[1], err.message, `error strings must match`)
-            if (type == 'say/ticks') {
-                body.forEach(dbgtick)
-            }
-        }
+    data.forEach((cmd, idx) => {
+        let func = cmd[0]
+        need(func == 'send', 'only doing send for now...')
+        let memo = rmap(cmd[1], h2b)
+        let [ok, val, err] = djin.turn(memo)
+        t.equal(ok, true, `pass`)
     })
-
-    /*
-    let line = data.args[0]
-    let body = rmap(data.args, h2b)
-    //let [ok, val, err] = func(...args)
-    t.ok(true, 'hi')
-    if (ok) {
-        t.ok(data.want[0] == "true", `must succeed`)
-    } else {
-        t.equal(data.want[0], "false", `must fail`)
-        t.equal(data.want[1], err.message, `error strings must match`)
-    }
-
-     */
 })
