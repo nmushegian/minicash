@@ -110,7 +110,6 @@ class Djin {
             if (MemoType.SayTicks == line) {
                 // -> say/ticks    accept/rebroadcast
                 // -> err
-                return pass(this._say_ticks(memo))
                 toss(`todo turn say/ticks`)
             }
             return fail(`unrecognized turn line: ${line}`)
@@ -155,28 +154,6 @@ class Djin {
         let thinmemo = vult_thin(this.tree, tocks[0])// as MemoAskTocks // todo full
         let typed = thinmemo as (MemoAskTocks | MemoAskTacks)
         return typed
-    }
-
-    _say_ticks(memo :Memo) :Memo {
-        const [line, body] = memo
-        aver(_=>body.length == 1, `panic, djin memo is not split into units`)
-
-        const ticks = body
-        const rebro = []
-        ticks.forEach(tick => {
-            okay(form_tick(tick))
-        })
-        ticks.forEach(tick => {
-            const tickhash = mash(roll(tick))
-            const key = rkey(tick, tickhash)
-            if (bleq(this.rock.read_one(key), h2b(''))) {
-                this.rock.etch_one(rkey(tick, tickhash), roll(tick))
-                rebro.push(tick)
-            }
-        })
-
-        need(rebro.length > 0, 'no new transactions to add/rebroadcast')
-        return [memo[0], rebro]
     }
 
 }
