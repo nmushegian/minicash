@@ -27,8 +27,8 @@ class Djin {
     tree :Tree   // per-tock view of state
     bang :Tock   // tock zero
 
-    constructor(path :string) {
-        this.rock = new Rock(path)
+    constructor(path :string, reset=false) {
+        this.rock = new Rock(path, reset)
         this.tree = new Tree(this.rock)
         this.bang = [
             h2b('00'.repeat(24)),
@@ -44,6 +44,10 @@ class Djin {
             rite.etch(rkey('work', banghash), n2b(tuff(bangroll)))
             rite.etch(rkey('fold', banghash, n2b(BigInt(0))), roll([snap, n2b(BigInt(0))]))
         })
+    }
+
+    kill() {
+        this.rock.shut()
     }
 
     async *spin(memo) {
