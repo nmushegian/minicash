@@ -8,7 +8,7 @@ import {h2b, mash, memo, MemoType, merk, okay, roll, Tick,} from '../core/word.j
 
 
 test('djin', t=>{ try {
-    let djin = new Djin('')
+    let djin = new Djin('test/db')
     let out
     out = okay(djin.turn(memo(MemoType.AskTocks, mash(roll(djin.bang)))))
     t.deepEqual(out, memo(MemoType.SayTocks, [djin.bang]))

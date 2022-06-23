@@ -6,7 +6,7 @@ import {
 import { Rock } from '../core/rock.js'
 
 test('rock', t=>{
-    let rock = new Rock('')
+    let rock = new Rock('test/db')
     let empty
     rock.rite(r=> {
         empty = r.read(h2b('ff'))
@@ -41,7 +41,7 @@ test('rock', t=>{
 })
 
 test('rock find_min', t=> {
-    let rock = new Rock('')
+    let rock = new Rock('test/db')
     rock.rite(r => {
         r.etch(h2b('aa00'), h2b('0000'))
         r.etch(h2b('aa11'), h2b('0001'))
@@ -55,11 +55,3 @@ test('rock find_min', t=> {
     t.deepEqual(min, [h2b('bb00'), h2b('0002')])
 })
 
-import { LmdbRock } from '../core/lmdbrock.js'
-
-test('lmdb', t=>{
-    let rock = new LmdbRock('test/db')
-    rock.rite(r=>{
-        r.etch(h2b('ff'), h2b('00'))
-    })
-})

@@ -1,111 +1,73 @@
-// content-addressed data and other deterministic insert-only data
+import { default as lmdb } from 'node-lmdb'
+import { default as process } from 'node:process'
 
 import {
-    Okay, okay, pass, fail, toss, aver,
-    Blob, bleq, h2b, b2h
+    Blob, aver, isblob,
+    need, toss, err
 } from './word.js'
 
 export {
-    Rock
+    Rock, Rite
 }
 
-// This level of abstraction deals with blob keys and values,
-// but we can still `aver` that the keys and values have one of
-// a small set of types from minicash.
-
-//  ['tick', tickhash]         -> tick
-//  ['tack', tockhash,i]       -> tack
-//  ['tock', tockhash]         -> tock
-
-//  ['work', tockhash]         -> work // cumulative work
-//  ['fold', tockhash,i]       -> fold // [snap, fees]  partial utxo / fees
-//  ['know', tockhash]         -> know // validity state
-
-//  ['best']                   -> tock
-
-//  [(snap) 'ment', mark       -> ment // utxo put [code, cash]
-//  [(snap) 'pent', mark       -> pent // utxo use [tish, tosh] (by tick, in tock)
-//  [(snap) 'pyre', mark       -> time // utxo expires
-
-
-// A rite is a database transaction over Rock.
-// We say "database transaction" or just "rite" to emphasize
-// that this is not 1:1 with a minicash transaction (called a "tick").
-
 class Rite {
-    _dbtx
-    _done
-    constructor(dbtx) {
-        this._dbtx = dbtx
-        this._done = false
+    dbi
+    dbtx
+    constructor(dbi, dbtx) {
+        this.dbi = dbi
+        this.dbtx = dbtx
     }
     etch(key :Blob, val :Blob) {
-        aver(_=> key != undefined, `etch key must be defined`)
-        aver(_=> key.length > 0, `etch key is empty`)
-        aver(_=> {
-            let pval = this.read(key)
-            if (pval.length > 0 && !bleq(val, pval)) {
-                toss(`panic: etch key with new value`)
-            }
-            return true
-        }, `etch preconditions`)
-        let skey = b2h(key)
-        this._dbtx.set(skey, val)
-        return val
+        aver(_=>isblob(key), `rite.etch key not a blob: ${key}`)
+        aver(_=>isblob(val), `rite.etch val not a blob: ${val}`)
+        this.dbtx.putBinary(this.dbi, key, val)
     }
     read(key :Blob) :Blob {
-        aver(_=> key != undefined, `read key must be defined`)
-        aver(_=> key.length > 0, `read key must not be empty`)
-        let skey = b2h(key)
-        let val = this._dbtx.get(skey)
-        if (val) {
-            return val
-        }
-        else {
-            return h2b('')
-        }
+        aver(_=>isblob(key), `rite.read key not a blob: ${key}`)
+        return this.dbtx.getBinary(this.dbi, key)
     }
-
-    // get first [key,val] with prefix(key) == fix
-    find_min(fix :Blob) :[Blob, Blob] {
-        let keys = [...this._dbtx.keys()]
-        let minkey = keys.find(key => key.startsWith(b2h(fix)))
-        return [h2b(minkey), this._dbtx.get(minkey)]
-    }
-    // get last [key,val] with prefix(key) == fix
-    find_max(fix :Blob) :[Blob, Blob] {
-        throw new Error('todo rock.find_max')
-    }
-
-    _seal() {}
-    _bail() {}
 }
 
 class Rock {
-    _db
-
-    constructor(path:string) {
-        this._db = new Map()
-    }
-
-    etch_one(key :Blob, val :Blob) {
-        this.rite(r => r.etch(key, val))
+    env
+    dbi
+    constructor(path) {
+        this.env = new lmdb.Env()
+        this.env.open({ path })
+        this.dbi = this.env.openDbi({
+            name: "testdb",
+            keyIsBuffer: true,
+            create: true
+        })
+        process.on('exit', exitcode => { // todo test...
+            this.dbi.close()
+            this.env.close()
+        })
     }
 
     read_one(key :Blob) :Blob {
-        let out
-        this.rite(r => { out = r.read(key) })
-        return out
+        let val
+        this.rite(rite => {
+            val = rite.read(key)
+        })
+        return val
     }
 
-    rite(f :((r:Rite) => void)) {
-        let rite = new Rite(this._db)
+    etch_one(key :Blob, val :Blob) {
+        this.rite(rite => { rite.etch(key, val) })
+    }
+
+    rite(f:((Rite)=>void)) {
+        let dbtx = this.env.beginTxn()
+        let rite = new Rite(this.dbi, dbtx)
         try {
             f(rite)
-            rite._seal()
+            //rite._seal()   todo check how nice lmdb plays with bad dbtx reuse
+            dbtx.commit()
         } catch (e) {
-            rite._bail()
-            toss(e)
+            //rite._seal()
+            dbtx.abort()
+            throw e
         }
     }
 }
