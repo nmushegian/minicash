@@ -12,9 +12,9 @@ import * as wordtest from './word.t.js'
 djintest
 //rocktest
 //treetest
-///vinxtest
+//vinxtest
 //vulttest
 //welltest
-//wordtest
+wordtest
 
 

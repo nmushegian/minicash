@@ -45,7 +45,8 @@ class Rite {
         aver(_=> {
             let pval = this.read(key)
             if (pval.length > 0 && !bleq(val, pval)) {
-                toss(`panic: etch key with new value`)
+                // todo can't assert when changing best
+                //toss(`panic: etch key with new value`)
             }
             return true
         }, `etch preconditions`)

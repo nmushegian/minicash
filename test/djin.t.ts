@@ -65,32 +65,37 @@ const dbgmemo = (omemo) => {
 }
 test('djin jams', t=>{
     let dir = './test/case/djin/'
-    let name = 'djin.jams'
-    let path = dir + name
-    let djin = new Djin('')
-    if (!name.endsWith('.jams')) return
-    let file = readFileSync(path)
-    let data = jams(file.toString())
-    let prev
-    data.forEach((cmd, idx) => {
-        let func = cmd[0]
-        need(func == 'send' || func == 'want', 'only doing send and want for now...')
-        /*
-        let omemo = memo_open(memo)
-        let type = omemo[0]
-        if (MemoType.SayTocks)
-         */
-        if ('send' == func) {
-            let memo = rmap(cmd[1], h2b)
-            dbgmemo(memo_open(memo))
-            let [ok, val, err] = djin.turn(memo)
-            let out = memo_open(val)
-            t.equal(ok, true, `send success`)
-            prev = val
-        }
-        if ('want' == func) {
-            debug(`want (prev=[${rmap(prev, b2h)}])`)
-            t.equal(bleq(roll(rmap(cmd[1], h2b)), roll(prev)), true, 'want failed')
-        }
+    let cases = readdirSync(dir)
+
+    cases.forEach(name => {
+        if (!name.endsWith('.jams')) return
+        let djin = new Djin('')
+        let path = dir + name
+        let file = readFileSync(path)
+        let data = jams(file.toString())
+        test(`${name}`, t => {
+            let prev
+            data.forEach((cmd, idx) => {
+                let func = cmd[0]
+                need(func == 'send' || func == 'want', 'only doing send and want for now...')
+                /*
+                let omemo = memo_open(memo)
+                let type = omemo[0]
+                if (MemoType.SayTocks)
+                 */
+                if ('send' == func) {
+                    let memo = rmap(cmd[1], h2b)
+                    dbgmemo(memo_open(memo))
+                    let [ok, val, err] = djin.turn(memo)
+                    let out = memo_open(val)
+                    t.equal(ok, true, `${name} send`)
+                    prev = val
+                }
+                if ('want' == func) {
+                    debug(`want (prev=[${rmap(prev, b2h)}])`)
+                    t.equal(bleq(roll(rmap(cmd[1], h2b)), roll(prev)), true, `${name} want`)
+                }
+            })
+        })
     })
 })

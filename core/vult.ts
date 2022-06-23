@@ -1,16 +1,8 @@
 // state transition critical path
 
-import {
-    Okay, pass, fail, aver,
-    Work, Snap, Fees, Know, tuff,
-    mash, roll, unroll, bnum,
-    h2b, n2b, bcat,
-    Memo, memo,
-    MemoType, OpenMemo,
-    Tick, Tock, Tack,
-} from './word.js'
+import {aver, bnum, fail, h2b, mash, MemoType, n2b, OpenMemo, roll, Snap, Tock, tuff, unroll,} from './word.js'
 
-import { Tree, Twig, rkey } from './tree.js'
+import {rkey, Tree} from './tree.js'
 
 export {
     vult_thin,
@@ -25,12 +17,13 @@ function vult_thin(tree :Tree, tock :Tock) :OpenMemo {
     let head = mash(roll(tock))
     let prev_head = tock[0]
     let prev_tock = unroll(tree.rock.read_one(rkey('tock', prev_head)))
+    aver(_ => prev_tock.length > 0, `vulting a tock with unrecognized prev`)
     let prev_work = tree.rock.read_one(rkey('work', prev_head))
     let this_work = n2b(bnum(prev_work) + tuff(head))
     let prev_fold = tree.rock.read_one(rkey('fold', prev_head, n2b(BigInt(0))))
-    aver(_=> prev_fold.length > 0, `prev fold must exist`)
-    let [prev_snap,,] = unroll(prev_fold)
-    tree.grow(prev_snap as Snap, (rite,twig,snap) => {
+    aver(_ => prev_fold.length > 0, `prev fold must exist`)
+    let [prev_snap, ,] = unroll(prev_fold)
+    tree.grow(prev_snap as Snap, (rite, twig, snap) => {
         rite.etch(rkey('tock', head), roll(tock))
         rite.etch(rkey('work', head), this_work)
         rite.etch(rkey('fold', head, h2b('00')), roll([snap, h2b('00')])) // [snap, fees]
@@ -38,6 +31,11 @@ function vult_thin(tree :Tree, tock :Tock) :OpenMemo {
         // pent only set by vult_full, where we will know the foot tick
         //twig.etch(rkey('pent', prev_head, h2b('07')), roll([head, foot])
     })
+    let best = tree.rock.read_one(rkey('best'))
+    let best_work = tree.rock.read_one(rkey('work', best))
+    if (this_work > best_work) {
+        tree.rock.etch_one(rkey('best'), head)
+    }
     return [MemoType.AskTocks, head]
 }
 
