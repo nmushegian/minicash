@@ -6,7 +6,7 @@ import {
 import { Rock } from '../core/rock.js'
 
 test('rock', t=>{
-    let rock = new Rock('test/db')
+    let rock = new Rock('test/db', true)
     let empty
     rock.rite(r=> {
         empty = r.read(h2b('ff'))
@@ -41,7 +41,7 @@ test('rock', t=>{
 })
 
 test('rock find_min', t=> {
-    let rock = new Rock('test/db')
+    let rock = new Rock('test/db', true)
     rock.rite(r => {
         r.etch(h2b('aa00'), h2b('0000'))
         r.etch(h2b('aa11'), h2b('0001'))

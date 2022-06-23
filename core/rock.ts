@@ -1,8 +1,9 @@
+import { rmSync, mkdirSync } from 'fs'
 import { default as lmdb } from 'node-lmdb'
 import { default as process } from 'node:process'
 
 import {
-    Blob, aver, isblob,
+    Blob, aver, isblob, bleq,
     need, toss, err
 } from './word.js'
 
@@ -19,20 +20,33 @@ class Rite {
     }
     etch(key :Blob, val :Blob) {
         aver(_=>isblob(key), `rite.etch key not a blob: ${key}`)
-        aver(_=>isblob(val), `rite.etch val not a blob: ${val}`)
+        aver(_=>isblob(val), `rite.etch val not a blob: ${val} (key was ${key})`)
+        aver(_=> {
+            let prev = this.dbtx.getBinary(this.dbi, key)
+            if (prev && prev.length > 0 && !bleq(prev, val)) {
+                return false
+            }
+            return true // todo usage
+        }, `etch must not set a new value for existing key`)
         this.dbtx.putBinary(this.dbi, key, val)
     }
     read(key :Blob) :Blob {
         aver(_=>isblob(key), `rite.read key not a blob: ${key}`)
-        return this.dbtx.getBinary(this.dbi, key)
+        let val = this.dbtx.getBinary(this.dbi, key)
+        if (val) return val
+        else return Buffer.from('')
     }
 }
 
 class Rock {
     env
     dbi
-    constructor(path) {
+    constructor(path, reset=false) {
         this.env = new lmdb.Env()
+        if (reset) {
+            rmSync(path, {force:true, recursive:true})
+            mkdirSync(path)
+        }
         this.env.open({ path })
         this.dbi = this.env.openDbi({
             name: "testdb",

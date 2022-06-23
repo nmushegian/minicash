@@ -26,7 +26,7 @@ function vult_thin(tree :Tree, tock :Tock) :OpenMemo {
     let prev_head = tock[0]
     let prev_tock = unroll(tree.rock.read_one(rkey('tock', prev_head)))
     let prev_work = tree.rock.read_one(rkey('work', prev_head))
-    let this_work = bnum(prev_work) + tuff(head)
+    let this_work = n2b(bnum(prev_work) + tuff(head))
     let prev_fold = tree.rock.read_one(rkey('fold', prev_head, n2b(BigInt(0))))
     aver(_=> prev_fold.length > 0, `prev fold must exist`)
     let [prev_snap,,] = unroll(prev_fold)
