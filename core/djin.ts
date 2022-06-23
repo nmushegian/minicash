@@ -45,6 +45,10 @@ class Djin {
         })
     }
 
+    kill() {
+        this.rock.shut()
+    }
+
     async *spin(memo) {
         // aver well-formed
         // aver valid-in-context

@@ -40,4 +40,6 @@ test('djin', t=>{ try {
     // djin asks for tack
 
     t.deepEqual(out, memo(MemoType.AskTocks, mash(roll(tock1))))
+
+    djin.kill()
 } catch(e) { console.log(e); t.ok(false, e.message); }})

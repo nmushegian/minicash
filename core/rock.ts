@@ -22,6 +22,9 @@ class Rite {
         aver(_=>isblob(key), `rite.etch key not a blob: ${key}`)
         aver(_=>isblob(val), `rite.etch val not a blob: ${val} (key was ${key})`)
         aver(_=> {
+            if (key.toString().startsWith('best')) {
+                return true
+            }
             let prev = this.dbtx.getBinary(this.dbi, key)
             if (prev && prev.length > 0 && !bleq(prev, val)) {
                 return false
@@ -36,6 +39,14 @@ class Rite {
         if (val) return val
         else return Buffer.from('')
     }
+    find_min(key :Blob) :Blob {
+        toss(`todo rock.find_min`)
+        return Buffer.from('')
+    }
+    find_max(key :Blob) :Blob {
+        toss(`todo rock.find_min`)
+        return Buffer.from('')
+    }
 }
 
 class Rock {
@@ -47,16 +58,20 @@ class Rock {
             rmSync(path, {force:true, recursive:true})
             mkdirSync(path)
         }
+        console.log('opening', path)
         this.env.open({ path })
         this.dbi = this.env.openDbi({
             name: "testdb",
             keyIsBuffer: true,
             create: true
         })
-        process.on('exit', exitcode => { // todo test...
-            this.dbi.close()
-            this.env.close()
-        })
+//        process.on('exit', exitcode => { // todo test...
+//            this.shut()
+//        })
+    }
+    shut() {
+        this.dbi.close()
+        this.env.close()
     }
 
     read_one(key :Blob) :Blob {
