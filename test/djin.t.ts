@@ -8,7 +8,7 @@ import {h2b, mash, memo, MemoType, merk, okay, roll, Tick,} from '../core/word.j
 
 
 test('djin', t=>{ try {
-    let djin = new Djin('')
+    let djin = new Djin('test/db', true)
     let out
     out = okay(djin.turn(memo(MemoType.AskTocks, mash(roll(djin.bang)))))
     t.deepEqual(out, memo(MemoType.SayTocks, [djin.bang]))
@@ -40,4 +40,6 @@ test('djin', t=>{ try {
     // djin asks for tack
 
     t.deepEqual(out, memo(MemoType.AskTocks, mash(roll(tock1))))
+
+    djin.kill()
 } catch(e) { console.log(e); t.ok(false, e.message); }})
