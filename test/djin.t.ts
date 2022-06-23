@@ -3,13 +3,15 @@ import { jams } from 'jams.js'
 
 import {Djin} from '../core/djin.js'
 
+import Debug from 'debug'
+const debug = Debug('djin::test')
 
 import {
     Tick,
     okay,
     roll, h2b,
-    mash, memo, merk,MemoType,
-    need, rmap, memo_open
+    mash, memo, merk, MemoType,
+    need, rmap, memo_open, bleq, b2h
 } from '../core/word.js'
 import {readdirSync, readFileSync} from "fs";
 import {dbgtick, dbgtock} from "./helpers.js";
@@ -50,6 +52,17 @@ test('djin', t=>{ try {
     t.deepEqual(out, memo(MemoType.AskTocks, mash(roll(tock1))))
 } catch(e) { console.log(e); t.ok(false, e.message); }})
 
+const dbgmemo = (omemo) => {
+    let type = omemo[0]
+    let body = omemo[1]
+    if (MemoType.SayTocks == type) {
+        body.forEach(tock => {
+            const tock_s = rmap(tock, b2h)
+            const hash = mash(roll(tock)).toString('hex')
+            debug('say/tocks in:', tock_s, hash)
+        })
+    }
+}
 test('djin jams', t=>{
     let dir = './test/case/djin/'
     let name = 'djin.jams'
@@ -58,11 +71,26 @@ test('djin jams', t=>{
     if (!name.endsWith('.jams')) return
     let file = readFileSync(path)
     let data = jams(file.toString())
+    let prev
     data.forEach((cmd, idx) => {
         let func = cmd[0]
-        need(func == 'send', 'only doing send for now...')
-        let memo = rmap(cmd[1], h2b)
-        let [ok, val, err] = djin.turn(memo)
-        t.equal(ok, true, `pass`)
+        need(func == 'send' || func == 'want', 'only doing send and want for now...')
+        /*
+        let omemo = memo_open(memo)
+        let type = omemo[0]
+        if (MemoType.SayTocks)
+         */
+        if ('send' == func) {
+            let memo = rmap(cmd[1], h2b)
+            dbgmemo(memo_open(memo))
+            let [ok, val, err] = djin.turn(memo)
+            let out = memo_open(val)
+            t.equal(ok, true, `send success`)
+            prev = val
+        }
+        if ('want' == func) {
+            debug(`want (prev=[${rmap(prev, b2h)}])`)
+            t.equal(bleq(roll(rmap(cmd[1], h2b)), roll(prev)), true, 'want failed')
+        }
     })
 })

@@ -26,13 +26,12 @@ function vult_thin(tree :Tree, tock :Tock) :OpenMemo {
     let prev_head = tock[0]
     let prev_tock = unroll(tree.rock.read_one(rkey('tock', prev_head)))
     let prev_work = tree.rock.read_one(rkey('work', prev_head))
-    let this_work = bnum(prev_work) + tuff(head)
+    let this_work = n2b(bnum(prev_work) + tuff(head))
     let prev_fold = tree.rock.read_one(rkey('fold', prev_head, n2b(BigInt(0))))
     aver(_=> prev_fold.length > 0, `prev fold must exist`)
     let [prev_snap,,] = unroll(prev_fold)
     tree.grow(prev_snap as Snap, (rite,twig,snap) => {
         rite.etch(rkey('tock', head), roll(tock))
-        console.log('vult_thin oetched tock', head)
         rite.etch(rkey('work', head), this_work)
         rite.etch(rkey('fold', head, h2b('00')), roll([snap, h2b('00')])) // [snap, fees]
         twig.etch(rkey('ment', head, h2b('07')), roll([head, h2b('00')])) // [code, cash]
@@ -51,7 +50,7 @@ function vult_full(tree :Tree, tock :Tock) { // :Memo
     let ticks = rock.read ...
     let [head,i,ribs,feet] = tack
 
-    let [prev_snap, prev_fees] = r.read([ 'fold', tockhash, i ])
+    // let [prev_snap, prev_fees] = r.read([ 'fold', tockhash, i ])
 
     let time = tock.time
     let fees = 0

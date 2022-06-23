@@ -18,7 +18,7 @@ import {
 
 import { Rock } from './rock.js'
 import { Tree, rkey } from './tree.js'
-import {form_tick} from "./well.js";
+import {form_tick, form_tock} from "./well.js";
 
 export { Djin }
 
@@ -74,7 +74,7 @@ class Djin {
             let line = copy[0]
             if (MemoType.AskTocks == line) {
                 // -> say/tocks | err
-                let memot = copy as unknown as MemoAskTocks // todo form_memo
+                let memot = copy as MemoAskTocks // todo form_memo
                 let out = this._ask_tocks(memot)
                 let typed = [Buffer.from([out[0]]), out[1]]
                 return pass(typed)
@@ -91,7 +91,7 @@ class Djin {
                 // -> ask/tocks    proceed
                 // -> ask/tacks    need tacks
                 // -> err
-                let memot = memo as unknown as MemoSayTocks // todo form_memo
+                let memot = memo_open(memo) as MemoSayTocks// todo form_memo
                 let out = this._say_tocks(memot)
                 let typed = [Buffer.from([out[0]]), out[1]]
                 return pass(typed)
@@ -142,12 +142,14 @@ class Djin {
     //                    ->  'ask/tacks tock:Mash,i:num
     _say_tocks(memo :MemoSayTocks) :(MemoAskTocks|MemoAskTacks) {
         let [line, body] = memo
-        aver(_=>body.length == 1, `panic, djin memo is not split into units`)
+        aver(_=>islist(body), `panic, say/tocks takes a list`)
+        body.forEach(b => aver(_=>form_tock(b)[0], `panic, say/tocks takes a list of tocks`))
+        aver(_ => body.length == 1, `panic, say/tocks memos can only hold one tock for now`) // TODO
         let tocks = body as Tock[]
         // aver prev is possibly-valid
-        let thinmemo = vult_thin(this.tree, tocks[0])// as MemoAskTocks
+
+        let thinmemo = vult_thin(this.tree, tocks[0])// as MemoAskTocks // todo full
         let typed = thinmemo as (MemoAskTocks | MemoAskTacks)
-//        let fullmemo = vult_full(this.tree, tock)
         return typed
     }
 
