@@ -72,6 +72,7 @@ test('djin jams', t=>{
     cases.forEach(name => {
         if (!name.endsWith('.jams')) return
         test(`${name}`, t => {
+            debug(`TESTING: ${name}`)
             let djin = new Djin('./test/db', true)
             let path = dir + name
             let file = readFileSync(path)

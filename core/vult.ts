@@ -1,6 +1,8 @@
 // state transition critical path
+import Debug from 'debug'
+const debug = Debug('djin::test')
 
-import {aver, bnum, fail, h2b, mash, MemoType, n2b, OpenMemo, roll, Snap, Tock, tuff, unroll,} from './word.js'
+import {aver, b2h, bnum, fail, h2b, mash, MemoType, n2b, OpenMemo, roll, Snap, Tock, tuff, unroll,} from './word.js'
 
 import {rkey, Tree} from './tree.js'
 
@@ -33,7 +35,8 @@ function vult_thin(tree :Tree, tock :Tock) :OpenMemo {
     })
     let best = tree.rock.read_one(rkey('best'))
     let best_work = tree.rock.read_one(rkey('work', best))
-    if (this_work > best_work) {
+    if (bnum(this_work) > bnum(best_work)) {
+        debug(`WORK: ${b2h(this_work)}, ${b2h(best_work)}`)
         tree.rock.etch_one(rkey('best'), head)
     }
     return [MemoType.AskTocks, head]
