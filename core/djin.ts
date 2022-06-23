@@ -1,24 +1,41 @@
 // engine
 
 import {
-    Okay, okay, pass, fail, toss, aver,
-    h2b, t2b, b2t,
-    Blob, isblob,
-    roll, unroll, bleq, islist,
-    Tock, tuff, n2b,
-    Mash, mash,
-    need, Memo, OpenMemo, MemoType,
-    MemoSayTocks, MemoSayTacks, MemoSayTicks,
-    MemoAskTocks, MemoAskTacks, MemoAskTicks, bnum, memo_open,
+    aver,
+    bleq,
+    Blob,
+    fail,
+    h2b,
+    islist,
+    mash,
+    Memo,
+    memo_close,
+    memo_open,
+    MemoAskTacks,
+    MemoAskTicks,
+    MemoAskTocks,
+    MemoErr,
+    MemoSayTacks,
+    MemoSayTicks,
+    MemoSayTocks,
+    MemoType,
+    n2b,
+    Okay,
+    okay,
+    pass,
+    roll,
+    Tick,
+    Tock,
+    toss,
+    tuff,
+    unroll
 } from './word.js'
 
-import {
-    vult_thin
-} from './vult.js'
+import {vult_thin} from './vult.js'
 
-import { Rock } from './rock.js'
-import { Tree, rkey } from './tree.js'
-import {form_tick, form_tock} from "./well.js";
+import {Rock} from './rock.js'
+import {rkey, Tree} from './tree.js'
+import {form_memo, form_tick, form_tock} from "./well.js";
 
 export { Djin }
 
@@ -74,11 +91,16 @@ class Djin {
 
     turn(memo :Memo) :Okay<Memo> {
         try {
+            let [wellformed,,] = form_memo(memo)
+            if (!wellformed) {
+                // todo is this ok?
+                return pass(memo)
+            }
             let copy = memo_open(memo)
             let line = copy[0]
             if (MemoType.AskTocks == line) {
                 // -> say/tocks | err
-                let memot = copy as MemoAskTocks // todo form_memo
+                let memot = copy as MemoAskTocks
                 let out = this._ask_tocks(memot)
                 let typed = [Buffer.from([out[0]]), out[1]]
                 return pass(typed)
@@ -89,13 +111,13 @@ class Djin {
             }
             if (MemoType.AskTicks == line) {
                 // -> say/ticks | err
-                toss(`todo djin read ask/ticks`)
+                return pass(this._ask_ticks(copy as MemoAskTicks))
             }
             if (MemoType.SayTocks == line) {
                 // -> ask/tocks    proceed
                 // -> ask/tacks    need tacks
                 // -> err
-                let memot = memo_open(memo) as MemoSayTocks// todo form_memo
+                let memot = memo_open(memo) as MemoSayTocks
                 let out = this._say_tocks(memot)
                 let typed = [Buffer.from([out[0]]), out[1]]
                 return pass(typed)
@@ -110,13 +132,58 @@ class Djin {
             if (MemoType.SayTicks == line) {
                 // -> say/ticks    accept/rebroadcast
                 // -> err
-                return pass(this._say_ticks(memo))
-                toss(`todo turn say/ticks`)
+                return pass(this._say_ticks(copy as MemoSayTicks))
             }
             return fail(`unrecognized turn line: ${line}`)
         } catch(e) {
             toss(`engine panic: ${e.message}`)
         }
+    }
+
+    _ask_ticks(memo :MemoAskTicks) :MemoSayTicks|MemoErr {
+        let tickhashes = memo[1]
+
+        let ticks = []
+        tickhashes.forEach(tickhash => {
+            let tick = unroll(this.rock.read_one(rkey('tick', tickhash)))
+            ticks.push(tick)
+        })
+
+        if (ticks.length == 0) {
+            return [MemoType.Err, ['invalid', memo_close(memo)]]
+        }
+        return [MemoType.SayTicks, ticks]
+    }
+
+    _say_ticks(memo :MemoSayTicks) :MemoSayTicks|MemoErr {
+        const [line, body] = memo
+        aver(_=>islist(body), `panic, djin say/ticks memo body is not a list`)
+        aver(_=>body.length == 1, `panic, djin memo is not split into units`)
+
+        const tick = body[0] as Tick
+        aver(_ => okay(form_tick(tick)), `panic, djin say/ticks tick not well-formed`)
+        const tickhash = mash(roll(tick))
+        const key = rkey('tick', tickhash)
+        if (bleq(this.rock.read_one(key), h2b(''))) {
+            this.rock.etch_one(rkey('tick', tickhash), roll(tick))
+            return [memo[0], [tick]]
+        }
+
+        return [MemoType.Err, ['invalid', memo_close(memo)]]
+    }
+
+    _say_tacks(memo :MemoSayTacks) :MemoSayTacks|MemoErr {
+        let [line, tacks] = memo
+
+        tacks.forEach(tack => {
+            let [tock, eye,,] = tack
+            let tockhash = mash(roll(tock))
+        })
+
+
+
+
+        return [MemoType.Err, ['invalid', memo_close(memo)]]
     }
 
     // ['ask/tocks tailhash ]  ->  'say/tocks tocks
@@ -157,26 +224,5 @@ class Djin {
         return typed
     }
 
-    _say_ticks(memo :Memo) :Memo {
-        const [line, body] = memo
-        aver(_=>body.length == 1, `panic, djin memo is not split into units`)
-
-        const ticks = body
-        const rebro = []
-        ticks.forEach(tick => {
-            okay(form_tick(tick))
-        })
-        ticks.forEach(tick => {
-            const tickhash = mash(roll(tick))
-            const key = rkey(tick, tickhash)
-            if (bleq(this.rock.read_one(key), h2b(''))) {
-                this.rock.etch_one(rkey(tick, tickhash), roll(tick))
-                rebro.push(tick)
-            }
-        })
-
-        need(rebro.length > 0, 'no new transactions to add/rebroadcast')
-        return [memo[0], rebro]
-    }
 
 }
