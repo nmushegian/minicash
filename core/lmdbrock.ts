@@ -1,4 +1,5 @@
 import { default as lmdb } from 'node-lmdb'
+import { default as process } from 'node:process'
 
 import {
     Blob,
@@ -36,12 +37,10 @@ class LmdbRock {
             keyIsBuffer: true,
             create: true
         })
-    }
-
-    load() {} // todo from constructor
-    save() {
-        this.dbi.close()
-        this.env.close()
+        process.on('exit', exitcode => { // todo test...
+            this.dbi.close()
+            this.env.close()
+        })
     }
 
     rite(f:((LmdbRite)=>void)) {
