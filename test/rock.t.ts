@@ -56,4 +56,3 @@ test('rock', t=>{ try {
 //    }, 'must not modify same key with new value')
     rock.shut()
 } catch (e) { t.ifError(e, 'rock test throw') } } )
-

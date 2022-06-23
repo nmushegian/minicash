@@ -71,11 +71,11 @@ test('djin jams', t=>{
 
     cases.forEach(name => {
         if (!name.endsWith('.jams')) return
-        let djin = new Djin('./test/db')
-        let path = dir + name
-        let file = readFileSync(path)
-        let data = jams(file.toString())
         test(`${name}`, t => {
+            let djin = new Djin('./test/db', true)
+            let path = dir + name
+            let file = readFileSync(path)
+            let data = jams(file.toString())
             let prev
             data.forEach((cmd, idx) => {
                 let func = cmd[0]
@@ -98,6 +98,7 @@ test('djin jams', t=>{
                     t.equal(bleq(roll(rmap(cmd[1], h2b)), roll(prev)), true, `${name} want`)
                 }
             })
+            djin.kill()
         })
     })
 })
