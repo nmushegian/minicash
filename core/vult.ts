@@ -2,7 +2,23 @@
 import Debug from 'debug'
 const debug = Debug('djin::test')
 
-import {aver, b2h, bnum, fail, h2b, mash, MemoType, n2b, OpenMemo, roll, Snap, Tock, tuff, unroll,} from './word.js'
+import {
+    aver,
+    b2h, bleq,
+    bnum,
+    fail,
+    h2b,
+    mash,
+    MemoAskTocks,
+    MemoType,
+    n2b, need,
+    OpenMemo,
+    roll,
+    Snap, t2b, Tack,
+    Tock, toss,
+    tuff,
+    unroll,
+} from './word.js'
 
 import {rkey, Tree} from './tree.js'
 
@@ -44,7 +60,33 @@ function vult_thin(tree :Tree, tock :Tock) :OpenMemo {
 
 // vult_full grows definitely-valid state tree
 //   (could also invalidate tock)
-function vult_full(tree :Tree, tock :Tock) { // :Memo
+function vult_full(tree :Tree, tock :Tock) :OpenMemo{ // :Memo
+    let [prev, root, time, fuzz] = tock
+    let prevtack = unroll(tree.rock.read_one(rkey('tack', prev)))
+    let tockhash = mash(roll(tock))
+    let tack = unroll(tree.rock.read_one(rkey('tack', tockhash))) as Tack
+    let [head, eye, ribs, feet] = tack
+    let ticks = feet.map(foot => this.rock.read_one(rkey('tick', foot)))
+
+    let prev_fold = tree.rock.read_one(rkey('fold', tockhash, eye))
+    let [prev_snap, prev_fees] = unroll(prev_fold)
+
+    let fees = 0
+    let valid
+    let next_snap = tree.grow(prev_snap as Snap, (rock, twig, snap) => {
+        try {
+            ticks.forEach(tick => {
+                let [moves, ments] = tick
+                moves.forEach(move => {
+                    let [txin, idx, sign] = move
+                    need(!bleq(twig.read(rkey('ment', txin, idx)), t2b('')), 'move must exist')
+                    need(bleq(twig.read(rkey('pent', txin, idx)), t2b('')), 'move must be unspent')
+                    let pyre = Number(twig.read(rkey('pyre', txin, idx)))
+                    need(time < pyre, `move can't be expired`)
+                })
+            })
+        } catch (e) {toss(e)}
+    })
     /*
     let last = rock.read ... last applied tack
     let tack = rock.read ... this tack

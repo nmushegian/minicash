@@ -24,6 +24,7 @@ import {
     okay,
     pass,
     roll,
+    t2b,
     Tick,
     Tock,
     toss,
@@ -31,7 +32,7 @@ import {
     unroll
 } from './word.js'
 
-import {vult_thin} from './vult.js'
+import {vult_thin, vult_full} from './vult.js'
 
 import {Rock} from './rock.js'
 import {rkey, Tree} from './tree.js'
@@ -107,7 +108,7 @@ class Djin {
             }
             if (MemoType.AskTacks == line) {
                 // -> say/tacks | err
-                toss(`todo djin read ask/tacks`)
+                return pass(this._ask_tacks(copy as MemoAskTacks))
             }
             if (MemoType.AskTicks == line) {
                 // -> say/ticks | err
@@ -127,7 +128,7 @@ class Djin {
                 // -> ask/tacks    proceed
                 // -> ask/ticks    need ticks
                 // return pass(this._say_tacks(memo)
-                toss(`todo turn say/tacks`)
+                return pass(this._say_tacks(copy as MemoSayTacks))
             }
             if (MemoType.SayTicks == line) {
                 // -> say/ticks    accept/rebroadcast
@@ -172,18 +173,44 @@ class Djin {
         return [MemoType.Err, ['invalid', memo_close(memo)]]
     }
 
-    _say_tacks(memo :MemoSayTacks) :MemoSayTacks|MemoErr {
+    _say_tacks(memo :MemoSayTacks) :MemoAskTocks|MemoAskTacks|MemoAskTicks|MemoErr {
         let [line, tacks] = memo
+        aver(_ => tacks.length == 1, `only saying one tack at a time for now`)
+        let tack = tacks[0]
+        let [head, eye, ribs, feet] = tack
+        let prev = head[0]
 
-        tacks.forEach(tack => {
-            let [tock, eye,,] = tack
-            let tockhash = mash(roll(tock))
-        })
+        let prevhash = mash(roll(prev))
+        if (bleq(t2b(''), this.rock.read_one(rkey('tock', prevhash)))) {
+            return [MemoType.AskTocks, prevhash]
+        }
+        // todo should this happen here?
+        let headhash = mash(roll(head))
+        this.rock.etch_one(rkey('tack', headhash), roll(tack))
 
+        let leftfeet = feet.filter(
+            foot => bleq(t2b(''), this.rock.read_one(rkey('tick', foot)))
+        )
+        if (leftfeet.length > 0) {
+            return [MemoType.AskTicks, leftfeet]
+        }
 
+        return vult_full(this.tree, head) as MemoAskTocks
+    }
 
+    _ask_tacks(memo :MemoAskTacks) :MemoSayTacks {
+        let [line, tockhash] = memo
 
-        return [MemoType.Err, ['invalid', memo_close(memo)]]
+        let tacks = []
+        for (let eye = 0; eye <= 128; eye++) {
+            console.log(n2b(BigInt(eye)))
+            let tackroll = this.rock.read_one(rkey('tack', tockhash, n2b(BigInt(eye))))
+            if (bleq(tackroll, t2b(''))) {
+                break
+            }
+            tacks.push(unroll(tackroll))
+        }
+        return [MemoType.SayTacks, tacks]
     }
 
     // ['ask/tocks tailhash ]  ->  'say/tocks tocks
@@ -223,6 +250,5 @@ class Djin {
         let typed = thinmemo as (MemoAskTocks | MemoAskTacks)
         return typed
     }
-
 
 }
