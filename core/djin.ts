@@ -181,12 +181,19 @@ class Djin {
         let prev = head[0]
 
         let prevhash = mash(roll(prev))
-        if (bleq(t2b(''), this.rock.read_one(rkey('tock', prevhash)))) {
+        let headhash = mash(roll(head))
+        if (bleq(t2b(''), this.rock.read_one(rkey('tock', headhash)))) {
             return [MemoType.AskTocks, prevhash]
         }
-        // todo should this happen here?
-        let headhash = mash(roll(head))
+
         this.rock.etch_one(rkey('tack', headhash), roll(tack))
+
+        for (let i = 0; i < ribs.length; i++) {
+            let oldtack = this.rock.read_one(rkey('tack', headhash, n2b(BigInt(i))))
+            if (bleq(oldtack, t2b(''))) {
+                return [MemoType.AskTacks, headhash]
+            }
+        }
 
         let leftfeet = feet.filter(
             foot => bleq(t2b(''), this.rock.read_one(rkey('tick', foot)))

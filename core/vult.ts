@@ -1,26 +1,32 @@
 // state transition critical path
 import Debug from 'debug'
-const debug = Debug('djin::test')
-
 import {
     aver,
-    b2h, bleq,
+    b2h,
+    bleq,
     bnum,
     fail,
     h2b,
     mash,
-    MemoAskTocks,
     MemoType,
-    n2b, need,
+    n2b,
+    need,
     OpenMemo,
     roll,
-    Snap, t2b, Tack,
-    Tock, toss,
+    Snap,
+    t2b,
+    Tack,
+    Tick,
+    Tock,
+    toss,
     tuff,
     unroll,
 } from './word.js'
 
 import {rkey, Tree} from './tree.js'
+import {Blob, Roll} from "coreword";
+
+const debug = Debug('djin::test')
 
 export {
     vult_thin,
@@ -58,35 +64,77 @@ function vult_thin(tree :Tree, tock :Tock) :OpenMemo {
     return [MemoType.AskTocks, head]
 }
 
+function subsidy(_time :Blob) :BigInt {
+    return BigInt(50)
+}
 // vult_full grows definitely-valid state tree
 //   (could also invalidate tock)
 function vult_full(tree :Tree, tock :Tock) :OpenMemo{ // :Memo
-    let [prev, root, time, fuzz] = tock
-    let prevtack = unroll(tree.rock.read_one(rkey('tack', prev)))
+    let [prevtockhash, root, time, fuzz] = tock
+    let prevtack = unroll(tree.rock.read_one(rkey('tack', prevtockhash)))
     let tockhash = mash(roll(tock))
-    let tack = unroll(tree.rock.read_one(rkey('tack', tockhash))) as Tack
-    let [head, eye, ribs, feet] = tack
-    let ticks = feet.map(foot => this.rock.read_one(rkey('tick', foot)))
+    let [head, , ribs, _feet] = unroll(tree.rock.read_one(rkey('tack', tockhash, h2b('00')))) as Tack
+    let feet = []
+    for (let eye = 0; eye < ribs.length; eye++) {
+        let tack = tree.rock.read_one(rkey('tack', tockhash, h2b('00')))
+        aver(_ => !bleq(tack, t2b('')), 'panic, vult, tick not found')
+        let feet = (unroll(tack) as Tack)[3]
+        feet.push(...feet)
+    }
+    let ticks = feet.map(foot => {
+        let tick = this.rock.read_one(rkey('tick', foot))
+        aver(_ => !bleq(tick, t2b('')), 'panic, vult, tick not found')
+        return unroll(tick) as Tick
+    })
 
-    let prev_fold = tree.rock.read_one(rkey('fold', tockhash, eye))
-    let [prev_snap, prev_fees] = unroll(prev_fold)
+    let prev_fold = tree.rock.read_one(rkey('fold', prevtockhash, n2b(BigInt(0))))
+    let [prev_snap, prev_fees] = unroll(prev_fold) as Roll
 
-    let fees = 0
-    let valid
-    let next_snap = tree.grow(prev_snap as Snap, (rock, twig, snap) => {
+    let fees = BigInt(0)
+    let valid = false
+    tree.grow(prev_snap as Snap, (rock, twig, snap) => {
         try {
+
             ticks.forEach(tick => {
+                let tickhash = mash(roll(tick))
                 let [moves, ments] = tick
                 moves.forEach(move => {
                     let [txin, idx, sign] = move
-                    need(!bleq(twig.read(rkey('ment', txin, idx)), t2b('')), 'move must exist')
+                    // todo why?  we can get the ment from the tick (read(rkey('tick', txin))[1][idx])
+                    let ment = twig.read(rkey('ment', txin, idx))
+                    need(!bleq(ment, t2b('')), 'move must exist')
                     need(bleq(twig.read(rkey('pent', txin, idx)), t2b('')), 'move must be unspent')
-                    let pyre = Number(twig.read(rkey('pyre', txin, idx)))
-                    need(time < pyre, `move can't be expired`)
+                    let pyre = twig.read(rkey('pyre', txin)) // todo ok?
+                    need(bnum(time) < bnum(pyre), `move can't be expired`)
+                    let [code, cash] = ment
+                    twig.etch(rkey('pent', txin, idx), h2b('ff'))
+                    fees += bnum(cash)
+                })
+                ments.forEach((ment, idx) => {
+                    twig.etch(rkey('ment', tickhash, n2b(BigInt(idx))), roll(ment))
+                    let pyre = bnum(time) + BigInt(536112000) // 17y
+                    twig.etch(rkey('pyre', tickhash), pyre)
+                    let [code, cash] = ment
+                    fees -= bnum(cash)
                 })
             })
-        } catch (e) {toss(e)}
+            valid = true
+        } catch (e) {
+            valid = false
+            toss(e)
+        }
     })
+
+    if (!valid) {
+        tree.rock.etch_one(rkey('know', tockhash), t2b('DN'))
+        return [MemoType.Err, ['unspendable', tock]]
+    }
+
+    fees = bnum(prev_fees as Blob) + fees
+    this.rock.etch(rkey('fold', tockhash, n2b(BigInt(0))), n2b(fees))
+    this.rock.etch(rkey('know', tockhash), t2b('DV'))
+    return [MemoType.AskTocks, tockhash]
+
     /*
     let last = rock.read ... last applied tack
     let tack = rock.read ... this tack
@@ -110,6 +158,7 @@ function vult_full(tree :Tree, tock :Tock) :OpenMemo{ // :Memo
             fees += cash
           }
           for ment in ments {
+            // todo ? it's indexed by ('ment', txid, idx), wouldn't there need to be a collision?
             need !twig.has 'ment' ment         // not exists
             put ment                           // put utxo
             put pyre = time + 17y              // put expiry
@@ -130,7 +179,9 @@ function vult_full(tree :Tree, tock :Tock) :OpenMemo{ // :Memo
 
     let fees = pfees + fees
     rock.etch ['fold head i] [next fees]
+    // todo why? should already be there...
     rock.etch ['tack head i] tack
+    // todo why? is this from an old tack definition?
     if last tack {
         need fees == mint // net fee is just the subsidy
         rock.etch ['know head] 'DV // definitely-valid
@@ -139,6 +190,4 @@ function vult_full(tree :Tree, tock :Tock) :OpenMemo{ // :Memo
         return memo( ask/tack ... )
     }
     */
-    return fail(`todo vult_full`)
-
 }
