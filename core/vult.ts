@@ -5,9 +5,9 @@ import {
     b2h,
     bleq,
     bnum,
-    fail,
     h2b,
-    mash,
+    mash, MemoAskTacks,
+    MemoAskTocks, MemoErr,
     MemoType,
     n2b,
     need,
@@ -35,7 +35,8 @@ export {
 
 // vult_thin grows possibly-valid state tree
 //   (could also invalidate tock)
-function vult_thin(tree :Tree, tock :Tock) :OpenMemo {
+function vult_thin(tree :Tree, tock :Tock) :MemoAskTocks {
+    debug('vult_thin')
     // aver prev tock must exist
     // aver well/vinx
     let head = mash(roll(tock))
@@ -69,15 +70,27 @@ function subsidy(_time :Blob) :BigInt {
 }
 // vult_full grows definitely-valid state tree
 //   (could also invalidate tock)
-function vult_full(tree :Tree, tock :Tock) :OpenMemo{ // :Memo
+function vult_full(tree :Tree, tock :Tock) :MemoAskTacks|MemoAskTocks|MemoErr { // :Memo
+    debug('vult_full')
     let [prevtockhash, root, time, fuzz] = tock
     let prevtack = unroll(tree.rock.read_one(rkey('tack', prevtockhash)))
     let tockhash = mash(roll(tock))
-    let [head, , ribs, _feet] = unroll(tree.rock.read_one(rkey('tack', tockhash, h2b('00')))) as Tack
-    let feet = []
-    for (let eye = 0; eye < ribs.length; eye++) {
+    if (bleq(tree.rock.read_one(rkey('tock', tockhash)), t2b(''))) {
+        vult_thin(tree, tock)
+        return [MemoType.AskTacks, tockhash]
+    }
+
+    let firsttack_blob = tree.rock.read_one(rkey('tack', tockhash, h2b('00')))
+    if (bleq(firsttack_blob, t2b(''))) {
+        return [MemoType.AskTacks, tockhash]
+    }
+    let [head, , ribs, feet] = unroll(firsttack_blob) as Tack
+    // ribs.length == 0 if tack has fewer than 512 feet
+    for (let eye = 1; eye < ribs.length; eye++) {
         let tack = tree.rock.read_one(rkey('tack', tockhash, h2b('00')))
-        aver(_ => !bleq(tack, t2b('')), 'panic, vult, tick not found')
+        if (bleq(tack, t2b(''))) {
+            return [MemoType.AskTacks, tockhash]
+        }
         let feet = (unroll(tack) as Tack)[3]
         feet.push(...feet)
     }

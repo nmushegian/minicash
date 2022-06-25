@@ -32,11 +32,14 @@ import {
     unroll
 } from './word.js'
 
-import {vult_thin, vult_full} from './vult.js'
+import {vult_full, vult_thin} from './vult.js'
 
 import {Rock} from './rock.js'
 import {rkey, Tree} from './tree.js'
 import {form_memo, form_tick, form_tock} from "./well.js";
+import Debug from 'debug'
+
+const debug = Debug('djin::test')
 
 export { Djin }
 
@@ -44,8 +47,9 @@ class Djin {
     rock :Rock   // content-addressed values
     tree :Tree   // per-tock view of state
     bang :Tock   // tock zero
+    full :boolean
 
-    constructor(path :string, reset=false) {
+    constructor(path :string, reset=false, full=false) {
         this.rock = new Rock(path, reset)
         this.tree = new Tree(this.rock)
         this.bang = [
@@ -62,6 +66,7 @@ class Djin {
             rite.etch(rkey('work', banghash), n2b(tuff(bangroll)))
             rite.etch(rkey('fold', banghash, n2b(BigInt(0))), roll([snap, n2b(BigInt(0))]))
         })
+        this.full = full
     }
 
     kill() {
@@ -253,9 +258,12 @@ class Djin {
         let tocks = body as Tock[]
         // aver prev is possibly-valid
 
-        let thinmemo = vult_thin(this.tree, tocks[0])// as MemoAskTocks // todo full
-        let typed = thinmemo as (MemoAskTocks | MemoAskTacks)
-        return typed
+        let tock = tocks[0]
+        if (this.full) {
+            return vult_full(this.tree, tock) as MemoAskTacks|MemoAskTocks
+        }
+
+        return vult_thin(this.tree, tock) as MemoAskTocks
     }
 
 }
