@@ -96,6 +96,7 @@ class Djin {
     }
 
     turn(memo :Memo) :Okay<Memo> {
+        okay(form_memo(memo))
         try {
             let [wellformed,,] = form_memo(memo)
             if (!wellformed) {
@@ -113,11 +114,11 @@ class Djin {
             }
             if (MemoType.AskTacks == line) {
                 // -> say/tacks | err
-                return pass(this._ask_tacks(copy as MemoAskTacks))
+                return pass(memo_close(this._ask_tacks(copy as MemoAskTacks)))
             }
             if (MemoType.AskTicks == line) {
                 // -> say/ticks | err
-                return pass(this._ask_ticks(copy as MemoAskTicks))
+                return pass(memo_close(this._ask_ticks(copy as MemoAskTicks)))
             }
             if (MemoType.SayTocks == line) {
                 // -> ask/tocks    proceed
@@ -133,12 +134,12 @@ class Djin {
                 // -> ask/tacks    proceed
                 // -> ask/ticks    need ticks
                 // return pass(this._say_tacks(memo)
-                return pass(this._say_tacks(copy as MemoSayTacks))
+                return pass(memo_close(this._say_tacks(copy as MemoSayTacks)))
             }
             if (MemoType.SayTicks == line) {
                 // -> say/ticks    accept/rebroadcast
                 // -> err
-                return pass(this._say_ticks(copy as MemoSayTicks))
+                return pass(memo_close(this._say_ticks(copy as MemoSayTicks)))
             }
             return fail(`unrecognized turn line: ${line}`)
         } catch(e) {
@@ -179,6 +180,7 @@ class Djin {
     }
 
     _say_tacks(memo :MemoSayTacks) :MemoAskTocks|MemoAskTacks|MemoAskTicks|MemoErr {
+        debug('say/tacks')
         let [line, tacks] = memo
         aver(_ => tacks.length == 1, `only saying one tack at a time for now`)
         let tack = tacks[0]
@@ -188,6 +190,7 @@ class Djin {
         let prevhash = mash(roll(prev))
         let headhash = mash(roll(head))
         if (bleq(t2b(''), this.rock.read_one(rkey('tock', headhash)))) {
+            debug('say/tacks tock not found, sending ask/tocks')
             return [MemoType.AskTocks, prevhash]
         }
 
@@ -196,6 +199,7 @@ class Djin {
         for (let i = 0; i < ribs.length; i++) {
             let oldtack = this.rock.read_one(rkey('tack', headhash, n2b(BigInt(i))))
             if (bleq(oldtack, t2b(''))) {
+                debug('say/tacks other tacks not found.  sending ask/tacks')
                 return [MemoType.AskTacks, headhash]
             }
         }
@@ -204,6 +208,7 @@ class Djin {
             foot => bleq(t2b(''), this.rock.read_one(rkey('tick', foot)))
         )
         if (leftfeet.length > 0) {
+            debug('say/tacks not all ticks found, sending ask/ticks')
             return [MemoType.AskTicks, leftfeet]
         }
 

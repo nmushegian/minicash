@@ -19,11 +19,12 @@ import {dbgtick, dbgtock} from "./helpers.js";
 const dbgmemo = (omemo) => {
     let type = omemo[0]
     let body = omemo[1]
-    if (MemoType.SayTocks == type) {
+    // only log on say/*
+    if ('c' == Number(type).toString(16)[0]) {
         body.forEach(tock => {
             const tock_s = rmap(tock, b2h)
             const hash = mash(roll(tock)).toString('hex')
-            debug('say/tocks in:', tock_s, hash)
+            debug('send', Number(type).toString(16), tock_s, hash)
         })
     }
 }
@@ -129,6 +130,7 @@ test('full djin jams', t=>{
                     prev = val
                 }
                 if ('want' == func) {
+                    debug(prev)
                     debug(`want (prev=[${rmap(prev, b2h)}])`)
                     t.equal(bleq(roll(rmap(cmd[1], h2b)), roll(prev)), true, `${name} want`)
                 }
