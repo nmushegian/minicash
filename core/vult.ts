@@ -92,6 +92,7 @@ function vult_full(tree :Tree, tock :Tock) :OpenMemo{ // :Memo
 
     let fees = BigInt(0)
     let valid = false
+    let cur_snap
     tree.grow(prev_snap as Snap, (rock, twig, snap) => {
         try {
 
@@ -118,6 +119,7 @@ function vult_full(tree :Tree, tock :Tock) :OpenMemo{ // :Memo
                     fees -= bnum(cash)
                 })
             })
+            cur_snap = snap
             valid = true
         } catch (e) {
             valid = false
@@ -131,7 +133,7 @@ function vult_full(tree :Tree, tock :Tock) :OpenMemo{ // :Memo
     }
 
     fees = bnum(prev_fees as Blob) + fees
-    this.rock.etch(rkey('fold', tockhash, n2b(BigInt(0))), n2b(fees))
+    this.rock.etch(rkey('fold', tockhash, n2b(BigInt(0))), roll([cur_snap, n2b(fees)]))
     this.rock.etch(rkey('know', tockhash), t2b('DV'))
     return [MemoType.AskTocks, tockhash]
 
