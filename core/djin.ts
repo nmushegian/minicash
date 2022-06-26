@@ -96,55 +96,51 @@ class Djin {
     }
 
     turn(memo :Memo) :Okay<Memo> {
-        okay(form_memo(memo))
-        try {
-            let [wellformed,,] = form_memo(memo)
-            if (!wellformed) {
-                // todo is this ok?
-                return pass(memo)
-            }
-            let copy = memo_open(memo)
-            let line = copy[0]
-            if (MemoType.AskTocks == line) {
-                // -> say/tocks | err
-                let memot = copy as MemoAskTocks
-                let out = this._ask_tocks(memot)
-                let typed = [Buffer.from([out[0]]), out[1]]
-                return pass(typed)
-            }
-            if (MemoType.AskTacks == line) {
-                // -> say/tacks | err
-                return pass(memo_close(this._ask_tacks(copy as MemoAskTacks)))
-            }
-            if (MemoType.AskTicks == line) {
-                // -> say/ticks | err
-                return pass(memo_close(this._ask_ticks(copy as MemoAskTicks)))
-            }
-            if (MemoType.SayTocks == line) {
-                // -> ask/tocks    proceed
-                // -> ask/tacks    need tacks
-                // -> err
-                let memot = memo_open(memo) as MemoSayTocks
-                let out = this._say_tocks(memot)
-                let typed = [Buffer.from([out[0]]), out[1]]
-                return pass(typed)
-            }
-            if (MemoType.SayTacks == line) {
-                // -> ask/tocks    proceed
-                // -> ask/tacks    proceed
-                // -> ask/ticks    need ticks
-                // return pass(this._say_tacks(memo)
-                return pass(memo_close(this._say_tacks(copy as MemoSayTacks)))
-            }
-            if (MemoType.SayTicks == line) {
-                // -> say/ticks    accept/rebroadcast
-                // -> err
-                return pass(memo_close(this._say_ticks(copy as MemoSayTicks)))
-            }
-            return fail(`unrecognized turn line: ${line}`)
-        } catch(e) {
-            toss(`engine panic: ${e.message}`)
+        aver(_ => okay(form_memo(memo))[0], 'memo not well-formed')
+        let [wellformed, ,] = form_memo(memo)
+        if (!wellformed) {
+            // todo is this ok?
+            return pass(memo)
         }
+        let copy = memo_open(memo)
+        let line = copy[0]
+        if (MemoType.AskTocks == line) {
+            // -> say/tocks | err
+            let memot = copy as MemoAskTocks
+            let out = this._ask_tocks(memot)
+            let typed = [Buffer.from([out[0]]), out[1]]
+            return pass(typed)
+        }
+        if (MemoType.AskTacks == line) {
+            // -> say/tacks | err
+            return pass(memo_close(this._ask_tacks(copy as MemoAskTacks)))
+        }
+        if (MemoType.AskTicks == line) {
+            // -> say/ticks | err
+            return pass(memo_close(this._ask_ticks(copy as MemoAskTicks)))
+        }
+        if (MemoType.SayTocks == line) {
+            // -> ask/tocks    proceed
+            // -> ask/tacks    need tacks
+            // -> err
+            let memot = memo_open(memo) as MemoSayTocks
+            let out = this._say_tocks(memot)
+            let typed = [Buffer.from([out[0]]), out[1]]
+            return pass(typed)
+        }
+        if (MemoType.SayTacks == line) {
+            // -> ask/tocks    proceed
+            // -> ask/tacks    proceed
+            // -> ask/ticks    need ticks
+            // return pass(this._say_tacks(memo)
+            return pass(memo_close(this._say_tacks(copy as MemoSayTacks)))
+        }
+        if (MemoType.SayTicks == line) {
+            // -> say/ticks    accept/rebroadcast
+            // -> err
+            return pass(memo_close(this._say_ticks(copy as MemoSayTicks)))
+        }
+        return fail(`unrecognized turn line: ${line}`)
     }
 
     _ask_ticks(memo :MemoAskTicks) :MemoSayTicks|MemoErr {
@@ -194,7 +190,7 @@ class Djin {
             return [MemoType.AskTocks, prevhash]
         }
 
-        this.rock.etch_one(rkey('tack', headhash), roll(tack))
+        this.rock.etch_one(rkey('tack', headhash, eye), roll(tack))
 
         for (let i = 0; i < ribs.length; i++) {
             let oldtack = this.rock.read_one(rkey('tack', headhash, n2b(BigInt(i))))

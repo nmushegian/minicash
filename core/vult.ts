@@ -3,15 +3,17 @@ import Debug from 'debug'
 import {
     aver,
     b2h,
+    b2t,
     bleq,
     bnum,
     h2b,
-    mash, MemoAskTacks,
-    MemoAskTocks, MemoErr,
+    mash,
+    MemoAskTacks,
+    MemoAskTocks,
+    MemoErr,
     MemoType,
     n2b,
     need,
-    OpenMemo,
     roll,
     Snap,
     t2b,
@@ -75,13 +77,32 @@ function vult_full(tree :Tree, tock :Tock) :MemoAskTacks|MemoAskTocks|MemoErr { 
     let [prevtockhash, root, time, fuzz] = tock
     let prevtack = unroll(tree.rock.read_one(rkey('tack', prevtockhash)))
     let tockhash = mash(roll(tock))
-    if (bleq(tree.rock.read_one(rkey('tock', tockhash)), t2b(''))) {
+    let tockfound = !bleq(tree.rock.read_one(rkey('tock', tockhash)), t2b(''))
+    if (!tockfound) {
         vult_thin(tree, tock)
         return [MemoType.AskTacks, tockhash]
     }
 
+    let tockknow = b2t(tree.rock.read_one(rkey('know', tockhash)))
+    debug("KNOW=", tockknow)
+    if ('DV' == tockknow) {
+        debug('vult_full cur tock is DV, returning ask/tocks cur_tock')
+        return [MemoType.AskTocks, tockhash]
+    }
+
+    if ('PV' == b2t(tree.rock.read_one(rkey('know', tockhash)))) {
+        // todo need to do this in a loop
+        debug('vult_full last tock is PV, trying to vult it')
+        let prevtock = unroll(tree.rock.read_one(rkey('tock', prevtockhash))) as Tock
+        let prevmemo = vult_full(tree, prevtock)
+        if (MemoType.AskTocks != prevmemo[0]) {
+            return prevmemo
+        }
+    }
+
     let firsttack_blob = tree.rock.read_one(rkey('tack', tockhash, h2b('00')))
     if (bleq(firsttack_blob, t2b(''))) {
+        debug('first tack not found, asking tacks')
         return [MemoType.AskTacks, tockhash]
     }
     let [head, , ribs, feet] = unroll(firsttack_blob) as Tack
@@ -95,7 +116,7 @@ function vult_full(tree :Tree, tock :Tock) :MemoAskTacks|MemoAskTocks|MemoErr { 
         feet.push(...feet)
     }
     let ticks = feet.map(foot => {
-        let tick = this.rock.read_one(rkey('tick', foot))
+        let tick = tree.rock.read_one(rkey('tick', foot))
         aver(_ => !bleq(tick, t2b('')), 'panic, vult, tick not found')
         return unroll(tick) as Tick
     })
@@ -146,8 +167,8 @@ function vult_full(tree :Tree, tock :Tock) :MemoAskTacks|MemoAskTocks|MemoErr { 
     }
 
     fees = bnum(prev_fees as Blob) + fees
-    this.rock.etch(rkey('fold', tockhash, n2b(BigInt(0))), roll([cur_snap, n2b(fees)]))
-    this.rock.etch(rkey('know', tockhash), t2b('DV'))
+    tree.rock.etch_one(rkey('fold', tockhash, n2b(BigInt(0))), roll([cur_snap, n2b(fees)]))
+    tree.rock.etch_one(rkey('know', tockhash), t2b('DV'))
     return [MemoType.AskTocks, tockhash]
 
     /*
