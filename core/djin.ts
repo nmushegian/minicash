@@ -1,9 +1,9 @@
 // engine
 
 import {
-    aver,
+    aver, b2h, b2t,
     bleq,
-    Blob,
+    Blob, bnum,
     fail,
     h2b,
     islist,
@@ -65,6 +65,9 @@ class Djin {
             rite.etch(rkey('tock', banghash), bangroll)
             rite.etch(rkey('work', banghash), n2b(tuff(bangroll)))
             rite.etch(rkey('fold', banghash, n2b(BigInt(0))), roll([snap, n2b(BigInt(0))]))
+            twig.etch(rkey('ment', banghash, h2b('07')), roll([banghash, h2b('20')])) // [code, cash]
+            twig.etch(rkey('know', banghash, snap), t2b('DV'))
+            twig.etch(rkey('pyre', banghash), n2b(BigInt(536112000))) // 17y
         })
         this.full = full
     }

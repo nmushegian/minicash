@@ -130,7 +130,6 @@ test('full djin jams', t=>{
                     prev = val
                 }
                 if ('want' == func) {
-                    debug(prev)
                     debug(`want (actual=[${rmap(prev, b2h)}]) expected=[${cmd[1]}`)
                     t.equal(bleq(roll(rmap(cmd[1], h2b)), roll(prev)), true, `${name} want`)
                 }
