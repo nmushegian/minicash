@@ -128,7 +128,6 @@ function vinx_tack(tock :Tock, tack :Tack) :Okay<void> {
 // returns *marginal* work, the number you sum to get cumulative work
 function vinx_tock(prev :Tock, tock :Tock) :Okay<Work> {
     try {
-        console.log("VINX START")
         aver(_ => {
             okay(form_tock(prev))
             okay(form_tock(tock))
