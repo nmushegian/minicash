@@ -21,10 +21,10 @@ import {
     MemoType,
     n2b,
     Okay,
-    okay,
+    okay, OpenMemo,
     pass,
-    roll,
-    t2b,
+    roll, Snap,
+    t2b, Tack,
     Tick,
     Tock,
     toss,
@@ -32,12 +32,13 @@ import {
     unroll
 } from './word.js'
 
-import {vult_full, vult_thin} from './vult.js'
+import {latest_fold, know, vult_full, vult_thin} from './vult.js'
 
 import {Rock} from './rock.js'
 import {rkey, Tree} from './tree.js'
 import {form_memo, form_tick, form_tock} from "./well.js";
 import Debug from 'debug'
+import {vinx_tack, vinx_tick, vinx_tock} from "./vinx.js";
 
 const debug = Debug('djin::test')
 
@@ -167,7 +168,28 @@ class Djin {
         aver(_=>body.length == 1, `panic, djin memo is not split into units`)
 
         const tick = body[0] as Tick
-        aver(_ => okay(form_tick(tick)), `panic, djin say/ticks tick not well-formed`)
+
+        let [moves, ments] = tick
+        let tock
+        let conx
+        aver(
+            _ => {
+                conx = moves
+                    .filter(move => {
+                        if (Number('0x' + b2h(move[1])) == 7) {
+                            tock = unroll(this.rock.read_one(rkey('tock', move[0]))) as Tock
+                        }
+                        return true
+                    })
+                    .map(move => unroll(this.rock.read_one(rkey('tick', move[0]))) as Tick)
+                // todo multiple block reward/subsidy transactions?
+                let res = vinx_tick(conx, tick, tock)
+                //console.error(res[2])
+                return res[0]
+            }
+            , `panic, tick must be valid-in-context`
+        )
+
         const tickhash = mash(roll(tick))
         const key = rkey('tick', tickhash)
         if (bleq(this.rock.read_one(key), h2b(''))) {
@@ -185,15 +207,16 @@ class Djin {
         let tack = tacks[0]
         let [head, eye, ribs, feet] = tack
         let prev = head[0]
+        aver(_ => {let res = vinx_tack(head, tack); console.log(res[2]); return res[0]}, `panic, tack must be valid-in-context`)
+
+        let headhash = mash(roll(head))
+        this.rock.etch_one(rkey('tack', headhash, eye), roll(tack))
 
         let prevhash = mash(roll(prev))
-        let headhash = mash(roll(head))
         if (bleq(t2b(''), this.rock.read_one(rkey('tock', headhash)))) {
             debug('say/tacks tock not found, sending ask/tocks')
             return [MemoType.AskTocks, prevhash]
         }
-
-        this.rock.etch_one(rkey('tack', headhash, eye), roll(tack))
 
         for (let i = 0; i < ribs.length; i++) {
             let oldtack = this.rock.read_one(rkey('tack', headhash, n2b(BigInt(i))))
@@ -260,9 +283,23 @@ class Djin {
         body.forEach(b => aver(_=>form_tock(b)[0], `panic, say/tocks takes a list of tocks`))
         aver(_ => body.length == 1, `panic, say/tocks memos can only hold one tock for now`) // TODO
         let tocks = body as Tock[]
-        // aver prev is possibly-valid
-
         let tock = tocks[0]
+        let prevhash = tock[0]
+        aver(_ => {
+            let prev = this.rock.read_one(rkey('tock', prevhash))
+            if (bleq(prev, t2b(''))) {
+                console.error(`panic, _say_tocks: prev not found ${b2h(prevhash)}`)
+                return false
+            }
+            let res = vinx_tock(unroll(prev) as Tock, tock)
+            if (!res[0]) debug('err: ', res[2])
+            return res[0]
+        }, 'panic, tock must be valid-in-context')
+        aver(_ => {
+            let prevknow = know(this.tree, prevhash)
+            return 'PV' == prevknow || 'DV' == prevknow
+        }, 'panic, say/tocks prev must be PV')
+
         if (this.full) {
             return vult_full(this.tree, tock) as MemoAskTacks|MemoAskTocks
         }

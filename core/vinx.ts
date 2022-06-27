@@ -116,8 +116,8 @@ function vinx_tack(tock :Tock, tack :Tack) :Okay<void> {
                 const eyenum = Number('0x' + eye.toString('hex'))
                 need(bleq(merk(chunk), ribs[i + eyenum]), 'bad merkelization')
             }
+            need(bleq(merk(ribs), root), 'bad rib merkelization')
         }
-        need(bleq(merk(ribs), root), 'bad rib merkelization')
         return pass(undefined)
     } catch (e) {
         return fail(e.message)
@@ -128,6 +128,7 @@ function vinx_tack(tock :Tock, tack :Tack) :Okay<void> {
 // returns *marginal* work, the number you sum to get cumulative work
 function vinx_tock(prev :Tock, tock :Tock) :Okay<Work> {
     try {
+        console.log("VINX START")
         aver(_ => {
             okay(form_tock(prev))
             okay(form_tock(tock))
@@ -144,4 +145,3 @@ function vinx_tock(prev :Tock, tock :Tock) :Okay<Work> {
         return fail(e.message)
     }
 }
-

@@ -126,11 +126,12 @@ test('full djin jams', t=>{
                     dbgmemo(memo_open(memo))
                     let [ok, val, err] = djin.turn(memo)
                     let out = memo_open(val)
-                    t.equal(ok, true, `${name} send`)
                     prev = val
+                    t.equal(ok, true, `${name} send`)
                 }
                 if ('want' == func) {
                     debug(`want (actual=[${rmap(prev, b2h)}]) expected=[${cmd[1]}`)
+                    debug(bleq(roll(rmap(cmd[1], h2b)), roll(prev)))
                     t.equal(bleq(roll(rmap(cmd[1], h2b)), roll(prev)), true, `${name} want`)
                 }
             })

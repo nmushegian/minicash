@@ -4,11 +4,15 @@ import {
     aver,
     b2h,
     b2t,
-    bleq, Bnum,
-    bnum, Cash, Code,
+    bleq,
+    Bnum,
+    bnum,
+    Cash,
+    Code,
     h2b,
     mash,
     MemoAskTacks,
+    MemoAskTicks,
     MemoAskTocks,
     MemoErr,
     MemoType,
@@ -20,19 +24,22 @@ import {
     Tack,
     Tick,
     Tock,
-    toss,
     tuff,
     unroll,
+    toss
 } from './word.js'
 
 import {rkey, Tree} from './tree.js'
-import {Blob, Roll} from "coreword";
+import {Blob} from "coreword";
 
-const debug = Debug('djin::test')
+const debug = Debug('vult::test')
 
 export {
     vult_thin,
-    vult_full
+    vult_full,
+    latest_fold,
+    know
+
 }
 
 function latest_fold(tree :Tree, tockhash :Blob) :[Blob, Bnum]{
@@ -98,7 +105,7 @@ function subsidy(_time :Blob) :BigInt {
 }
 // vult_full grows definitely-valid state tree
 //   (could also invalidate tock)
-function vult_full(tree :Tree, tock :Tock) :MemoAskTacks|MemoAskTocks|MemoErr { // :Memo
+function vult_full(tree :Tree, tock :Tock) :MemoAskTacks|MemoAskTocks|MemoAskTicks|MemoErr { // :Memo
     let [prevtockhash, root, time, fuzz] = tock
     let prevtack = unroll(tree.rock.read_one(rkey('tack', prevtockhash)))
     let tockhash = mash(roll(tock))
@@ -117,12 +124,7 @@ function vult_full(tree :Tree, tock :Tock) :MemoAskTacks|MemoAskTocks|MemoErr { 
     let tockknow = know(tree, tockhash)
     debug("KNOW=", tockknow)
 
-    if ('DV' == tockknow) {
-        debug('vult_full cur tock is DV, returning ask/tocks cur_tock')
-        return [MemoType.AskTocks, tockhash]
-    }
-
-    if ('PV' == tockknow) {
+    if ('PV' == know(tree, prevtockhash)) {
         // todo need to do this in a loop
         debug('vult_full last tock is PV, trying to vult it')
         let prevtock = unroll(tree.rock.read_one(rkey('tock', prevtockhash))) as Tock
@@ -148,19 +150,25 @@ function vult_full(tree :Tree, tock :Tock) :MemoAskTacks|MemoAskTocks|MemoErr { 
         let feet = (unroll(tack) as Tack)[3]
         feet.push(...feet)
     }
+
+    let leftfeet = []
     let ticks = feet.map(foot => {
         let tick = tree.rock.read_one(rkey('tick', foot))
-        aver(_ => !bleq(tick, t2b('')), 'panic, vult, tick not found')
+        if (bleq(tick, t2b(''))) {
+            leftfeet.push(tick)
+        }
         return unroll(tick) as Tick
     })
 
+    if (leftfeet.length != 0) {
+        return [MemoType.AskTicks, leftfeet]
+    }
 
     let valid = false
     let cur_snap
     let fees = BigInt(0)
     tree.grow(prev_snap as Snap, (rock, twig, snap) => {
-        //try {
-
+        try {
             ticks.forEach(tick => {
                 let tickhash = mash(roll(tick))
                 let [moves, ments] = tick
@@ -186,13 +194,10 @@ function vult_full(tree :Tree, tock :Tock) :MemoAskTacks|MemoAskTocks|MemoErr { 
             })
             cur_snap = snap
             valid = true
-            /*
         } catch (e) {
             valid = false
             toss(e)
         }
-
-             */
     })
 
     if (!valid) {
