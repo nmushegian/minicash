@@ -63,7 +63,7 @@ function know(tree :Tree, tockhash :Blob) :string {
 
     let [snap,] = unroll(prev_tail_fold)
     tree.look(snap as Snap, (rock, twig) => {
-        res = twig.read(rkey('know', tockhash, snap as Snap))
+        res = twig.read(rkey('know', tockhash))
     })
     return b2t(res)
 }
@@ -92,7 +92,7 @@ function vult_thin(tree :Tree, tock :Tock) :MemoAskTocks {
         rite.etch(rkey('fold', head, h2b('00')), roll([snap, h2b('00')])) // [snap, fees]
         // subsidy = 0x20
         twig.etch(rkey('ment', head, h2b('07')), roll([head, h2b('20')])) // [code, cash]
-        twig.etch(rkey('know', head, snap), t2b('PV'))
+        twig.etch(rkey('know', head), t2b('PV'))
         twig.etch(rkey('pyre', head), n2b(bnum(time) + BigInt(536112000)))
     })
     let best = tree.rock.read_one(rkey('best'))
@@ -199,7 +199,7 @@ function vult_full(tree :Tree, tock :Tock) :MemoAskTacks|MemoAskTocks|MemoAskTic
                 })
             })
             debug('vult_full SUCCESS, setting DV', b2h(tockhash))
-            twig.etch(rkey('know', tockhash, snap), t2b('DV'))
+            twig.etch(rkey('know', tockhash), t2b('DV'))
             cur_snap = snap
             valid = true
         } catch (e) {
