@@ -13,10 +13,6 @@ const keys = {
     cat: '1d4d8c560879214483c8645fe4b60d0fb72033c0591716c7af2df787823cf3b7',
 }
 
-export const dbgtock = (tock) => {
-    debugkey
-}
-
 export const dbgtick = (tick) => {
     debugkey(tick)
     try {

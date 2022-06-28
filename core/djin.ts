@@ -178,6 +178,7 @@ class Djin {
                     .filter(move => {
                         if (Number('0x' + b2h(move[1])) == 7) {
                             tock = unroll(this.rock.read_one(rkey('tock', move[0]))) as Tock
+                            return false
                         }
                         return true
                     })
