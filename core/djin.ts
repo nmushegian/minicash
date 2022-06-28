@@ -243,7 +243,6 @@ class Djin {
 
         let tacks = []
         for (let eye = 0; eye <= 128; eye++) {
-            console.log(n2b(BigInt(eye)))
             let tackroll = this.rock.read_one(rkey('tack', tockhash, n2b(BigInt(eye))))
             if (bleq(tackroll, t2b(''))) {
                 break
@@ -299,7 +298,7 @@ class Djin {
         aver(_ => {
             let prevknow = know(this.tree, prevhash)
             return 'PV' == prevknow || 'DV' == prevknow
-        }, 'panic, say/tocks prev must be PV')
+        }, `panic, say/tocks prev must be PV (${b2h(prevhash)})`)
 
         if (this.full) {
             return vult_full(this.tree, tock) as MemoAskTacks|MemoAskTocks
