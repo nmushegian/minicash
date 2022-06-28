@@ -32,7 +32,7 @@ import {
     unroll
 } from './word.js'
 
-import {latest_fold, know, vult_full, vult_thin} from './vult.js'
+import {latest_fold, know, vult_full, vult_thin, vult_tack, vult_tick} from './vult.js'
 
 import {Rock} from './rock.js'
 import {rkey, Tree} from './tree.js'
@@ -193,14 +193,7 @@ class Djin {
             , `panic, tick must be valid-in-context`
         )
 
-        const tickhash = mash(roll(tick))
-        const key = rkey('tick', tickhash)
-        if (bleq(this.rock.read_one(key), h2b(''))) {
-            this.rock.etch_one(rkey('tick', tickhash), roll(tick))
-            return [memo[0], [tick]]
-        }
-
-        return [MemoType.Err, ['invalid', memo_close(memo)]]
+        return vult_tick(this.tree, tick)
     }
 
     _say_tacks(memo :MemoSayTacks) :MemoAskTocks|MemoAskTacks|MemoAskTicks|MemoErr {
@@ -213,34 +206,7 @@ class Djin {
         aver(_ => {let res = vinx_tack(head, tack); return res[0]}, `panic, tack must be valid-in-context`)
 
         let headhash = mash(roll(head))
-        this.rock.etch_one(rkey('tack', headhash, eye), roll(tack))
-
-        let prevhash = mash(roll(prev))
-        if (bleq(t2b(''), this.rock.read_one(rkey('tock', headhash)))) {
-            debug('say/tacks tock not found, sending ask/tocks')
-            return [MemoType.AskTocks, prevhash]
-        }
-
-        for (let i = 0; i < ribs.length; i++) {
-            let oldtack = this.rock.read_one(rkey('tack', headhash, n2b(BigInt(i))))
-            if (bleq(oldtack, t2b(''))) {
-                debug('say/tacks other tacks not found.  sending ask/tacks')
-                return [MemoType.AskTacks, headhash]
-            }
-        }
-
-        let leftfeet = feet.filter(
-            foot => bleq(t2b(''), this.rock.read_one(rkey('tick', foot)))
-        )
-        if (leftfeet.length > 0) {
-            debug('say/tacks not all ticks found, sending ask/ticks')
-            return [MemoType.AskTicks, leftfeet]
-        }
-
-        if (this.full) {
-            return vult_full(this.tree, head)
-        }
-        return vult_thin(this.tree, head)
+        return vult_tack(this.tree, tack)
     }
 
     _ask_tacks(memo :MemoAskTacks) :MemoSayTacks {

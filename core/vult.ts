@@ -11,10 +11,12 @@ import {
     Code,
     h2b,
     mash,
+    memo_close,
     MemoAskTacks,
     MemoAskTicks,
     MemoAskTocks,
     MemoErr,
+    MemoSayTicks,
     MemoType,
     n2b,
     need,
@@ -24,9 +26,9 @@ import {
     Tack,
     Tick,
     Tock,
+    toss,
     tuff,
-    unroll,
-    toss
+    unroll
 } from './word.js'
 
 import {rkey, Tree} from './tree.js'
@@ -38,7 +40,9 @@ export {
     vult_thin,
     vult_full,
     latest_fold,
-    know
+    know,
+    vult_tack,
+    vult_tick
 
 }
 
@@ -107,6 +111,38 @@ function vult_thin(tree :Tree, tock :Tock) :MemoAskTocks {
 
 function subsidy(_time :Blob) :BigInt {
     return BigInt(50)
+}
+
+function vult_tick(tree :Tree, tick :Tick) :MemoSayTicks|MemoErr{
+    const tickhash = mash(roll(tick))
+    const key = rkey('tick', tickhash)
+    const memo = [MemoType.SayTicks, [tick]] as MemoSayTicks
+    if (bleq(tree.rock.read_one(key), h2b(''))) {
+        tree.rock.etch_one(rkey('tick', tickhash), roll(tick))
+        return memo
+    }
+
+    return [MemoType.Err, ['invalid', memo_close(memo)]]
+}
+
+function vult_tack(tree :Tree, tack :Tack, full=false) :MemoAskTocks|MemoAskTacks|MemoAskTicks|MemoErr {
+    let [head, eye, ribs, feet] = tack
+    let headhash = mash(roll(head))
+    let prev = head[0]
+    let prevhash = mash(roll(prev))
+    tree.rock.etch_one(rkey('tack', mash(roll(head)), eye), roll(tack))
+
+    let tockroll = this.rock.read_one(rkey('tock', headhash))
+    if (bleq(t2b(''), tockroll)) {
+        debug('vult_tack tock not found, sending ask/tocks')
+        return [MemoType.AskTocks, prevhash]
+    }
+
+    if (full) {
+        return vult_full(tree, head)
+    }
+
+    return vult_thin(tree, head)
 }
 // vult_full grows definitely-valid state tree
 //   (could also invalidate tock)
