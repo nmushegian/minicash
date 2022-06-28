@@ -237,7 +237,10 @@ class Djin {
             return [MemoType.AskTicks, leftfeet]
         }
 
-        return (this.full ? vult_full(this.tree, head) : vult_thin(this.tree, head)) as MemoAskTocks
+        if (this.full) {
+            return vult_full(this.tree, head)
+        }
+        return vult_thin(this.tree, head)
     }
 
     _ask_tacks(memo :MemoAskTacks) :MemoSayTacks {
