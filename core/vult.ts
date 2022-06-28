@@ -212,6 +212,7 @@ function vult_full(tree :Tree, tock :Tock) :MemoAskTacks|MemoAskTocks|MemoAskTic
     let valid = false
     let cur_snap
     let fees = BigInt(0)
+    let subsidy = bnum(h2b('ff00000000'))
     tree.grow(prev_snap as Snap, (rite, twig, snap) => {
         try {
             ticks.forEach(tick => {
@@ -238,13 +239,14 @@ function vult_full(tree :Tree, tock :Tock) :MemoAskTacks|MemoAskTocks|MemoAskTic
                     fees -= bnum(cash)
                 })
             })
+            need(fees >= BigInt(0), `fees can't be < 0 (fees=${fees}) block=${b2h(tockhash)}`)
             debug('vult_full SUCCESS, setting DV', b2h(tockhash))
+            twig.etch(rkey('ment', tockhash, h2b('07')), roll([tockhash, n2b(subsidy)]))
             twig.etch(rkey('know', tockhash), t2b('DV'))
             cur_snap = snap
             valid = true
         } catch (e) {
             valid = false
-            toss(e.message)
         }
     })
 

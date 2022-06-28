@@ -11,7 +11,7 @@ import {
     okay,
     roll, h2b,
     mash, memo, merk, MemoType,
-    need, rmap, memo_open, bleq, b2h
+    need, rmap, memo_open, bleq, b2h, t2b
 } from '../core/word.js'
 import {readdirSync, readFileSync} from "fs";
 import {dbgtick} from "./helpers.js";
@@ -28,6 +28,13 @@ const dbgmemo = (omemo) => {
             if (MemoType.SayTicks == type) dbgtick(t)
         })
     }
+}
+
+const flatten = x => {
+    if (isNaN(Number('0x'+x))) {
+        return t2b(x)
+    }
+    return h2b(x)
 }
 
 test('djin', t=>{ try {
@@ -94,8 +101,9 @@ test('djin jams', t=>{
                 }
                 if ('want' == func) {
                     debug(`want (actual=[${rmap(prev, b2h)}]) expected=[${cmd[1]}`)
-                    debug(bleq(roll(rmap(cmd[1], h2b)), roll(prev)))
-                    if (!bleq(roll(rmap(cmd[1], h2b)), roll(prev))) {
+                    debug(bleq(roll(rmap(cmd[1], flatten)), roll(prev)))
+                    if (!bleq(roll(rmap(cmd[1], flatten)), roll(prev))) {
+                        console.log(`want fail expected`, cmd[1], 'actual', rmap(prev, b2h))
                         t.fail(`want fail expected=${cmd[1]} actual=${rmap(prev, b2h)}`)
                     }
                 }
@@ -131,8 +139,9 @@ test('full djin jams', t=>{
                 }
                 if ('want' == func) {
                     debug(`want (actual=[${rmap(prev, b2h)}]) expected=[${cmd[1]}`)
-                    debug(bleq(roll(rmap(cmd[1], h2b)), roll(prev)))
-                    if (!bleq(roll(rmap(cmd[1], h2b)), roll(prev))) {
+                    debug(bleq(roll(rmap(cmd[1], flatten)), roll(prev)))
+                    if (!bleq(roll(rmap(cmd[1], flatten)), roll(prev))) {
+                        console.log(`want fail expected`, cmd[1], 'actual', rmap(prev, b2h))
                         t.fail(`want fail expected=${cmd[1]} actual=${rmap(prev, b2h)}`)
                     }
                 }

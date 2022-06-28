@@ -66,7 +66,7 @@ class Djin {
             rite.etch(rkey('tock', banghash), bangroll)
             rite.etch(rkey('work', banghash), n2b(tuff(bangroll)))
             rite.etch(rkey('fold', banghash, n2b(BigInt(0))), roll([snap, n2b(BigInt(0))]))
-            twig.etch(rkey('ment', banghash, h2b('07')), roll([banghash, h2b('20')])) // [code, cash]
+            twig.etch(rkey('ment', banghash, h2b('07')), roll([banghash, h2b('ff00000000')])) // [code, cash]
             twig.etch(rkey('know', banghash), t2b('DV'))
             twig.etch(rkey('pyre', banghash), n2b(BigInt(536112000))) // 17y
         })
@@ -113,9 +113,7 @@ class Djin {
         if (MemoType.AskTocks == line) {
             // -> say/tocks | err
             let memot = copy as MemoAskTocks
-            let out = this._ask_tocks(memot)
-            let typed = [Buffer.from([out[0]]), out[1]]
-            return pass(typed)
+            return pass(memo_close(this._ask_tocks(memot)))
         }
         if (MemoType.AskTacks == line) {
             // -> say/tacks | err
@@ -130,9 +128,7 @@ class Djin {
             // -> ask/tacks    need tacks
             // -> err
             let memot = memo_open(memo) as MemoSayTocks
-            let out = this._say_tocks(memot)
-            let typed = [Buffer.from([out[0]]), out[1]]
-            return pass(typed)
+            return pass(memo_close(this._say_tocks(memot)))
         }
         if (MemoType.SayTacks == line) {
             // -> ask/tocks    proceed

@@ -59,10 +59,16 @@ function mash(x :Blob) :Mash {
 }
 
 function memo_open(m :Memo) :OpenMemo {
+    let line = m[0][0]
     return [m[0][0], m[1]] as OpenMemo
 }
 
 function memo_close(m :OpenMemo) :Memo {
+    let line = m[0]
+    if (MemoType.Err == line) {
+        let merr = m as MemoErr
+        return [Buffer.from([merr[0]]), [t2b(merr[1][0]), merr[1][1]]]
+    }
     return [Buffer.from([m[0]]), m[1]] as Memo
 }
 
