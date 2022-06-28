@@ -78,8 +78,10 @@ class Djin {
     }
 
     async *spin(memo) {
-        // aver well-formed
-        // aver valid-in-context
+        // todo aver well-formed
+        // todo aver valid-in-context
+
+
         // split up memo into units
         // turn/reflect/yield K turns at a time
         //   one unit memo can cause more than one turn

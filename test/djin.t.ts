@@ -30,7 +30,6 @@ const dbgmemo = (omemo) => {
     }
 }
 
-/*
 test('djin', t=>{ try {
     let djin = new Djin('test/db', true)
     let out
@@ -70,7 +69,7 @@ test('djin', t=>{ try {
 
 
 test('djin jams', t=>{
-    let dir = './test/case/djin/'
+    let dir = './test/case/djin/thin/'
     let cases = readdirSync(dir)
 
     cases.forEach(name => {
@@ -102,7 +101,6 @@ test('djin jams', t=>{
         })
     })
 })
-*/
 
 
 test('full djin jams', t=>{
