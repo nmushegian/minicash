@@ -93,15 +93,17 @@ test('djin jams', t=>{
                     prev = val
                 }
                 if ('want' == func) {
-                    debug(`want (prev=[${rmap(prev, b2h)}])`)
-                    t.equal(bleq(roll(rmap(cmd[1], h2b)), roll(prev)), true, `${name} want`)
+                    debug(`want (actual=[${rmap(prev, b2h)}]) expected=[${cmd[1]}`)
+                    debug(bleq(roll(rmap(cmd[1], h2b)), roll(prev)))
+                    if (!bleq(roll(rmap(cmd[1], h2b)), roll(prev))) {
+                        t.fail(`want fail expected=${cmd[1]} actual=${rmap(prev, b2h)}`)
+                    }
                 }
             })
             djin.kill()
         })
     })
 })
-
 
 test('full djin jams', t=>{
     let dir = './test/case/djin/full/'
@@ -130,7 +132,6 @@ test('full djin jams', t=>{
                 if ('want' == func) {
                     debug(`want (actual=[${rmap(prev, b2h)}]) expected=[${cmd[1]}`)
                     debug(bleq(roll(rmap(cmd[1], h2b)), roll(prev)))
-                    //t.equal(bleq(roll(rmap(cmd[1], h2b)), roll(prev)), true, `${name} want`)
                     if (!bleq(roll(rmap(cmd[1], h2b)), roll(prev))) {
                         t.fail(`want fail expected=${cmd[1]} actual=${rmap(prev, b2h)}`)
                     }

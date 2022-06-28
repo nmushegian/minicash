@@ -98,7 +98,7 @@ function vult_thin(tree :Tree, tock :Tock) :MemoAskTocks {
     let best = tree.rock.read_one(rkey('best'))
     let best_work = tree.rock.read_one(rkey('work', best))
     if (bnum(this_work) > bnum(best_work)) {
-        debug(`WORK: ${b2h(this_work)}, ${b2h(best_work)}`)
+        debug(`new best block: ${b2h(head)} (new work: ${b2h(this_work)}, old work: ${b2h(best_work)})`)
         tree.rock.etch_one(rkey('best'), head)
     }
     debug('vult_thin: grew', b2h(head), 'to PV')
