@@ -74,7 +74,7 @@ test('djin jams', t=>{
 
     cases.forEach(name => {
         if (!name.endsWith('.jams')) return
-        test(`${name}`, t => {
+        test(`thin ${name}`, t => {
             debug(`TESTING: ${name}`)
             let djin = new Djin('./test/db', true)
             let path = dir + name
@@ -89,7 +89,7 @@ test('djin jams', t=>{
                     dbgmemo(memo_open(memo))
                     let [ok, val, err] = djin.turn(memo)
                     let out = memo_open(val)
-                    t.equal(ok, true, `${name} send`)
+                    t.equal(ok, true, `${name} send ${rmap(val, b2h)}`)
                     prev = val
                 }
                 if ('want' == func) {
@@ -105,14 +105,13 @@ test('djin jams', t=>{
     })
 })
 
-/*
 test('full djin jams', t=>{
     let dir = './test/case/djin/full/'
     let cases = readdirSync(dir)
 
     cases.forEach(name => {
         if (!name.endsWith('.jams')) return
-        test(`${name}`, t => {
+        test(`full ${name}`, t => {
             debug(`TESTING: ${dir + name}`)
             let djin = new Djin('./test/db', true, true)
             let path = dir + name
@@ -128,7 +127,7 @@ test('full djin jams', t=>{
                     let [ok, val, err] = djin.turn(memo)
                     let out = memo_open(val)
                     prev = val
-                    t.equal(ok, true, `${name} send`)
+                    t.equal(ok, true, `${name} send ${rmap(cmd[1], b2h)}`)
                 }
                 if ('want' == func) {
                     debug(`want (actual=[${rmap(prev, b2h)}]) expected=[${cmd[1]}`)
@@ -142,5 +141,3 @@ test('full djin jams', t=>{
         })
     })
 })
-
- */

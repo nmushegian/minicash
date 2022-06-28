@@ -19,7 +19,7 @@ import {
     MemoSayTicks,
     MemoSayTocks,
     MemoType,
-    n2b,
+    n2b, need,
     Okay,
     okay, OpenMemo,
     pass, rmap,
@@ -206,7 +206,11 @@ class Djin {
         aver(_ => {let res = vinx_tack(head, tack); return res[0]}, `panic, tack must be valid-in-context`)
 
         let headhash = mash(roll(head))
-        return vult_tack(this.tree, tack)
+        if (this.full) {
+            return vult_tack(this.tree, tack, true)
+        } else {
+            return vult_tack(this.tree, tack)
+        }
     }
 
     _ask_tacks(memo :MemoAskTacks) :MemoSayTacks {

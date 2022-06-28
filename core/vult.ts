@@ -19,7 +19,7 @@ import {
     MemoSayTicks,
     MemoType,
     n2b,
-    need,
+    need, rmap,
     roll,
     Snap,
     t2b,
@@ -130,9 +130,9 @@ function vult_tack(tree :Tree, tack :Tack, full=false) :MemoAskTocks|MemoAskTack
     let headhash = mash(roll(head))
     let prev = head[0]
     let prevhash = mash(roll(prev))
-    tree.rock.etch_one(rkey('tack', mash(roll(head)), eye), roll(tack))
+    tree.rock.etch_one(rkey('tack', headhash, eye), roll(tack))
 
-    let tockroll = this.rock.read_one(rkey('tock', headhash))
+    let tockroll = tree.rock.read_one(rkey('tock', headhash))
     if (bleq(t2b(''), tockroll)) {
         debug('vult_tack tock not found, sending ask/tocks')
         return [MemoType.AskTocks, prevhash]
@@ -142,7 +142,11 @@ function vult_tack(tree :Tree, tack :Tack, full=false) :MemoAskTocks|MemoAskTack
         return vult_full(tree, head)
     }
 
-    return vult_thin(tree, head)
+    if (bleq(t2b(''), tockroll)) {
+        return vult_thin(tree, head)
+    }
+
+    return [MemoType.AskTocks, headhash]
 }
 // vult_full grows definitely-valid state tree
 //   (could also invalidate tock)
@@ -196,7 +200,7 @@ function vult_full(tree :Tree, tock :Tock) :MemoAskTacks|MemoAskTocks|MemoAskTic
     let ticks = feet.map(foot => {
         let tick = tree.rock.read_one(rkey('tick', foot))
         if (bleq(tick, t2b(''))) {
-            leftfeet.push(tick)
+            leftfeet.push(foot)
         }
         return unroll(tick) as Tick
     })
