@@ -105,6 +105,7 @@ test('djin jams', t=>{
     })
 })
 
+/*
 test('full djin jams', t=>{
     let dir = './test/case/djin/full/'
     let cases = readdirSync(dir)
@@ -141,3 +142,5 @@ test('full djin jams', t=>{
         })
     })
 })
+
+ */

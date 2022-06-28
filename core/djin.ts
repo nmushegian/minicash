@@ -22,7 +22,7 @@ import {
     n2b,
     Okay,
     okay, OpenMemo,
-    pass,
+    pass, rmap,
     roll, Snap,
     t2b, Tack,
     Tick,
@@ -237,7 +237,7 @@ class Djin {
             return [MemoType.AskTicks, leftfeet]
         }
 
-        return vult_full(this.tree, head) as MemoAskTocks
+        return (this.full ? vult_full(this.tree, head) : vult_thin(this.tree, head)) as MemoAskTocks
     }
 
     _ask_tacks(memo :MemoAskTacks) :MemoSayTacks {

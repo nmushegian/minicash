@@ -75,12 +75,12 @@ function vult_thin(tree :Tree, tock :Tock) :MemoAskTocks {
     // aver well/vinx
     let [prev, root, time, fuzz] = tock
     let head = mash(roll(tock))
-    debug('vult_thin', b2h(head))
     let prev_head = tock[0]
     let prev_tock = unroll(tree.rock.read_one(rkey('tock', prev_head)))
     aver(_ => prev_tock.length > 0, `vulting a tock with unrecognized prev`)
     let prev_work = tree.rock.read_one(rkey('work', prev_head))
     let this_work = n2b(bnum(prev_work) + tuff(head))
+    debug('vult_thin', b2h(head), 'work=', b2h(this_work))
     let prev_foldandidx = latest_fold(tree, prev_head)
     let [prev_fold,] = prev_foldandidx
     //let prev_fold = tree.rock.read_one(rkey('fold', prev_head, n2b(BigInt(0))))
