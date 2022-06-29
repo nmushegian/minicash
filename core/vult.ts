@@ -114,6 +114,7 @@ function subsidy(_time :Blob) :BigInt {
 }
 
 function vult_tick(tree :Tree, tick :Tick) :MemoSayTicks|MemoErr{
+    debug(`vult_tick ${rmap(tick, b2h)}`)
     const tickhash = mash(roll(tick))
     const key = rkey('tick', tickhash)
     const memo = [MemoType.SayTicks, [tick]] as MemoSayTicks

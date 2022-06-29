@@ -26,6 +26,7 @@ const dbgmemo = (omemo) => {
             const hash = mash(roll(t)).toString('hex')
             debug('send', Number(type).toString(16), t_s, hash)
             if (MemoType.SayTicks == type) dbgtick(t)
+            if (MemoType.SayTacks == type) debug(`merk: ${b2h(merk(t[3]))}`)
         })
     }
 }

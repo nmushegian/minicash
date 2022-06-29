@@ -16,7 +16,7 @@ import {
     Bnum, bnum, bleq, mash, roll, t2b,
     Cash, Byte, Work, Fees, Code, Pubk, tuff,
     scry, addr,
-    Tick, Tock, Tack, b2h, merk
+    Tick, Tock, Tack, b2h, merk, rmap
 } from './word.js'
 
 import {
@@ -40,6 +40,7 @@ function _checksig(tick :Tick, i :number, lock :Code) :boolean {
         [ move ],  // blob[][]
         ments      // blob[][]
     ])
+    move[2] = sign
     let pubk = scry(mask, sign)
     let code = addr(pubk)
     return bleq(code, lock)
