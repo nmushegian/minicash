@@ -75,45 +75,54 @@ test('djin', t=>{ try {
     djin.kill()
 } catch(e) { console.log(e); t.ok(false, e.message); }})
 
+const runcase = (dir, name, full=false) => {
+    if (!name.endsWith('.jams')) return
+    test(`${full ? 'full' : 'thin'} ${name}`, t => {
+        debug(`TESTING: ${dir + name}`)
+        let djin = new Djin('./test/db', true, full)
+        let path = dir + name
+        let file = readFileSync(path)
+        let data = jams(file.toString())
+        let prev
+        data.forEach((cmd, idx) => {
+            let func = cmd[0]
+            need(func == 'send' || func == 'want', 'only doing send and want for now...')
+            if ('send' == func) {
+                let memo = rmap(cmd[1], h2b)
+                dbgmemo(memo_open(memo))
+                let [ok, val, err] = djin.turn(memo)
+                let out = memo_open(val)
+                prev = val
+                t.equal(ok, true, `${name} send ${rmap(cmd[1], b2h)}`)
+            }
+            if ('want' == func) {
+                debug(`want (actual=[${rmap(prev, b2h)}]) expected=[${cmd[1]}`)
+                debug(bleq(roll(rmap(cmd[1], flatten)), roll(prev)))
+                if (!bleq(roll(rmap(cmd[1], flatten)), roll(prev))) {
+                    console.log(`want fail expected`, cmd[1], 'actual', rmap(prev, b2h))
+                    t.fail(`want fail expected=${cmd[1]} actual=${rmap(prev, b2h)}`)
+                }
+            }
+        })
+        djin.kill()
+    })
+}
 
 test('djin jams', t=>{
     let dir = './test/case/djin/thin/'
     let cases = readdirSync(dir)
 
-    cases.forEach(name => {
-        if (!name.endsWith('.jams')) return
-        test(`thin ${name}`, t => {
-            debug(`TESTING: ${name}`)
-            let djin = new Djin('./test/db', true)
-            let path = dir + name
-            let file = readFileSync(path)
-            let data = jams(file.toString())
-            let prev
-            data.forEach((cmd, idx) => {
-                let func = cmd[0]
-                need(func == 'send' || func == 'want', 'only doing send and want for now...')
-                if ('send' == func) {
-                    let memo = rmap(cmd[1], h2b)
-                    dbgmemo(memo_open(memo))
-                    let [ok, val, err] = djin.turn(memo)
-                    let out = memo_open(val)
-                    t.equal(ok, true, `${name} send ${rmap(val, b2h)}`)
-                    prev = val
-                }
-                if ('want' == func) {
-                    debug(`want (actual=[${rmap(prev, b2h)}]) expected=[${cmd[1]}`)
-                    debug(bleq(roll(rmap(cmd[1], flatten)), roll(prev)))
-                    if (!bleq(roll(rmap(cmd[1], flatten)), roll(prev))) {
-                        console.log(`want fail expected`, cmd[1], 'actual', rmap(prev, b2h))
-                        t.fail(`want fail expected=${cmd[1]} actual=${rmap(prev, b2h)}`)
-                    }
-                }
-            })
-            djin.kill()
-        })
-    })
+    cases.forEach(c => runcase(dir, c))
 })
 
+test('full djin jams', t=>{
+    let dir = './test/case/djin/full/'
+    let cases = readdirSync(dir)
+
+    cases.forEach(c => runcase(dir, c, true))
+})
+
+/*
 test('full djin jams', t=>{
     let dir = './test/case/djin/full/'
     let cases = readdirSync(dir)
@@ -151,3 +160,5 @@ test('full djin jams', t=>{
         })
     })
 })
+
+ */
