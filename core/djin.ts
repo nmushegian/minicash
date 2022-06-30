@@ -248,7 +248,7 @@ class Djin {
 
     // 'say/tocks Tock[]  ->  'ask/tocks tock:Mash
     //                    ->  'ask/tacks tock:Mash,i:num
-    _say_tocks(memo :MemoSayTocks) :(MemoAskTocks|MemoAskTacks) {
+    _say_tocks(memo :MemoSayTocks) :(MemoAskTocks|MemoAskTacks|MemoAskTicks) {
         let [line, body] = memo
         aver(_=>islist(body), `panic, say/tocks takes a list`)
         body.forEach(b => aver(_=>form_tock(b)[0], `panic, say/tocks takes a list of tocks`))
@@ -272,7 +272,7 @@ class Djin {
         }, `panic, say/tocks prev must be PV (${b2h(prevhash)})`)
 
         if (this.full) {
-            return vult_full(this.tree, tock) as MemoAskTacks|MemoAskTocks
+            return vult_full(this.tree, tock) as MemoAskTacks|MemoAskTocks|MemoAskTicks
         }
 
         return vult_thin(this.tree, tock) as MemoAskTocks

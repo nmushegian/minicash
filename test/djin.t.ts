@@ -99,7 +99,6 @@ const runcase = (dir, name, full=false) => {
                 debug(`want (actual=[${rmap(prev, b2h)}]) expected=[${cmd[1]}`)
                 debug(bleq(roll(rmap(cmd[1], flatten)), roll(prev)))
                 if (!bleq(roll(rmap(cmd[1], flatten)), roll(prev))) {
-                    console.log(`want fail expected`, cmd[1], 'actual', rmap(prev, b2h))
                     t.fail(`want fail expected=${cmd[1]} actual=${rmap(prev, b2h)}`)
                 }
             }
@@ -121,3 +120,5 @@ test('full djin jams', t=>{
 
     cases.forEach(c => runcase(dir, c, true))
 })
+
+//runcase('./test/case/djin/full/', 'djin_2cycles_noduptock.jams', true)
