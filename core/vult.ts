@@ -240,7 +240,6 @@ function vult_full(tree :Tree, tock :Tock) :MemoAskTacks|MemoAskTocks|MemoAskTic
                 let [moves, ments] = tick
                 moves.forEach(move => {
                     let [txin, idx, sign] = move
-                    // todo why?  we can get the ment from the tick (read(rkey('tick', txin))[1][idx])
                     let ment = twig.read(rkey('ment', txin, idx))
                     need(!bleq(ment, t2b('')), `ment must exist txin=${b2h(txin)} idx=${b2h(idx)}`)
                     need(bleq(twig.read(rkey('pent', txin, idx)), t2b('')), 'move must be unspent')
@@ -253,16 +252,18 @@ function vult_full(tree :Tree, tock :Tock) :MemoAskTacks|MemoAskTocks|MemoAskTic
                 })
                 ments.forEach((ment, idx) => {
                     twig.etch(rkey('ment', tickhash, n2b(BigInt(idx))), roll(ment))
-                    let pyre = bnum(time) + BigInt(536112000) // 17y
-                    twig.etch(rkey('pyre', tickhash), n2b(pyre))
                     let [code, cash] = ment
                     fees -= bnum(cash)
                 })
+                let pyre = bnum(time) + BigInt(536112000)
+                twig.etch(rkey('pyre', tickhash), n2b(pyre))
             })
             need(fees >= BigInt(0), `fees can't be < 0 (fees=${fees}) block=${b2h(tockhash)}`)
             debug('vult_full SUCCESS, setting DV', b2h(tockhash))
             twig.etch(rkey('ment', tockhash, h2b('07')), roll([tockhash, n2b(subsidy)]))
             twig.etch(rkey('know', tockhash), t2b('DV'))
+            let pyre = bnum(time) + BigInt(536112000)
+            twig.etch(rkey('pyre', tockhash), n2b(pyre))
             cur_snap = snap
             valid = true
         } catch (e) {

@@ -183,7 +183,7 @@ class Djin {
                     .map(move => unroll(this.rock.read_one(rkey('tick', move[0]))) as Tick)
                 // todo multiple block reward/subsidy transactions?
                 let res = vinx_tick(conx, tick, tock)
-                //console.error(res[2])
+                console.error(res[2])
                 return res[0]
             }
             , `panic, tick must be valid-in-context`
