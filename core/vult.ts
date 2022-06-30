@@ -82,7 +82,6 @@ function vult_thin(tree :Tree, tock :Tock) :MemoAskTocks|MemoErr {
     if (!bleq(t2b(''), tree.rock.read_one(rkey('tock', head)))) {
         let tockknow = know(tree, head)
         if ('PV' == tockknow || 'DV' == tockknow) {
-            console.log("THIN!!! tockknow")
             return [MemoType.AskTocks, head]
         }
     }
@@ -258,7 +257,6 @@ function vult_full(tree :Tree, tock :Tock) :MemoAskTacks|MemoAskTocks|MemoAskTic
                     twig.etch(rkey('pyre', tickhash), n2b(pyre))
                     let [code, cash] = ment
                     fees -= bnum(cash)
-                    console.log('FEE:', fees, b2t(twig.read(rkey('know', prevtockhash))))
                 })
             })
             need(fees >= BigInt(0), `fees can't be < 0 (fees=${fees}) block=${b2h(tockhash)}`)
