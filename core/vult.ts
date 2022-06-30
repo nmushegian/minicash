@@ -82,6 +82,10 @@ function vult_best(tree :Tree, tockhash :Blob) {
     }
 }
 
+function subsidy(time :Bnum) :Bnum {
+    return BigInt('0xff00000000')
+}
+
 // vult_thin grows possibly-valid state tree
 //   (could also invalidate tock)
 function vult_thin(tree :Tree, tock :Tock, updatebest :boolean =true) :MemoAskTocks|MemoErr {
@@ -106,14 +110,13 @@ function vult_thin(tree :Tree, tock :Tock, updatebest :boolean =true) :MemoAskTo
     //let prev_fold = tree.rock.read_one(rkey('fold', prev_head, n2b(BigInt(0))))
     aver(_ => prev_fold.length > 0, `prev fold must exist`)
     let [prev_snap, ,] = unroll(prev_fold)
-    let subsidy = bnum(h2b('ff00000000'))
     tree.grow(prev_snap as Snap, (rite, twig, snap) => {
         rite.etch(rkey('tock', head), roll(tock))
         rite.etch(rkey('work', head), this_work)
         rite.etch(rkey('fold', head, h2b('00')), roll([snap, h2b('00')])) // [snap, fees]
         twig.etch(rkey('know', head), t2b('PV'))
         twig.etch(rkey('pyre', head), n2b(bnum(time) + BigInt(536112000)))
-        twig.etch(rkey('ment', head, h2b('07')), roll([head, n2b(subsidy)])) // [code, cash]
+        twig.etch(rkey('ment', head, h2b('07')), roll([head, n2b(subsidy(bnum(time)))])) // [code, cash]
         let pyre = bnum(time) + BigInt(536112000)
         twig.etch(rkey('pyre', head), n2b(pyre))
     })
@@ -124,9 +127,6 @@ function vult_thin(tree :Tree, tock :Tock, updatebest :boolean =true) :MemoAskTo
     return [MemoType.AskTocks, head]
 }
 
-function subsidy(_time :Blob) :BigInt {
-    return BigInt(50)
-}
 
 function vult_tick(tree :Tree, tick :Tick) :MemoSayTicks|MemoErr{
     debug(`vult_tick ${rmap(tick, b2h)} hash=${b2h(mash(roll(tick)))}`)
