@@ -37,6 +37,7 @@ export {
     MemoType,// enum export as value not type
     memo_open,
     memo_close,
+    extend
 }
 
 function t2b(x :string) :Blob {
@@ -56,6 +57,14 @@ function addr(x :Blob) :Code {
 }
 function mash(x :Blob) :Mash {
     return chop(hash(x), 24)
+}
+
+function extend(x :Blob, n) :Blob {
+    let head = n - x.length
+    if (head > 0) {
+        return Buffer.concat([Buffer.from('00'.repeat(head), 'hex'), x])
+    }
+    return x
 }
 
 function memo_open(m :Memo) :OpenMemo {
