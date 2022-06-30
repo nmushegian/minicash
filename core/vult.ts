@@ -72,9 +72,19 @@ function know(tree :Tree, tockhash :Blob) :string {
     return b2t(res)
 }
 
+function vult_best(tree :Tree, tockhash :Blob) {
+    let this_work = tree.rock.read_one(rkey('work', tockhash))
+    let best = tree.rock.read_one(rkey('best'))
+    let best_work = tree.rock.read_one(rkey('work', best))
+    if (bnum(this_work) > bnum(best_work)) {
+        debug(`new best block: ${b2h(tockhash)} (new work: ${b2h(this_work)}, old work: ${b2h(best_work)})`)
+        tree.rock.etch_one(rkey('best'), tockhash)
+    }
+}
+
 // vult_thin grows possibly-valid state tree
 //   (could also invalidate tock)
-function vult_thin(tree :Tree, tock :Tock) :MemoAskTocks|MemoErr {
+function vult_thin(tree :Tree, tock :Tock, updatebest :boolean =true) :MemoAskTocks|MemoErr {
     // aver prev tock must exist
     // aver well/vinx
     let [prev, root, time, fuzz] = tock
@@ -105,11 +115,8 @@ function vult_thin(tree :Tree, tock :Tock) :MemoAskTocks|MemoErr {
         twig.etch(rkey('know', head), t2b('PV'))
         twig.etch(rkey('pyre', head), n2b(bnum(time) + BigInt(536112000)))
     })
-    let best = tree.rock.read_one(rkey('best'))
-    let best_work = tree.rock.read_one(rkey('work', best))
-    if (bnum(this_work) > bnum(best_work)) {
-        debug(`new best block: ${b2h(head)} (new work: ${b2h(this_work)}, old work: ${b2h(best_work)})`)
-        tree.rock.etch_one(rkey('best'), head)
+    if (updatebest) {
+        vult_best(tree, head)
     }
     debug('vult_thin: grew', b2h(head), 'to PV')
     return [MemoType.AskTocks, head]
@@ -150,11 +157,13 @@ function vult_tack(tree :Tree, tack :Tack, full=false) :MemoAskTocks|MemoAskTack
     }
 
     if (bleq(t2b(''), tockroll)) {
-        return vult_thin(tree, head)
+        return vult_thin(tree, head, !full)
     }
 
     return [MemoType.AskTocks, headhash]
 }
+
+
 // vult_full grows definitely-valid state tree
 //   (could also invalidate tock)
 function vult_full(tree :Tree, tock :Tock) :MemoAskTacks|MemoAskTocks|MemoAskTicks|MemoErr { // :Memo
@@ -185,7 +194,7 @@ function vult_full(tree :Tree, tock :Tock) :MemoAskTacks|MemoAskTocks|MemoAskTic
         }
     }
 
-    let thin = vult_thin(tree, tock)
+    let thin = vult_thin(tree, tock, false)
     if (MemoType.Err == thin[0]) {
         return thin
     }
@@ -277,6 +286,8 @@ function vult_full(tree :Tree, tock :Tock) :MemoAskTacks|MemoAskTocks|MemoAskTic
         tree.rock.etch_one(rkey('know', tockhash), t2b('DN'))
         return [MemoType.Err, ['unspendable', tock]]
     }
+
+    vult_best(tree, tockhash)
 
     tree.rock.etch_one(rkey('fold', tockhash, n2b(foldidx + BigInt(1))), roll([cur_snap, n2b(prev_fees + fees)]))
     return [MemoType.AskTocks, tockhash]

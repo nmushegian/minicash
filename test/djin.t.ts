@@ -121,4 +121,4 @@ test('full djin jams', t=>{
     cases.forEach(c => runcase(dir, c, true))
 })
 
-//runcase('./test/case/djin/full/', 'djin_realtx_dubspenddifftock_DVsibling.jams', true)
+//runcase('./test/case/djin/full/', 'djin_realtx_invalidnotbest.jams', true)
