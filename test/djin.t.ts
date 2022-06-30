@@ -120,5 +120,3 @@ test('full djin jams', t=>{
 
     cases.forEach(c => runcase(dir, c, true))
 })
-
-//runcase('./test/case/djin/full/', 'djin_2cycles_noduptock.jams', true)
