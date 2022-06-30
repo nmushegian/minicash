@@ -106,14 +106,16 @@ function vult_thin(tree :Tree, tock :Tock, updatebest :boolean =true) :MemoAskTo
     //let prev_fold = tree.rock.read_one(rkey('fold', prev_head, n2b(BigInt(0))))
     aver(_ => prev_fold.length > 0, `prev fold must exist`)
     let [prev_snap, ,] = unroll(prev_fold)
+    let subsidy = bnum(h2b('ff00000000'))
     tree.grow(prev_snap as Snap, (rite, twig, snap) => {
         rite.etch(rkey('tock', head), roll(tock))
         rite.etch(rkey('work', head), this_work)
         rite.etch(rkey('fold', head, h2b('00')), roll([snap, h2b('00')])) // [snap, fees]
-        // subsidy = 0x20
-        twig.etch(rkey('ment', head, h2b('07')), roll([head, h2b('20')])) // [code, cash]
         twig.etch(rkey('know', head), t2b('PV'))
         twig.etch(rkey('pyre', head), n2b(bnum(time) + BigInt(536112000)))
+        twig.etch(rkey('ment', head, h2b('07')), roll([head, n2b(subsidy)])) // [code, cash]
+        let pyre = bnum(time) + BigInt(536112000)
+        twig.etch(rkey('pyre', head), n2b(pyre))
     })
     if (updatebest) {
         vult_best(tree, head)
@@ -238,7 +240,6 @@ function vult_full(tree :Tree, tock :Tock) :MemoAskTacks|MemoAskTocks|MemoAskTic
     let valid = false
     let cur_snap
     let fees = BigInt(0)
-    let subsidy = bnum(h2b('ff00000000'))
     let err
     tree.grow(prev_snap as Snap, (rite, twig, snap) => {
         try {
@@ -269,10 +270,7 @@ function vult_full(tree :Tree, tock :Tock) :MemoAskTacks|MemoAskTocks|MemoAskTic
             })
             need(fees >= BigInt(0), `fees can't be < 0 (fees=${fees}) block=${b2h(tockhash)}`)
             debug('vult_full SUCCESS, setting DV', b2h(tockhash))
-            twig.etch(rkey('ment', tockhash, h2b('07')), roll([tockhash, n2b(subsidy)]))
             twig.etch(rkey('know', tockhash), t2b('DV'))
-            let pyre = bnum(time) + BigInt(536112000)
-            twig.etch(rkey('pyre', tockhash), n2b(pyre))
             cur_snap = snap
             valid = true
         } catch (e) {
