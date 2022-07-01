@@ -226,7 +226,7 @@ class Pool {
             }
 
             ments.forEach((ment, mentidx) => {
-                bad[b2h(mash(roll(cand)))+n2b(BigInt(mentidx))] = true
+                bad[b2h(mash(roll(cand)))+b2h(n2b(BigInt(mentidx)))] = true
             })
         }
 
