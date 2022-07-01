@@ -24,7 +24,7 @@ import {
     Tick,
     Tock, toss,
     unroll,
-    scry, sign
+    scry, sign, rmap
 } from './word.js'
 
 import elliptic from 'elliptic'
@@ -37,6 +37,9 @@ const ec = elliptic.ec('secp256k1')
 type EzSend = [string, bigint, string, bigint]
 type EzTick = EzSend[] //from, to, amt
 
+import Debug from 'debug'
+const debug = Debug('pool::test')
+
 class Pool {
     djin :Djin
     plug :Plug
@@ -44,7 +47,7 @@ class Pool {
     tree :Tree
 
 
-    bowl :Tick[]           // mempool
+    cands :Tick[]           // mempool
 
     // each of these should be in per-candidate map, aka use a pure Tree
     sink :Tick[]           // tock template
@@ -60,10 +63,12 @@ class Pool {
         this.plug = plug
         this.guy  = addr(h2b(pubkey))
         this.tree = this.djin.tree
+        this.cands = []
     }
 
-    mine() {
+    mine() :string {
         let besthash = this.djin.tree.rock.read_one(rkey('best'))
+        debug(`mine best=${b2h(besthash)}`)
         let bestroll = this.djin.tree.rock.read_one(rkey('tock', besthash))
         need(!bleq(t2b(''), bestroll), `best tock not found`)
         let moves = [[besthash, h2b('07'), h2b('00'.repeat(65))]]
@@ -82,14 +87,40 @@ class Pool {
         let best = unroll(bestroll) as Tock
         okay(vinx_tick([], mint, best))
 
-        let feet = [mash(roll(mint))]
-        let prevtime = best[3]
+        let ticks = [mint]
+        let used = {}
+        // todo check double spends
+        for (let [idx, cand] of this.cands.entries()) {
+            if (ticks.length >= 512) {
+                break
+            }
+
+            let [moves, ments] = cand
+            let ok = true
+            let used = {}
+            for (let move of moves) {
+                let [txin, idx,] = move
+                if (used[b2h(txin) + b2h(idx)] != undefined) {
+                    ok = false
+                    break
+                }
+            }
+
+            if (!ok) {
+                break
+            }
+
+            ticks.push(cand)
+            this.cands[idx] = undefined
+        }
+        this.cands = this.cands.filter(c => c != undefined)
+        let prevtime = best[2]
         let time = extend(n2b(bnum(prevtime) + BigInt('0x39')), 7)
         // todo better fuzz
+        let feet = ticks.map(t => mash(roll(t)))
         let tock = [besthash, merk(feet), time, h2b('00'.repeat(7))] as Tock
         okay(form_tock(tock))
         okay(vinx_tock(best, tock))
-
 
         let tack = [tock, h2b('00'), [], feet] as Tack
         okay(form_tack(tack))
@@ -97,10 +128,11 @@ class Pool {
 
         let memo = memo_close([MemoType.SayTicks, [mint]])
 
-        this.djin.turn(memo_close([MemoType.SayTocks, [tock]]))
+        ticks.forEach(t => this.djin.turn(memo_close([MemoType.SayTicks, [t]])))
         this.djin.turn(memo_close([MemoType.SayTacks, [tack]]))
-        this.djin.turn(memo_close([MemoType.SayTicks, [mint]]))
-        console.log(`mined a block! ${b2h(mash(roll(tock)))}`)
+        this.djin.turn(memo_close([MemoType.SayTocks, [tock]]))
+        debug(`mined a block! hash=${b2h(mash(roll(tock)))} block=${rmap(tock, b2h)}`)
+        return b2h(mash(roll(mint)))
     }
 
     make(eztick :EzTick) :Tick {
@@ -109,6 +141,10 @@ class Pool {
         let ments = []
         eztick.forEach(ezsend => {
             let [from, index, to, amt] = ezsend
+            if (from == 'best') {
+                let besthash = this.tree.rock.read_one(rkey('best'))
+                from = b2h(besthash)
+            }
 
             let txin = h2b(from)
             let idx  = n2b(index)
@@ -122,26 +158,27 @@ class Pool {
         return [moves, ments]
     }
 
-    signTick(tick :Tick, privkeys :string[]|string) {
-        if (privkeys.toString() == privkeys) {
-            privkeys = privkeys.repeat(tick.length)
-        }
-
+    signTick(tick :Tick, privkey :string[]|string) {
         let [_moves, ments] = tick
-        need(_moves.length == privkeys.length, 'must have as many keys as moves')
+        need(typeof privkey == 'string' || _moves.length == privkey.length, 'must have as many keys as moves')
+
 
         let moves = _moves.map((move, idx) => {
-            let privkey = privkeys[idx]
+            let pk = privkey
+            if (typeof privkey != 'string') {
+                pk = privkey[idx]
+            }
             const mask = roll([
                 t2b("minicash movement"),
                 [ move ],
                 ments
             ])
 
-            let seck = h2b(privkey)
+            let seck = h2b(pk as string)
             let sig = sign(mask, seck)
             return [move[0], move[1], sig]
         })
+        okay(form_tick([moves, ments]))
 
         return [moves, ments]
     }
@@ -151,23 +188,19 @@ class Pool {
         return this.signTick(tick, privkeys)
     }
 
-    send(ezTick :EzTick, privkeys :string[]|string) {
+    send(ezTick :EzTick, privkeys :string[]|string) :string {
         let tick = this.makeSigned(ezTick, privkeys) as Tick
         okay(form_tick(tick))
         let [moves, ments] = tick
         let tock
-        let conx = moves
-            .filter(move => {
-                if (Number('0x' + b2h(move[1])) == 7) {
-                    tock = unroll(this.tree.rock.read_one(rkey('tock', move[0]))) as Tock
-                    return false
-                }
-                return true
-            })
-            .map(move => unroll(this.tree.rock.read_one(rkey('tick', move[0]))) as Tick)
-        okay(vinx_tick([...conx, ...this.bowl], tick, tock))
+        let conx = moves.map(move => {
+            need(Number('0x' + b2h(move[1])) != 7, 'only miner can mint')
+            return unroll(this.tree.rock.read_one(rkey('tick', move[0]))) as Tick
+        })
+        okay(vinx_tick([...conx, ...this.cands], tick, tock))
 
-        this.bowl.push(tick)
+        this.cands.push(tick)
+        return b2h(mash(roll(tick)))
     }
 
     pool() {
@@ -178,7 +211,7 @@ class Pool {
             //   update best
             // say/ticks ticks
             //   this.snap = this.djin.tree.grow_twig(this.snap, twig => {
-            //      deque tick from bowl
+            //      deque tick from cands
             //      let ok = vult_tick(twig, tick)
             //      if (ok)
             //         this.sink.push(tick)
