@@ -168,16 +168,6 @@ class Pool {
         return this.signTick(tick, privkeys)
     }
 
-    org() {
-        let best = this.tree.rock.read_one(rkey('best'))
-        if (best != this.best) {
-            this.best = best
-        }
-        let oldcands = this.cands
-        this.cands = []
-        oldcands.forEach(this.addpool)
-    }
-
     addpool(tick :Tick) {
         okay(form_tick(tick))
         let [moves, ments] = tick
