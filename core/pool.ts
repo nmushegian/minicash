@@ -6,7 +6,7 @@ export {Pool}
 import {
     addr,
     b2h,
-    bleq,
+    bleq, Bnum,
     bnum, extend,
     h2b,
     Hexs,
@@ -23,7 +23,8 @@ import {
     Tack,
     Tick,
     Tock, toss,
-    unroll
+    unroll,
+    scry, sign
 } from './word.js'
 
 import elliptic from 'elliptic'
@@ -33,6 +34,8 @@ import {vinx_tack, vinx_tick, vinx_tock} from "./vinx.js";
 import {form_tack, form_tick, form_tock} from "./well.js";
 
 const ec = elliptic.ec('secp256k1')
+type EzSend = [string, bigint, string, bigint]
+type EzTick = EzSend[] //from, to, amt
 
 class Pool {
     djin :Djin
@@ -57,10 +60,6 @@ class Pool {
         this.plug = plug
         this.guy  = addr(h2b(pubkey))
         this.tree = this.djin.tree
-    }
-
-    send(tick :Tick) {
-
     }
 
     mine() {
@@ -102,6 +101,73 @@ class Pool {
         this.djin.turn(memo_close([MemoType.SayTacks, [tack]]))
         this.djin.turn(memo_close([MemoType.SayTicks, [mint]]))
         console.log(`mined a block! ${b2h(mash(roll(tock)))}`)
+    }
+
+    make(eztick :EzTick) :Tick {
+        need(eztick.length <= 7, 'too many moves in this tick')
+        let moves = []
+        let ments = []
+        eztick.forEach(ezsend => {
+            let [from, index, to, amt] = ezsend
+
+            let txin = h2b(from)
+            let idx  = n2b(index)
+            let code = addr(h2b(to))
+            let cash = extend(n2b(amt), 7)
+            let sign = t2b('')
+            moves.push([txin, idx, sign])
+            ments.push([code, cash])
+        })
+
+        return [moves, ments]
+    }
+
+    signTick(tick :Tick, privkeys :string[]|string) {
+        if (privkeys.toString() == privkeys) {
+            privkeys = privkeys.repeat(tick.length)
+        }
+
+        let [_moves, ments] = tick
+        need(_moves.length == privkeys.length, 'must have as many keys as moves')
+
+        let moves = _moves.map((move, idx) => {
+            let privkey = privkeys[idx]
+            const mask = roll([
+                t2b("minicash movement"),
+                [ move ],
+                ments
+            ])
+
+            let seck = h2b(privkey)
+            let sig = sign(mask, seck)
+            return [move[0], move[1], sig]
+        })
+
+        return [moves, ments]
+    }
+
+    makeSigned(ezTick :EzTick, privkeys:string[]|string) {
+        let tick = this.make(ezTick)
+        return this.signTick(tick, privkeys)
+    }
+
+    send(ezTick :EzTick, privkeys :string[]|string) {
+        let tick = this.makeSigned(ezTick, privkeys) as Tick
+        okay(form_tick(tick))
+        let [moves, ments] = tick
+        let tock
+        let conx = moves
+            .filter(move => {
+                if (Number('0x' + b2h(move[1])) == 7) {
+                    tock = unroll(this.tree.rock.read_one(rkey('tock', move[0]))) as Tock
+                    return false
+                }
+                return true
+            })
+            .map(move => unroll(this.tree.rock.read_one(rkey('tick', move[0]))) as Tick)
+        okay(vinx_tick([...conx, ...this.bowl], tick, tock))
+
+        this.bowl.push(tick)
     }
 
     pool() {
