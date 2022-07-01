@@ -55,7 +55,7 @@ class Pool {
     root :Mash   // active merk root
     snap :Snap   // active UTXO set handle
 
-    best :Tock   // best pow for this cycle
+    best : Mash   // best pow for this cycle
     roots :Map<Hexs,[Snap,number]>   // root -> [snap, fill.idx]  reverse index
 
     constructor(djin, plug, pubkey :Hexs) {
@@ -64,6 +64,7 @@ class Pool {
         this.guy  = addr(h2b(pubkey))
         this.tree = this.djin.tree
         this.cands = []
+        this.best = this.tree.rock.read_one(rkey('best'))
     }
 
     mine() :string {
@@ -87,33 +88,11 @@ class Pool {
         let best = unroll(bestroll) as Tock
         okay(vinx_tick([], mint, best))
 
-        let ticks = [mint]
-        let used = {}
-        // todo check double spends
-        for (let [idx, cand] of this.cands.entries()) {
-            if (ticks.length >= 512) {
-                break
-            }
+        let oldcands = [mint, ...this.cands]
+        this.cands = []
+        oldcands.forEach(c => this.addpool(c))
+        let ticks = this.cands
 
-            let [moves, ments] = cand
-            let ok = true
-            let used = {}
-            for (let move of moves) {
-                let [txin, idx,] = move
-                if (used[b2h(txin) + b2h(idx)] != undefined) {
-                    ok = false
-                    break
-                }
-            }
-
-            if (!ok) {
-                break
-            }
-
-            ticks.push(cand)
-            this.cands[idx] = undefined
-        }
-        this.cands = this.cands.filter(c => c != undefined)
         let prevtime = best[2]
         let time = extend(n2b(bnum(prevtime) + BigInt('0x39')), 7)
         // todo better fuzz
@@ -132,6 +111,7 @@ class Pool {
         this.djin.turn(memo_close([MemoType.SayTacks, [tack]]))
         this.djin.turn(memo_close([MemoType.SayTocks, [tock]]))
         debug(`mined a block! hash=${b2h(mash(roll(tock)))} block=${rmap(tock, b2h)}`)
+        this.cands = []
         return b2h(mash(roll(mint)))
     }
 
@@ -188,19 +168,85 @@ class Pool {
         return this.signTick(tick, privkeys)
     }
 
-    send(ezTick :EzTick, privkeys :string[]|string) :string {
-        let tick = this.makeSigned(ezTick, privkeys) as Tick
+    org() {
+        let best = this.tree.rock.read_one(rkey('best'))
+        if (best != this.best) {
+            this.best = best
+        }
+        let oldcands = this.cands
+        this.cands = []
+        oldcands.forEach(this.addpool)
+    }
+
+    addpool(tick :Tick) {
         okay(form_tick(tick))
         let [moves, ments] = tick
         let tock
         let conx = moves.map(move => {
-            need(Number('0x' + b2h(move[1])) != 7, 'only miner can mint')
+            let _tock = this.tree.rock.read_one(rkey('tock', move[0]))
+            if (!bleq(t2b(''), _tock)) {
+                tock = unroll(_tock)
+            }
             return unroll(this.tree.rock.read_one(rkey('tick', move[0]))) as Tick
         })
         okay(vinx_tick([...conx, ...this.cands], tick, tock))
 
+        // check no pents in current snap
+        let besthash = this.tree.rock.read_one(rkey('best'))
+        let [snapfees, snapidx] = latest_fold(this.tree, besthash)
+        let [snap, fees] = unroll(snapfees)
+        this.tree.look(snap as Snap, (rock, twig) => {
+            moves.forEach(move => {
+                let [txin, idx, sign] = move
+                let pent = twig.read(rkey('pent', txin, idx))
+                need(bleq(t2b(''), pent), `ment already pent ${b2h(txin)} idx=${b2h(idx)}`)
+            })
+        })
+
+        // check no pents in cands
+        let bad = {}
+        for (let [idx, cand] of this.cands.entries()) {
+            if (this.cands.length >= 512) {
+                break
+            }
+
+            let [moves, ments] = cand
+            let ok = true
+            for (let move of moves) {
+                let [txin, idx,] = move
+                if (bad[b2h(txin) + b2h(idx)] == true) {
+                    ok = false
+                    break
+                }
+            }
+
+            if (!ok) {
+                moves.forEach((move, idx) => bad[b2h(move[0])+Number(idx).toString(16)] = true)
+                break
+            }
+
+            ments.forEach((ment, mentidx) => {
+                bad[b2h(mash(roll(cand)))+n2b(BigInt(mentidx))] = true
+            })
+        }
+
         this.cands.push(tick)
         return b2h(mash(roll(tick)))
+    }
+
+    send(ezTick :EzTick, privkeys :string[]|string) :string {
+        let tick = this.makeSigned(ezTick, privkeys) as Tick
+        this.add(tick)
+        return b2h(mash(roll(tick)))
+    }
+
+
+    add(tick :Tick) {
+        let [moves, ments] = tick
+        moves.forEach(move => {
+            need(Number('0x' + b2h(move[1])) != 7, 'only miner can mint')
+        })
+        this.addpool(tick)
     }
 
     pool() {

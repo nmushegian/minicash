@@ -26,7 +26,7 @@ import {
     t2b,
     Tack,
     Tick,
-    Tock,
+    Tock, toss,
     tuff,
     unroll
 } from './word.js'

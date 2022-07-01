@@ -40,7 +40,8 @@ test('pool', t => {
     let alitobobhash = pool.send([[minthash, BigInt(0), BOB, BigInt(1)]], keys.ali)
     pool.mine()
     let bobtocat = pool.send([[alitobobhash, BigInt(0), CAT, BigInt(1)]], keys.bob)
-    pool.mine()
+    let last = pool.mine()
+    t.ok(true, `mined a block! ${last}`)
 
     /*
     setInterval(() => {
