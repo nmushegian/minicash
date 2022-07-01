@@ -196,7 +196,8 @@ class Pool {
         // check no pents in cands
         let bad = {}
         for (let [idx, cand] of this.cands.entries()) {
-            if (this.cands.length >= 512) {
+            if (idx >= 512) {
+                // not dealing with ribs yet
                 break
             }
 

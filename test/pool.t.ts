@@ -43,10 +43,16 @@ test('pool', t => {
     let last = pool.mine()
     t.ok(true, `mined a block! ${last}`)
 
-    /*
-    setInterval(() => {
-        pool.mine()
-    }, 5000)
+    let prevhash = bobtocat
+    let time = performance.now()
+    let numtx = 500
+    t.ok(true, `time start, mining a block with ${numtx+1} ticks`)
+    for (let i = 0; i < numtx; i++) {
+        // send to self a bunch of times
+        prevhash = pool.send([[prevhash, BigInt(0), CAT, BigInt(1)]], keys.cat)
+    }
+    t.ok(true, `sent some transactions, time=${performance.now() - time} ms`)
+    last = pool.mine()
+    t.ok(true, `mined a bigger block with ${numtx+1} ticks ${last}, time=${performance.now() - time} ms`)
 
-     */
 })
