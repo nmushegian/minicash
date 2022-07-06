@@ -10,13 +10,13 @@ import * as welltest from './well.t.js'
 import * as wordtest from './word.t.js'
 import * as pooltest from './pool.t.js'
 
-//djintest
-//rocktest
-//treetest
-//vinxtest
-//vulttest
-//welltest
-//wordtest
+djintest
+rocktest
+treetest
+vinxtest
+vulttest
+welltest
+wordtest
 pooltest
 
 

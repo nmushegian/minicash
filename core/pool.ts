@@ -24,7 +24,8 @@ import {
     Tick,
     Tock, toss,
     unroll,
-    scry, sign, rmap
+    scry, sign, rmap, Fees,
+    Blob, Code, Cash, memo_open
 } from './word.js'
 
 import elliptic from 'elliptic'
@@ -57,6 +58,7 @@ class Pool {
 
     best : Mash   // best pow for this cycle
     roots :Map<Hexs,[Snap,number]>   // root -> [snap, fill.idx]  reverse index
+    fees : Map<Hexs, Bnum>
 
     constructor(djin, plug, pubkey :Hexs) {
         this.djin = djin
@@ -65,33 +67,44 @@ class Pool {
         this.tree = this.djin.tree
         this.cands = []
         this.best = this.tree.rock.read_one(rkey('best'))
+        this.fees = new Map<Hexs, Bnum>()
     }
 
     mine() :string {
         let besthash = this.djin.tree.rock.read_one(rkey('best'))
-        debug(`mine best=${b2h(besthash)}`)
+        debug(`mine best=${b2h(besthash)}, cands length=${this.cands.length}`)
         let bestroll = this.djin.tree.rock.read_one(rkey('tock', besthash))
         need(!bleq(t2b(''), bestroll), `best tock not found`)
-        let moves = [[besthash, h2b('07'), h2b('00'.repeat(65))]]
+        let mintmoves = [[besthash, h2b('07'), h2b('00'.repeat(65))]]
         let [fold, foldidx] = latest_fold(this.djin.tree, besthash)
-        let [snap, fees] = unroll(fold)
+        let [snap, _fees] = unroll(fold) as [Snap, Blob]
+
+
+        let oldcands = this.cands
+        this.cands = []
+        oldcands.forEach(c => this.addpool(c))
+        let ticks = this.cands
+        let fees = bnum(_fees)
+        need(fees == BigInt(0), `best fees must equal 0`)
+
+        // mintcash = previous tockhash's ment plus this tock's fees
         let cash
         this.djin.tree.look(snap as Snap, (rock, twig) => {
             let bestment = twig.read(rkey('ment', besthash, h2b('07')))
             ;[,cash] = unroll(bestment)
         })
         need(cash != undefined, 'cash not found')
-        let ments = [[this.guy, extend(cash, 7)]]
-        let mint = [moves, ments] as Tick
-
+        let cashandfees = bnum(cash)
+        ticks.forEach(tick => {
+            cashandfees += this.fees[b2h(mash(roll(tick)))]
+        })
+        let mintments = [[this.guy, extend(n2b(cashandfees), 7)]]
+        let mint = [mintmoves, mintments] as Tick
         okay(form_tick(mint))
         let best = unroll(bestroll) as Tock
         okay(vinx_tick([], mint, best))
-
-        let oldcands = [mint, ...this.cands]
-        this.cands = []
-        oldcands.forEach(c => this.addpool(c))
-        let ticks = this.cands
+        ticks.push(mint)
+        debug('created mint')
 
         let prevtime = best[2]
         let time = extend(n2b(bnum(prevtime) + BigInt('0x39')), 7)
@@ -107,9 +120,15 @@ class Pool {
 
         let memo = memo_close([MemoType.SayTicks, [mint]])
 
-        ticks.forEach(t => this.djin.turn(memo_close([MemoType.SayTicks, [t]])))
-        this.djin.turn(memo_close([MemoType.SayTacks, [tack]]))
-        this.djin.turn(memo_close([MemoType.SayTocks, [tock]]))
+        let out
+        ticks.forEach(t => {
+            out = okay(this.djin.turn(memo_close([MemoType.SayTicks, [t]])))
+            need(MemoType.Err != memo_open(out)[0], `mine: say/ticks failed ${rmap(out, b2h)}`)
+        })
+        out = okay(this.djin.turn(memo_close([MemoType.SayTacks, [tack]])))
+        need(MemoType.Err != memo_open(out)[0], `mine: say/tacks failed ${rmap(out, b2h)}`)
+        out = okay(this.djin.turn(memo_close([MemoType.SayTocks, [tock]])))
+        need(MemoType.Err != memo_open(out)[0], `mine: say/tocks failed ${rmap(out, b2h)}`)
         debug(`mined a block! hash=${b2h(mash(roll(tock)))} block=${rmap(tock, b2h)}`)
         this.cands = []
         return b2h(mash(roll(mint)))
@@ -169,6 +188,7 @@ class Pool {
     }
 
     addpool(tick :Tick) {
+        //debug('addpool')
         okay(form_tick(tick))
         let [moves, ments] = tick
         let tock
@@ -181,11 +201,11 @@ class Pool {
         })
         okay(vinx_tick([...conx, ...this.cands], tick, tock))
 
-        // check no pents in current snap
         let besthash = this.tree.rock.read_one(rkey('best'))
         let [snapfees, snapidx] = latest_fold(this.tree, besthash)
-        let [snap, fees] = unroll(snapfees)
+        let [snap, ] = unroll(snapfees)
         this.tree.look(snap as Snap, (rock, twig) => {
+            // check no pents in current snap
             moves.forEach(move => {
                 let [txin, idx, sign] = move
                 let pent = twig.read(rkey('pent', txin, idx))
@@ -194,36 +214,52 @@ class Pool {
         })
 
         // check no pents in cands
-        let bad = {}
-        for (let [idx, cand] of this.cands.entries()) {
-            if (idx >= 512) {
-                // not dealing with ribs yet
-                break
-            }
-
-            let [moves, ments] = cand
-            let ok = true
-            for (let move of moves) {
-                let [txin, idx,] = move
-                if (bad[b2h(txin) + b2h(idx)] == true) {
-                    ok = false
-                    break
-                }
-            }
-
-            if (!ok) {
-                moves.forEach((move, idx) => bad[b2h(move[0])+Number(idx).toString(16)] = true)
-                break
-            }
-
-            ments.forEach((ment, mentidx) => {
-                bad[b2h(mash(roll(cand)))+b2h(n2b(BigInt(mentidx)))] = true
+        moves.forEach(move => {
+            let [txin, idx, ] = move
+            this.cands.forEach(cand => {
+                let [candmoves, candments] = cand
+                candmoves.forEach(candmove => {
+                    let [candtxin, candidx,] = candmove
+                    need(
+                        !(bleq(txin, candtxin) && bleq(idx, candidx)),
+                        `conflicting tick found in pool existing=${rmap(cand, b2h)} new=${rmap(tick, b2h)}`
+                    )
+                })
             })
-        }
+        })
+
+        this.tree.look(snap as Snap, (rock, twig) => {
+            // calculate this tock's fees
+            let fees = BigInt(0)
+            moves.forEach(move => {
+                let [txin, idx, sign] = move
+                let _prevment = twig.read(rkey('ment', txin, idx))
+                let prevment
+                if (bleq(t2b(''), _prevment)) {
+                    let prevtick = this.cands.find(t => bleq(mash(roll(t)), txin))
+                    let [, prevments] = prevtick
+                    need(BigInt(prevments.length) > bnum(idx), 'addpool prev ment not found (1)')
+                    prevment = prevments[Number(bnum(idx))]
+                } else {
+                    prevment = unroll(_prevment)
+                }
+                let [code, cash] = prevment
+                fees += bnum(cash)
+            })
+            ments.forEach(ment => {
+                let [code, cash] = ment
+                fees -= bnum(cash)
+            })
+            need(fees >= BigInt(0), `addpool tick fees must be >= 0`)
+            this.fees[b2h(mash(roll(tick)))] = fees
+        })
 
         this.cands.push(tick)
+        //debug(`pushing tick ${b2h(mash(roll(tick)))}`)
         return b2h(mash(roll(tick)))
     }
+
+
 
     send(ezTick :EzTick, privkeys :string[]|string) :string {
         let tick = this.makeSigned(ezTick, privkeys) as Tick

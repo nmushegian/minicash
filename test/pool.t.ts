@@ -37,8 +37,10 @@ test('pool', t => {
     let pubkey = b2h(Buffer.from(keypair.getPublic().encodeCompressed()))
     let pool = new Pool(djin, undefined, ALI)
     let minthash = pool.mine()
+    t.ok(true, `mined a block with just a mint tick ${minthash}`)
     let alitobobhash = pool.send([[minthash, BigInt(0), BOB, BigInt(1)]], keys.ali)
     pool.mine()
+    t.ok(true, `mined a block!`)
     let bobtocat = pool.send([[alitobobhash, BigInt(0), CAT, BigInt(1)]], keys.bob)
     let last = pool.mine()
     t.ok(true, `mined a block! ${last}`)
@@ -47,12 +49,15 @@ test('pool', t => {
     let time = performance.now()
     let numtx = 500
     t.ok(true, `time start, mining a block with ${numtx+1} ticks`)
-    for (let i = 0; i < numtx; i++) {
-        // send to self a bunch of times
-        prevhash = pool.send([[prevhash, BigInt(0), CAT, BigInt(1)]], keys.cat)
+    const spam = (last, n) => {
+        for (let i = 0; i < numtx; i++) {
+            // send to self a bunch of times
+            last = pool.send([[last, BigInt(0), CAT, BigInt(1)]], keys.cat)
+        }
     }
+    spam(prevhash, numtx)
+
     t.ok(true, `sent some transactions, time=${performance.now() - time} ms`)
     last = pool.mine()
     t.ok(true, `mined a bigger block with ${numtx+1} ticks ${last}, time=${performance.now() - time} ms`)
-
 })
