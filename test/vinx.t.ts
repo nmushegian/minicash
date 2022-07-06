@@ -12,7 +12,7 @@ import {
     sign, scry,
     Tick, Tock,
     addr, t2b, need,
-    rmap, mash, bleq, merk
+    rmap, mash, bleq, merk, b2h
 } from '../core/word.js'
 import {
     form_tick
@@ -74,17 +74,19 @@ const makefeet = x => {
     return feet
 }
 test('vinx_tack', t=> {
-    const tock = [
-        '00'.repeat(24),
-        'a53a45d1b2be6a113a3170c9dafd976d1099d5b862b83e1f',
-        '00'.repeat(6) + '39',
-        '00'.repeat(7)
-    ].map(h2b) as Tock
     const eye = h2b('00')
     const ribs = [
         '83b4282db216b3261120d479ab6f0f70b50f4345d79c64c9',
-        'e53e9f9941199fd10480771ceb747af31da36d60b613e235'
+        'e53e9f9941199fd10480771ceb747af31da36d60b613e235',
+        '000000000000000000000000000000000000000000000000'
     ].map(h2b)
+    const tock = [
+        '00'.repeat(24),
+        b2h(merk(ribs)),
+        '00'.repeat(6) + '39',
+        '00'.repeat(7)
+    ].map(h2b) as Tock
+
 
     const feet = makefeet(1536)
     const [ok, val, err] = vinx_tack(tock, [tock, eye, ribs, feet])
