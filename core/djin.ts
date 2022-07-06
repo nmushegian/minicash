@@ -32,7 +32,7 @@ import {
     unroll
 } from './word.js'
 
-import {latest_fold, know, vult_full, vult_thin, vult_tack, vult_tick} from './vult.js'
+import {latest_fold, know, vult_full, vult_thin, vult_tack, vult_tick, subsidyleft} from './vult.js'
 
 import {Rock} from './rock.js'
 import {rkey, Tree} from './tree.js'
@@ -66,7 +66,10 @@ class Djin {
             rite.etch(rkey('tock', banghash), bangroll)
             rite.etch(rkey('work', banghash), n2b(tuff(bangroll)))
             rite.etch(rkey('fold', banghash, n2b(BigInt(0))), roll([snap, n2b(BigInt(0))]))
-            twig.etch(rkey('ment', banghash, h2b('07')), roll([banghash, h2b('ff00000000')])) // [code, cash]
+            let left = BigInt(2) ** BigInt(53) - BigInt(1)
+            rite.etch(rkey('left', n2b(BigInt(0))), n2b(BigInt(2) ** BigInt(53) - BigInt(1)))
+            let nextleft = subsidyleft(rite, n2b(BigInt(57)))
+            twig.etch(rkey('ment', banghash, h2b('07')), roll([banghash, n2b(left - nextleft)])) // [code, cash]
             twig.etch(rkey('know', banghash), t2b('DV'))
             twig.etch(rkey('pyre', banghash), n2b(BigInt(536112000))) // 17y
         })
@@ -183,7 +186,7 @@ class Djin {
                     .map(move => unroll(this.rock.read_one(rkey('tick', move[0]))) as Tick)
                 // todo multiple block reward/subsidy transactions?
                 let res = vinx_tick(conx, tick, tock)
-                console.error(res[2])
+                //console.error(res[2])
                 return res[0]
             }
             , `panic, tick must be valid-in-context`
