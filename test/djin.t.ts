@@ -84,7 +84,7 @@ const runcase = (dir, name, full=false) => {
         let file = readFileSync(path)
         let data = jams(file.toString())
         let prev
-        data.forEach((cmd, idx) => {
+        for (let cmd of data) {
             let func = cmd[0]
             need(func == 'send' || func == 'want', 'only doing send and want for now...')
             if ('send' == func) {
@@ -100,9 +100,10 @@ const runcase = (dir, name, full=false) => {
                 debug(bleq(roll(rmap(cmd[1], flatten)), roll(prev)))
                 if (!bleq(roll(rmap(cmd[1], flatten)), roll(prev))) {
                     t.fail(`want fail expected=${cmd[1]} actual=${rmap(prev, b2h)}`)
+                    break
                 }
             }
-        })
+        }
         djin.kill()
     })
 }
@@ -121,4 +122,4 @@ test('full djin jams', t=>{
     cases.forEach(c => runcase(dir, c, true))
 })
 
-//runcase('./test/case/djin/full/', 'djin_realtx_invalidnotbest.jams', true)
+//runcase('./test/case/djin/full/', 'djin_fees.jams', true)
