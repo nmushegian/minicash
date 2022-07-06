@@ -71,67 +71,73 @@ class Pool {
     }
 
     mine() :string {
-        let besthash = this.djin.tree.rock.read_one(rkey('best'))
-        debug(`mine best=${b2h(besthash)}, cands length=${this.cands.length}`)
-        let bestroll = this.djin.tree.rock.read_one(rkey('tock', besthash))
-        need(!bleq(t2b(''), bestroll), `best tock not found`)
-        let mintmoves = [[besthash, h2b('07'), h2b('00'.repeat(65))]]
-        let [fold, foldidx] = latest_fold(this.djin.tree, besthash)
-        let [snap, _fees] = unroll(fold) as [Snap, Blob]
+        try {
+            let besthash = this.djin.tree.rock.read_one(rkey('best'))
+            debug(`mine best=${b2h(besthash)}, cands length=${this.cands.length}`)
+            let bestroll = this.djin.tree.rock.read_one(rkey('tock', besthash))
+            need(!bleq(t2b(''), bestroll), `best tock not found`)
+            let mintmoves = [[besthash, h2b('07'), h2b('00'.repeat(65))]]
+            let [fold, foldidx] = latest_fold(this.djin.tree, besthash)
+            let [snap, _fees] = unroll(fold) as [Snap, Blob]
 
 
-        let oldcands = this.cands
-        this.cands = []
-        oldcands.forEach(c => this.addpool(c))
-        let ticks = this.cands
-        let fees = bnum(_fees)
-        need(fees == BigInt(0), `best fees must equal 0`)
+            let oldcands = this.cands
+            this.cands = []
+            oldcands.forEach(c => this.addpool(c))
+            let ticks = this.cands
+            let fees = bnum(_fees)
+            need(fees == BigInt(0), `best fees must equal 0`)
 
-        // mintcash = previous tockhash's ment plus this tock's fees
-        let cash
-        this.djin.tree.look(snap as Snap, (rock, twig) => {
-            let bestment = twig.read(rkey('ment', besthash, h2b('07')))
-            ;[,cash] = unroll(bestment)
-        })
-        need(cash != undefined, 'cash not found')
-        let cashandfees = bnum(cash)
-        ticks.forEach(tick => {
-            cashandfees += this.fees[b2h(mash(roll(tick)))]
-        })
-        let mintments = [[this.guy, extend(n2b(cashandfees), 7)]]
-        let mint = [mintmoves, mintments] as Tick
-        okay(form_tick(mint))
-        let best = unroll(bestroll) as Tock
-        okay(vinx_tick([], mint, best))
-        ticks.push(mint)
-        debug('created mint')
+            // mintcash = previous tockhash's ment plus this tock's fees
+            let cash
+            this.djin.tree.look(snap as Snap, (rock, twig) => {
+                let bestment = twig.read(rkey('ment', besthash, h2b('07')))
+                ;[, cash] = unroll(bestment)
+            })
+            need(cash != undefined, 'cash not found')
+            let cashandfees = bnum(cash)
+            ticks.forEach(tick => {
+                cashandfees += this.fees[b2h(mash(roll(tick)))]
+            })
+            let mintments = [[this.guy, extend(n2b(cashandfees), 7)]]
+            let mint = [mintmoves, mintments] as Tick
+            okay(form_tick(mint))
+            let best = unroll(bestroll) as Tock
+            okay(vinx_tick([], mint, best))
+            ticks.push(mint)
+            debug('created mint')
 
-        let prevtime = best[2]
-        let time = extend(n2b(bnum(prevtime) + BigInt('0x39')), 7)
-        // todo better fuzz
-        let feet = ticks.map(t => mash(roll(t)))
-        let tock = [besthash, merk(feet), time, h2b('00'.repeat(7))] as Tock
-        okay(form_tock(tock))
-        okay(vinx_tock(best, tock))
+            let prevtime = best[2]
+            let time = extend(n2b(bnum(prevtime) + BigInt('0x39')), 7)
+            // todo better fuzz
+            let feet = ticks.map(t => mash(roll(t)))
+            let tock = [besthash, merk(feet), time, h2b('00'.repeat(7))] as Tock
+            okay(form_tock(tock))
+            okay(vinx_tock(best, tock))
 
-        let tack = [tock, h2b('00'), [], feet] as Tack
-        okay(form_tack(tack))
-        okay(vinx_tack(tock, tack))
+            let tack = [tock, h2b('00'), [], feet] as Tack
+            okay(form_tack(tack))
+            okay(vinx_tack(tock, tack))
 
-        let memo = memo_close([MemoType.SayTicks, [mint]])
+            let memo = memo_close([MemoType.SayTicks, [mint]])
 
-        let out
-        ticks.forEach(t => {
-            out = okay(this.djin.turn(memo_close([MemoType.SayTicks, [t]])))
-            need(MemoType.Err != memo_open(out)[0], `mine: say/ticks failed ${rmap(out, b2h)}`)
-        })
-        out = okay(this.djin.turn(memo_close([MemoType.SayTacks, [tack]])))
-        need(MemoType.Err != memo_open(out)[0], `mine: say/tacks failed ${rmap(out, b2h)}`)
-        out = okay(this.djin.turn(memo_close([MemoType.SayTocks, [tock]])))
-        need(MemoType.Err != memo_open(out)[0], `mine: say/tocks failed ${rmap(out, b2h)}`)
-        debug(`mined a block! hash=${b2h(mash(roll(tock)))} block=${rmap(tock, b2h)}`)
-        this.cands = []
-        return b2h(mash(roll(mint)))
+            let out
+            ticks.forEach(t => {
+                out = okay(this.djin.turn(memo_close([MemoType.SayTicks, [t]])))
+                need(MemoType.Err != memo_open(out)[0], `mine: say/ticks failed ${rmap(out, b2h)}`)
+            })
+            out = okay(this.djin.turn(memo_close([MemoType.SayTacks, [tack]])))
+            need(MemoType.Err != memo_open(out)[0], `mine: say/tacks failed ${rmap(out, b2h)}`)
+            out = okay(this.djin.turn(memo_close([MemoType.SayTocks, [tock]])))
+            need(MemoType.Err != memo_open(out)[0], `mine: say/tocks failed ${rmap(out, b2h)}`)
+            debug(`mined a block! hash=${b2h(mash(roll(tock)))} block=${rmap(tock, b2h)}`)
+            this.cands = []
+            return b2h(mash(roll(mint)))
+        } catch (e) {
+            console.error(e)
+            this.cands = []
+            return undefined
+        }
     }
 
     make(eztick :EzTick) :Tick {
