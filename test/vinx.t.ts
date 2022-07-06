@@ -114,6 +114,7 @@ test('merk', t=> {
         mash(Buffer.concat([feet[2], zero]))
     ]))
     actual = merk(feet)
+    t.equal(feet.length, 3, `merk must not modify its input`)
     cmp(expected, actual)
 })
 

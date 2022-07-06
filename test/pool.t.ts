@@ -54,10 +54,16 @@ test('pool', t => {
             // send to self a bunch of times
             last = pool.send([[last, BigInt(0), CAT, BigInt(1)]], keys.cat)
         }
+        return last
     }
-    spam(prevhash, numtx)
+    let prevtxhash = spam(prevhash, numtx)
 
     t.ok(true, `sent some transactions, time=${performance.now() - time} ms`)
     last = pool.mine()
     t.ok(true, `mined a bigger block with ${numtx+1} ticks ${last}, time=${performance.now() - time} ms`)
+
+    numtx = 512
+    spam(prevtxhash, numtx)
+    last = pool.mine()
+    t.ok(true, `mined a block with a rib ${last}`)
 })

@@ -81,9 +81,9 @@ class Pool {
             let [snap, _fees] = unroll(fold) as [Snap, Blob]
 
 
-            let oldcands = this.cands
-            this.cands = []
-            oldcands.forEach(c => this.addpool(c))
+            //let oldcands = this.cands
+            //this.cands = []
+            //oldcands.forEach(c => this.addpool(c))
             let ticks = this.cands
             let fees = bnum(_fees)
             need(fees == BigInt(0), `best fees must equal 0`)
@@ -115,28 +115,45 @@ class Pool {
             okay(form_tock(tock))
             okay(vinx_tock(best, tock))
 
-            let tack = [tock, h2b('00'), [], feet] as Tack
-            okay(form_tack(tack))
-            okay(vinx_tack(tock, tack))
+            let ribs = []
+            let feetslices = []
+            for (let i = 512; i < feet.length; i += 1024) {
+                let start = i - 512
+                let end   = i + 512
+                let feetslice = feet.slice(start, end)
+                let rib = merk(feetslice)
+                ribs.push(rib)
+                feetslices.push(feetslice)
+            }
+            if (feetslices.length == 0) {
+                feetslices = [feet]
+            }
+            let tacks = feetslices.map((feetslice, idx) => {
+                let tack = [tock, n2b(BigInt(idx)), ribs, feetslice] as Tack
+                okay(form_tack(tack))
+                okay(vinx_tack(tock, tack))
+                return tack
+            })
 
             let memo = memo_close([MemoType.SayTicks, [mint]])
 
             let out
-            ticks.forEach(t => {
-                out = okay(this.djin.turn(memo_close([MemoType.SayTicks, [t]])))
+            ticks.forEach(tick => {
+                out = okay(this.djin.turn(memo_close([MemoType.SayTicks, [tick]])))
                 need(MemoType.Err != memo_open(out)[0], `mine: say/ticks failed ${rmap(out, b2h)}`)
             })
-            out = okay(this.djin.turn(memo_close([MemoType.SayTacks, [tack]])))
-            need(MemoType.Err != memo_open(out)[0], `mine: say/tacks failed ${rmap(out, b2h)}`)
+            tacks.forEach(tack => {
+                out = okay(this.djin.turn(memo_close([MemoType.SayTacks, [tack]])))
+                need(MemoType.Err != memo_open(out)[0], `mine: say/tacks failed ${rmap(out, b2h)}`)
+            })
             out = okay(this.djin.turn(memo_close([MemoType.SayTocks, [tock]])))
             need(MemoType.Err != memo_open(out)[0], `mine: say/tocks failed ${rmap(out, b2h)}`)
-            debug(`mined a block! hash=${b2h(mash(roll(tock)))} block=${rmap(tock, b2h)}`)
+            debug(`mined a block! hash=${b2h(mash(roll(tock)))} block=${rmap(tock, b2h)} numtx=${feet.length}`)
             this.cands = []
             return b2h(mash(roll(mint)))
         } catch (e) {
-            console.error(e)
             this.cands = []
-            return undefined
+            toss('mine error', e)
         }
     }
 
@@ -194,7 +211,7 @@ class Pool {
     }
 
     addpool(tick :Tick) {
-        //debug('addpool')
+        //debug('addpool', mash(roll(tick)))
         okay(form_tick(tick))
         let [moves, ments] = tick
         let tock
@@ -243,6 +260,7 @@ class Pool {
                 let prevment
                 if (bleq(t2b(''), _prevment)) {
                     let prevtick = this.cands.find(t => bleq(mash(roll(t)), txin))
+                    need(undefined != prevtick, `addpool couldn't find prev ment ${b2h(txin)} ${b2h(idx)} ${this.cands.length}`)
                     let [, prevments] = prevtick
                     need(BigInt(prevments.length) > bnum(idx), 'addpool prev ment not found (1)')
                     prevment = prevments[Number(bnum(idx))]

@@ -94,12 +94,16 @@ function _merk(x :Mash[]) :Mash {
     if (x.length == 1) {
         return x[0]
     }
-    if (x.length % 2 == 1) {
+    let extended = x.length % 2 == 1
+    if (extended) {
         x.push(h2b('00'.repeat(24)))
     }
     let hops = []
     for (let i = 0; i < x.length; i += 2) { // ! +2
         hops.push(mash(Buffer.concat([x[i], x[i+1]])))
+    }
+    if (extended) {
+        x.pop()
     }
     return _merk(hops)
 }

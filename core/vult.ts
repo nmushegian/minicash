@@ -229,6 +229,7 @@ function vult_full(tree :Tree, tock :Tock) :MemoAskTacks|MemoAskTocks|MemoAskTic
     for (let eye = 1; eye < ribs.length; eye++) {
         let tack = tree.rock.read_one(rkey('tack', tockhash, n2b(BigInt(eye))))
         if (bleq(tack, t2b(''))) {
+            debug("tack not found, asking tacks")
             return [MemoType.AskTacks, tockhash]
         }
         let feet = (unroll(tack) as Tack)[3]
@@ -246,6 +247,7 @@ function vult_full(tree :Tree, tock :Tock) :MemoAskTacks|MemoAskTocks|MemoAskTic
     })
 
     if (leftfeet.length != 0) {
+        debug('some feet not found, asking ticks')
         return [MemoType.AskTicks, leftfeet]
     }
 
