@@ -16,20 +16,19 @@ const keys = {
 }
 
 
-test('dmon', async t => {
+test.only('dmon', async t => {
     let [ALI, BOB, CAT] = ['ali', 'bob', 'cat']
         .map(name =>
             b2h(t2b(ec.keyFromPrivate(h2b(keys[name])).getPublic().encodeCompressed()))
         )
     let ali = new Dmon()
     let bob = new Dmon()
-    ali.init('./test/dbali', 10334, ALI, ['127.0.0.1:10335'])
+    let epoch = Date.now()
+    ali.init('./test/dbali', 10334, ALI, ['127.0.0.1:10335'], epoch, 57000, 200)
     //bob.init('./test/dbbob', 10335, BOB, ['127.0.0.1:10334'])
 
     //bob.play()
-    ali.play()
+    await ali.play()
 
 
 })
-
-

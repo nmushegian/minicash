@@ -1,4 +1,4 @@
-import {h2b, Memo, memo, memo_close, MemoType, okay,} from './word.js'
+import {b2h, bnum, h2b, Memo, memo, memo_close, MemoType, okay, Tock, unroll,} from './word.js'
 
 import {Djin} from './djin.js'
 import {Plug} from './plug.js'
@@ -8,25 +8,33 @@ import {Hexs} from "coreword";
 export {Dmon}
 
 import Debug from 'debug'
+import {rkey} from "./tree.js";
 const debug = Debug('dmon::test')
 
 class Dmon {
     djin :Djin
     plug :Plug
     pool :Pool
-    minetime :Number
+    minetime :number
+    epoch :number
+    speedup :number
+    period :number
 
     // data dir, wss port
-    init(path :string, port :number, pubkey :Hexs, peers :string[]) {
+    init(path :string, port :number, pubkey :Hexs, peers :string[], epoch :number, period: number, speedup :number) {
         this.djin = new Djin(path, true, true)
         this.plug = new Plug(port, peers)
         this.pool = new Pool(this.djin, this.plug, pubkey)
+        this.period = period
+        this.epoch = epoch
+        this.period = period
+        this.speedup = speedup
         this.minetime = 1000
     }
 
-    play() {
-        this.mine()
-        this.serv()
+    async play() {
+        await this.mine()
+        //this.serv()
         //this.sync()
     }
 
@@ -34,15 +42,33 @@ class Dmon {
         this.plug.kill()
     }
 
-    mine() {
-        setInterval(() => {
-            let starttime = performance.now()
-            this.pool.mine(this.minetime)
-            let endtime = performance.now()
-            let muller = endtime - starttime > 2000 ? 0.9 : 1.1
-            this.minetime = Math.floor(this.minetime.valueOf() * muller)
-            debug('minetime =', this.minetime)
-        },  2000)
+    async mine() {
+
+        const spin = async (endtime) => {
+            while (true) {
+                await (new Promise(resolve => setTimeout(resolve, 0)))
+                let realtime = (Date.now() - this.epoch) * this.speedup
+                if (realtime > endtime) {
+                    return
+                }
+            }
+        }
+
+        while (true) {
+            let nexttockhash = this.pool.mine(this.minetime)
+
+            // adjust minetime if mining too slow or fast
+            let besthash = this.djin.tree.rock.read_one(rkey('best'))
+            let best = unroll(this.djin.tree.rock.read_one(rkey('tock', besthash))) as Tock
+            let [,,time,] = best
+            let tocktime = Number(bnum(time)) * 1000
+            let realtime = (Date.now() - this.epoch) * this.speedup
+            let muller = (tocktime + this.period) > realtime? 1.1 : 0.9
+            this.minetime = Math.floor(this.minetime * muller)
+            await spin(tocktime + this.period)
+
+            debug(`mined a tock @${nexttockhash} minetime =`, this.minetime)
+        }
     }
 
     // handle requests
