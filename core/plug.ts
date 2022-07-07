@@ -1,51 +1,49 @@
-import { WebSocketServer } from 'ws'
-import {
-    Blob,
-    Mail, Memo, memo,
-    Peer,
-    h2b, t2b, roll
-} from './word.js'
+import {Server} from 'socket.io'
+import {io} from 'socket.io-client'
+
+import {b2h, Memo, memo_open, MemoType, rmap} from './word.js'
+
+import Debug from 'debug'
+
+const debug = Debug('plug::test')
 
 export { Plug }
 
 class Plug {
     addr
-    socks
+    server
     peers
     constructor(port :number, peers :string[]) {
-        this.socks = new WebSocketServer({ port });
+        this.server = new Server(port);
         this.addr = `127.0.0.1:${port}`
+        debug(`listening on ${this.addr}`)
         this.peers = []
         peers.forEach(peer => this.peers.push(peer))
     }
     when( what:( (memo:Memo,back:((memo:Memo)=>void) )=>void) ) {
-        this.socks.on('connection', sock => {
-            sock.on(mail => {
-                let [peer, memo] = mail // peer enforced in other transport types
-                what(memo, outs => {
-                    for (let out of outs) {
-                        let [oline, obody] = out as Memo;
-                        // respond, or disconnect
-                        sock.send([this.addr, out])
-                        this.emit([this.addr, out], peer)
-                    }
+        this.server.on('connection', (sock) => {
+            sock.once('minicash', mail => {
+                let [peer, memo] = mail as [string, Memo] // peer enforced in other transport types
+                debug('mail', peer, rmap(memo, b2h))
+                what(memo, out => {
+                    this.emit(out, peer)
                 })
             })
         })
     }
-    emit(memo:Memo, peer? :string) {
+    emit(memo:Memo, dest? :string) {
         // can also take K random, rotate, etc
         let peers = this.peers
-        if (undefined != peer) {
-            peers = [peer]
+        if (undefined != dest) {
+            peers = [dest]
         }
         peers.forEach((peer) => {
-            let sock = new WebSocket('http://'+peer)
-            sock.send(roll([t2b(this.addr), memo]))
-            sock.close()
+            let sock = io('http://' + peer)
+            //sock.send(roll([t2b(this.addr), memo]))
+            sock.timeout(2000).emit('minicash', [this.addr, memo])
         })
     }
     async kill() {
-        this.socks.close()
+        this.server.close()
     }
 }
