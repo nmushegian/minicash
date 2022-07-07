@@ -121,7 +121,8 @@ test('merk', t=> {
 
 let $ = {
     vinx_tick,
-    vinx_tock
+    vinx_tock,
+    vinx_tack
 }
 
 test('cases', t=>{
