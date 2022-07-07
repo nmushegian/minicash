@@ -116,6 +116,28 @@ test('merk', t=> {
     actual = merk(feet)
     t.equal(feet.length, 3, `merk must not modify its input`)
     cmp(expected, actual)
+
+    feet = makefeet(4)
+    expected = mash(Buffer.concat([
+        mash(Buffer.concat([feet[0], feet[1]])),
+        mash(Buffer.concat([feet[2], feet[3]]))
+    ]))
+    actual = merk(feet)
+    cmp(expected, actual)
+
+    feet = makefeet(5)
+    expected = mash(Buffer.concat([
+        mash(Buffer.concat([
+            mash(Buffer.concat([feet[0], feet[1]])),
+            mash(Buffer.concat([feet[2], feet[3]]))
+        ])),
+        mash(Buffer.concat([
+            mash(Buffer.concat([feet[4], zero])),
+            zero
+        ]))
+    ]))
+    actual = merk(feet)
+    cmp(expected, actual)
 })
 
 let $ = {
