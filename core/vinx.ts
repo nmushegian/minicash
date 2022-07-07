@@ -117,8 +117,8 @@ function vinx_tack(tock :Tock, tack :Tack) :Okay<void> {
                 const eyenum = Number('0x' + eye.toString('hex'))
                 need(bleq(merk(chunk), ribs[i + eyenum]), 'bad merkelization')
             }
+            need(bleq(merk(ribs), root), 'bad rib merkelization')
         }
-        need(bleq(merk(ribs), root), 'bad rib merkelization')
         return pass(undefined)
     } catch (e) {
         return fail(e.message)
