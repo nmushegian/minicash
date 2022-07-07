@@ -111,23 +111,30 @@ class Pool {
             let time = extend(n2b(bnum(prevtime) + BigInt('0x39')), 7)
             // todo better fuzz
             let feet = ticks.map(t => mash(roll(t)))
-            let tock = [besthash, merk(feet), time, h2b('00'.repeat(7))] as Tock
-            okay(form_tock(tock))
-            okay(vinx_tock(best, tock))
+            let tock = [besthash, undefined, time, h2b('00'.repeat(7))] as Tock
 
             let ribs = []
             let feetslices = []
-            for (let i = 512; i < feet.length; i += 1024) {
-                let start = i - 512
-                let end   = i + 512
-                let feetslice = feet.slice(start, end)
-                let rib = merk(feetslice)
-                ribs.push(rib)
-                feetslices.push(feetslice)
-            }
-            if (feetslices.length == 0) {
+            if (feet.length < 512) {
+                tock[1] = merk(feet)
                 feetslices = [feet]
+            } else {
+                debug("FEET LENGTH", feet.length)
+                for (let i = 0; i < feet.length; i += 1024) {
+                    let start = i
+                    let end = i + 1024
+                    let feetslice = feet.slice(start, end)
+                    let rib = merk(feetslice)
+                    ribs.push(rib)
+                    feetslices.push(feetslice)
+                }
+                tock[1] = merk(ribs)
             }
+
+            debug(`mining with ${ribs.length} ribs`)
+            okay(form_tock(tock))
+            okay(vinx_tock(best, tock))
+
             let tacks = feetslices.map((feetslice, idx) => {
                 let tack = [tock, n2b(BigInt(idx)), ribs, feetslice] as Tack
                 okay(form_tack(tack))

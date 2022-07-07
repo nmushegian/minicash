@@ -161,6 +161,7 @@ function vult_tick(tree :Tree, tick :Tick) :MemoSayTicks|MemoErr{
 
 function vult_tack(tree :Tree, tack :Tack, full=false) :MemoAskTocks|MemoAskTacks|MemoAskTicks|MemoErr {
     let [head, eye, ribs, feet] = tack
+    need(feet.length <= 1024, `vult not dealing with tacks with multiple chunks atm`) // todo
     let headhash = mash(roll(head))
     let prev = head[0]
     let prevhash = mash(roll(prev))

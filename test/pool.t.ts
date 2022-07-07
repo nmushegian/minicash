@@ -47,7 +47,7 @@ test('pool', t => {
 
     let prevhash = bobtocat
     let time = performance.now()
-    let numtx = 500
+    let numtx = 10
     t.ok(true, `time start, mining a block with ${numtx+1} ticks`)
     const spam = (last, n) => {
         for (let i = 0; i < numtx; i++) {
@@ -60,10 +60,11 @@ test('pool', t => {
 
     t.ok(true, `sent some transactions, time=${performance.now() - time} ms`)
     last = pool.mine()
-    t.ok(true, `mined a bigger block with ${numtx+1} ticks ${last}, time=${performance.now() - time} ms`)
+    t.ok(true, `mined a block with ${numtx+1} ticks ${last}, time=${performance.now() - time} ms`)
 
-    numtx = 512
+    numtx = 1024
     spam(prevtxhash, numtx)
     last = pool.mine()
-    t.ok(true, `mined a block with a rib ${last}`)
+    t.ok(true, `mined a block with two ribs ${last}, numtx=${numtx+1}, time=${performance.now() - time} ms`)
+
 })
