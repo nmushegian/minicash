@@ -36,14 +36,14 @@ test('pool', t => {
     let keypair = ec.genKeyPair()
     let pubkey = b2h(Buffer.from(keypair.getPublic().encodeCompressed()))
     let pool = new Pool(djin, undefined, ALI)
-    let minthash = pool.mine()
+    let [tockhash, minthash] = pool.mine()
     t.ok(true, `mined a block with just a mint tick ${minthash}`)
     let alitobobhash = pool.send([[minthash, BigInt(0), BOB, BigInt(1)]], keys.ali)
     pool.mine()
     t.ok(true, `mined a block!`)
     let bobtocat = pool.send([[alitobobhash, BigInt(0), CAT, BigInt(1)]], keys.bob)
-    let last = pool.mine()
-    t.ok(true, `mined a block! ${last}`)
+    ;[tockhash, minthash] = pool.mine()
+    t.ok(true, `mined a block! ${tockhash}`)
 
     let prevhash = bobtocat
     let time = performance.now()
@@ -59,12 +59,12 @@ test('pool', t => {
     let prevtxhash = spam(prevhash, numtx)
 
     t.ok(true, `sent some transactions, time=${performance.now() - time} ms`)
-    last = pool.mine()
-    t.ok(true, `mined a block with ${numtx+1} ticks ${last}, time=${performance.now() - time} ms`)
+    ;[tockhash, minthash] = pool.mine()
+    t.ok(true, `mined a block with ${numtx+1} ticks ${tockhash}, time=${performance.now() - time} ms`)
 
     numtx = 1024
     spam(prevtxhash, numtx)
-    last = pool.mine()
-    t.ok(true, `mined a block with two ribs ${last}, numtx=${numtx+1}, time=${performance.now() - time} ms`)
+    ;[tockhash, minthash] = pool.mine()
+    t.ok(true, `mined a block with two ribs ${tockhash}, numtx=${numtx+1}, time=${performance.now() - time} ms`)
 
 })

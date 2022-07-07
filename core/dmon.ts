@@ -70,7 +70,7 @@ class Dmon {
         }
 
         while (true) {
-            let nexttockhash = this.pool.mine(this.minetime)
+            let [nexttockhash,] = this.pool.mine(this.minetime)
 
             // adjust minetime if mining too slow or fast
             let besthash = this.djin.tree.rock.read_one(rkey('best'))

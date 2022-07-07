@@ -70,7 +70,7 @@ class Pool {
         this.fees = new Map<Hexs, Bnum>()
     }
 
-    mine(minetime :Number =0) :string {
+    mine(minetime :Number =0) :[string, string] {
         try {
             let besthash = this.djin.tree.rock.read_one(rkey('best'))
             debug(`mine best=${b2h(besthash)}, cands length=${this.cands.length}`)
@@ -169,7 +169,7 @@ class Pool {
             debug(`mined a block! hash=${b2h(mash(roll(tock)))} block=${rmap(tock, b2h)} numtx=${feet.length}`)
             debug(`best=${b2h(this.tree.rock.read_one(rkey('best')))}`)
             this.cands = []
-            return b2h(mash(roll(tock)))
+            return [b2h(mash(roll(tock))), b2h(mash(roll(mint)))]
         } catch (e) {
             this.cands = []
             toss('mine error', e)

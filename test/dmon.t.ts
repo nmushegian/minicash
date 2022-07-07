@@ -17,7 +17,7 @@ const keys = {
 }
 
 
-test.only('dmon', async t => {
+test('dmon', async t => {
     let [ALI, BOB, CAT] = ['ali', 'bob', 'cat']
         .map(name =>
             b2h(t2b(ec.keyFromPrivate(h2b(keys[name])).getPublic().encodeCompressed()))
