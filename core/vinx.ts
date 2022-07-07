@@ -111,7 +111,7 @@ function vinx_tack(tock :Tock, tack :Tack) :Okay<void> {
             let nchunks = Math.ceil(feet.length / 1024)
             need(
                 ribs.length >= nchunks,
-                `len(ribs) must be >= ceil(len(feet)/1024) if ribs not empty ${ribs.length}, ${feet.length}`
+                `len(ribs) must be ceil(len(feet)/1024) if ribs not empty`
             )
             for (let i = 0; i < nchunks; i++) {
                 let chunk = feet.slice(i, i + 1024)
