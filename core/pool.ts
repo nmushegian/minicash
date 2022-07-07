@@ -119,7 +119,6 @@ class Pool {
                 tock[1] = merk(feet)
                 feetslices = [feet]
             } else {
-                debug("FEET LENGTH", feet.length)
                 for (let i = 0; i < feet.length; i += 1024) {
                     let start = i
                     let end = i + 1024
