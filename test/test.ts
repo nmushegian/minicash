@@ -9,6 +9,7 @@ import * as vulttest from './vult.t.js'
 import * as welltest from './well.t.js'
 import * as wordtest from './word.t.js'
 import * as pooltest from './pool.t.js'
+import * as dmontest from './dmon.t.js'
 
 djintest
 rocktest
@@ -18,5 +19,6 @@ vulttest
 welltest
 wordtest
 pooltest
+dmontest
 
 

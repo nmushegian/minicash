@@ -1,21 +1,48 @@
-import {h2b, Memo, memo, MemoType, okay, toss,} from './word.js'
+import {h2b, Memo, memo, memo_close, MemoType, okay,} from './word.js'
 
 import {Djin} from './djin.js'
 import {Plug} from './plug.js'
+import {Pool} from "./pool.js";
+import {Hexs} from "coreword";
+
+export {Dmon}
+
+import Debug from 'debug'
+const debug = Debug('dmon::test')
 
 class Dmon {
     djin :Djin
     plug :Plug
+    pool :Pool
+    minetime :Number
 
     // data dir, wss port
-    async init(path :string, port :number) {
-        this.djin = new Djin(path)
-        this.plug = new Plug(port)
+    init(path :string, port :number, pubkey :Hexs, peers :string[]) {
+        this.djin = new Djin(path, true, true)
+        this.plug = new Plug(port, peers)
+        this.pool = new Pool(this.djin, this.plug, pubkey)
+        this.minetime = 1000
     }
 
-    async play() {
+    play() {
+        this.mine()
         this.serv()
-        this.sync()
+        //this.sync()
+    }
+
+    kill() {
+        this.plug.kill()
+    }
+
+    mine() {
+        setInterval(() => {
+            let starttime = performance.now()
+            this.pool.mine(this.minetime)
+            let endtime = performance.now()
+            let muller = endtime - starttime > 2000 ? 0.9 : 1.1
+            this.minetime = Math.floor(this.minetime.valueOf() * muller)
+            debug('minetime =', this.minetime)
+        },  2000)
     }
 
     // handle requests
@@ -30,14 +57,19 @@ class Dmon {
 
             // depending on error type,
             // disconnect / backoff / just respond
-            let out = okay(this.djin.turn(memo))
-            back(out)
-            toss(`todo dmon.serv`)
+            try {
+                let out = okay(this.djin.turn(memo))
+                back(out)
+            } catch (e) {
+                back(memo_close([MemoType.Err, ['invalid', []]]))
+                console.error(e.message)
+            }
         })
     }
 
+    /*
     // resolves when self-sync is done and peer-sync has started
-    async sync(tail = h2b('')) {
+    sync(tail = h2b('')) {
         // try to sync with yourself first
         let [ty, yarn] = this.djin.turn(memo(MemoType.AskTocks, tail))
         // need todo ty not err
@@ -53,6 +85,8 @@ class Dmon {
             }
         })
     }
+
+     */
 
 }
 

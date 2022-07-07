@@ -70,7 +70,7 @@ class Pool {
         this.fees = new Map<Hexs, Bnum>()
     }
 
-    mine() :string {
+    mine(minetime :Number =0) :string {
         try {
             let besthash = this.djin.tree.rock.read_one(rkey('best'))
             debug(`mine best=${b2h(besthash)}, cands length=${this.cands.length}`)
@@ -130,6 +130,17 @@ class Pool {
                 tock[1] = merk(ribs)
             }
 
+            let starttime = performance.now()
+            while (performance.now() - starttime < minetime) {
+                let [prev, root, time, fuzz] = tock
+                let curtockhash = mash(roll(tock))
+                let nexttock = [prev, root, time, extend(n2b(bnum(fuzz) + BigInt(1)), 7)] as Tock
+                let nexttockhash = mash(roll(nexttock))
+                if (bnum(nexttockhash) < bnum(curtockhash)) {
+                    tock = nexttock
+                }
+            }
+
             debug(`mining with ${ribs.length} ribs`)
             okay(form_tock(tock))
             okay(vinx_tock(best, tock))
@@ -155,6 +166,7 @@ class Pool {
             out = okay(this.djin.turn(memo_close([MemoType.SayTocks, [tock]])))
             need(MemoType.Err != memo_open(out)[0], `mine: say/tocks failed ${rmap(out, b2h)}`)
             debug(`mined a block! hash=${b2h(mash(roll(tock)))} block=${rmap(tock, b2h)} numtx=${feet.length}`)
+            debug(`best=${b2h(this.tree.rock.read_one(rkey('best')))}`)
             this.cands = []
             return b2h(mash(roll(mint)))
         } catch (e) {

@@ -150,13 +150,9 @@ function vult_tick(tree :Tree, tick :Tick) :MemoSayTicks|MemoErr{
     debug(`vult_tick ${rmap(tick, b2h)} hash=${b2h(mash(roll(tick)))}`)
     const tickhash = mash(roll(tick))
     const key = rkey('tick', tickhash)
+    tree.rock.etch_one(rkey('tick', tickhash), roll(tick))
     const memo = [MemoType.SayTicks, [tick]] as MemoSayTicks
-    if (bleq(tree.rock.read_one(key), h2b(''))) {
-        tree.rock.etch_one(rkey('tick', tickhash), roll(tick))
-        return memo
-    }
-
-    return [MemoType.Err, ['invalid', memo_close(memo)]]
+    return memo
 }
 
 function vult_tack(tree :Tree, tack :Tack, full=false) :MemoAskTocks|MemoAskTacks|MemoAskTicks|MemoErr {
