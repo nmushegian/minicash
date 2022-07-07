@@ -1,46 +1,31 @@
 // engine
 
 import {
-    aver, b2h, b2t,
-    bleq,
-    Blob, bnum,
-    fail,
-    h2b,
-    islist,
-    mash,
-    Memo,
+    b2h,
     memo_close,
-    memo_open,
-    MemoAskTacks,
-    MemoAskTicks,
-    MemoAskTocks,
-    MemoErr,
-    MemoSayTacks,
-    MemoSayTicks,
-    MemoSayTocks,
-    MemoType,
-    n2b, need,
-    Okay,
-    okay, OpenMemo,
-    pass, rmap,
-    roll, Snap,
-    t2b, Tack,
+    MemoErr, rmap, Snap,
+    Tack,
     Tick,
-    Tock,
-    toss,
-    tuff,
-    unroll
+    Okay, okay, pass, fail, toss, aver,
+    h2b, t2b, b2t,
+    Blob, isblob,
+    roll, unroll, bleq, islist,
+    Tock, tuff, n2b,
+    Mash, mash,
+    need, Memo, OpenMemo, MemoType,
+    MemoSayTocks, MemoSayTacks, MemoSayTicks,
+    MemoAskTocks, MemoAskTacks, MemoAskTicks, bnum, memo_open,
 } from './word.js'
 
 import {latest_fold, know, vult_full, vult_thin, vult_tack, vult_tick, subsidyleft} from './vult.js'
 
-import {Rock} from './rock.js'
-import {rkey, Tree} from './tree.js'
-import {form_memo, form_tick, form_tock} from "./well.js";
-import Debug from 'debug'
 import {vinx_tack, vinx_tick, vinx_tock} from "./vinx.js";
 
+import Debug from 'debug'
 const debug = Debug('djin::test')
+import { Rock } from './rock.js'
+import { Tree, rkey } from './tree.js'
+import {form_memo, form_tick, form_tock} from "./well.js";
 
 export { Djin }
 
