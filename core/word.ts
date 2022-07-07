@@ -35,7 +35,8 @@ export {
     sign, scry,
     memo,
     MemoType,// enum export as value not type
-    memo_open
+    memo_open,
+    memo_close,
 }
 
 function t2b(x :string) :Blob {
@@ -59,6 +60,10 @@ function mash(x :Blob) :Mash {
 
 function memo_open(m :Memo) :OpenMemo {
     return [m[0][0], m[1]] as OpenMemo
+}
+
+function memo_close(m :OpenMemo) :Memo {
+    return [Buffer.from([m[0]]), m[1]] as Memo
 }
 
 function memo(line :MemoType, body :Roll) :Memo {

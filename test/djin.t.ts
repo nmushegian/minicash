@@ -1,10 +1,20 @@
-import {test} from 'tapzero'
+import { test } from 'tapzero'
+import { jams } from 'jams.js'
 
-//import { tick } from '../core/cash.js'
 import {Djin} from '../core/djin.js'
 
+import Debug from 'debug'
+const debug = Debug('djin::test')
 
-import {h2b, mash, memo, MemoType, merk, okay, roll, Tick,} from '../core/word.js'
+import {
+    Tick,
+    okay,
+    roll, h2b,
+    mash, memo, merk, MemoType,
+    need, rmap, memo_open, bleq, b2h
+} from '../core/word.js'
+import {readdirSync, readFileSync} from "fs";
+import {dbgtick, dbgtock} from "./helpers.js";
 
 
 test('djin', t=>{ try {
@@ -43,3 +53,53 @@ test('djin', t=>{ try {
 
     djin.kill()
 } catch(e) { console.log(e); t.ok(false, e.message); }})
+
+const dbgmemo = (omemo) => {
+    let type = omemo[0]
+    let body = omemo[1]
+    if (MemoType.SayTocks == type) {
+        body.forEach(tock => {
+            const tock_s = rmap(tock, b2h)
+            const hash = mash(roll(tock)).toString('hex')
+            debug('say/tocks in:', tock_s, hash)
+        })
+    }
+}
+test('djin jams', t=>{
+    let dir = './test/case/djin/'
+    let cases = readdirSync(dir)
+
+    cases.forEach(name => {
+        if (!name.endsWith('.jams')) return
+        test(`${name}`, t => {
+            debug(`TESTING: ${name}`)
+            let djin = new Djin('./test/db', true)
+            let path = dir + name
+            let file = readFileSync(path)
+            let data = jams(file.toString())
+            let prev
+            data.forEach((cmd, idx) => {
+                let func = cmd[0]
+                need(func == 'send' || func == 'want', 'only doing send and want for now...')
+                /*
+                let omemo = memo_open(memo)
+                let type = omemo[0]
+                if (MemoType.SayTocks)
+                 */
+                if ('send' == func) {
+                    let memo = rmap(cmd[1], h2b)
+                    dbgmemo(memo_open(memo))
+                    let [ok, val, err] = djin.turn(memo)
+                    let out = memo_open(val)
+                    t.equal(ok, true, `${name} send`)
+                    prev = val
+                }
+                if ('want' == func) {
+                    debug(`want (prev=[${rmap(prev, b2h)}])`)
+                    t.equal(bleq(roll(rmap(cmd[1], h2b)), roll(prev)), true, `${name} want`)
+                }
+            })
+            djin.kill()
+        })
+    })
+})
