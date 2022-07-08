@@ -4,8 +4,9 @@ import { default as process } from 'node:process'
 
 import {
     Blob, aver, isblob, bleq,
-    need, toss, err
+    need, toss, err, Bnum, n2b, t2b, b2h
 } from './word.js'
+import {rkey, Tree} from "./tree";
 
 export {
     Rock, Rite
@@ -39,11 +40,21 @@ class Rite {
         if (val) return val
         else return Buffer.from('')
     }
-    find_min(key :Blob) :Blob {
-        toss(`todo rock.find_min`)
-        return Buffer.from('')
+    find_max(key :Blob) :[Blob, Bnum] {
+        let i = BigInt(0)
+        let prev_tail
+        while (true) {
+            let tail = this.read(Buffer.concat([key, n2b(i)]))
+            if (bleq(tail, t2b(''))) {
+                break
+            }
+            i++
+            prev_tail = tail
+        }
+        need(prev_tail != undefined, `no folds at tockhash ${b2h(key)}`)
+        return [prev_tail, i - BigInt(1)]
     }
-    find_max(key :Blob) :Blob {
+    find_min(key :Blob) :Blob {
         toss(`todo rock.find_min`)
         return Buffer.from('')
     }
@@ -107,5 +118,13 @@ class Rock {
             dbtx.abort()
             throw e
         }
+    }
+
+    find_max(key :Blob) {
+        let out
+        this.rite((rite) => {
+            out = rite.find_max(key)
+        })
+        return out
     }
 }

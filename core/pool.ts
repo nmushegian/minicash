@@ -30,7 +30,6 @@ import {
 
 import elliptic from 'elliptic'
 import {rkey, Tree} from "./tree.js";
-import {know, latest_fold} from "./vult.js";
 import {vinx_tack, vinx_tick, vinx_tock} from "./vinx.js";
 import {form_tack, form_tick, form_tock} from "./well.js";
 
@@ -77,7 +76,8 @@ class Pool {
             let bestroll = this.djin.tree.rock.read_one(rkey('tock', besthash))
             need(!bleq(t2b(''), bestroll), `best tock not found`)
             let mintmoves = [[besthash, h2b('07'), h2b('00'.repeat(65))]]
-            let [fold, foldidx] = latest_fold(this.djin.tree, besthash)
+            //let [fold, foldidx] = latest_fold(this.djin.tree, besthash)
+            let [fold, foldidx] = this.djin.rock.find_max(rkey('fold', besthash))
             let [snap, _fees] = unroll(fold) as [Snap, Blob]
 
             //let oldcands = this.cands
@@ -243,7 +243,7 @@ class Pool {
         okay(vinx_tick([...conx, ...this.cands], tick, tock))
 
         let besthash = this.tree.rock.read_one(rkey('best'))
-        let [snapfees, snapidx] = latest_fold(this.tree, besthash)
+        let [snapfees, snapidx] = this.djin.rock.find_max(rkey('fold', besthash))
         let [snap, ] = unroll(snapfees)
         this.tree.look(snap as Snap, (rock, twig) => {
             // check no pents in current snap

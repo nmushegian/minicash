@@ -17,7 +17,7 @@ import {
     MemoAskTocks, MemoAskTacks, MemoAskTicks, bnum, memo_open, Bnum,
 } from './word.js'
 
-import {latest_fold, know, vult_full, vult_thin, vult_tack, vult_tick, subsidyleft} from './vult.js'
+import {vult_full, vult_thin} from './vult.js'
 
 import {vinx_tack, vinx_tick, vinx_tock} from "./vinx.js";
 
@@ -57,7 +57,7 @@ class Djin {
             rite.etch(rkey('fold', banghash, n2b(BigInt(0))), roll([snap, n2b(BigInt(0))]))
             let left = BigInt(2) ** BigInt(53) - BigInt(1)
             rite.etch(rkey('left', n2b(BigInt(0))), n2b(BigInt(2) ** BigInt(53) - BigInt(1)))
-            let nextleft = subsidyleft(rite, n2b(BigInt(57)))
+            let nextleft = left - (left / (BigInt(2) ** BigInt(21)))
             twig.etch(rkey('ment', banghash, h2b('07')), roll([banghash, n2b(left - nextleft)])) // [code, cash]
             twig.etch(rkey('know', banghash), t2b('DV'))
             twig.etch(rkey('pyre', banghash), n2b(BigInt(536112000))) // 17y
@@ -195,7 +195,11 @@ class Djin {
             , `panic, tick must be valid-in-context`
         )
 
-        return vult_tick(this.tree, tick)
+        debug(`say/ticks ${rmap(tick, b2h)} hash=${b2h(mash(roll(tick)))}`)
+        const tickhash = mash(roll(tick))
+        const key = rkey('tick', tickhash)
+        this.tree.rock.etch_one(rkey('tick', tickhash), roll(tick))
+        return memo
     }
 
     _say_tacks(memo :MemoSayTacks) :MemoAskTocks|MemoAskTacks|MemoAskTicks|MemoErr {
@@ -207,12 +211,26 @@ class Djin {
         let prev = head[0]
         aver(_ => {let res = vinx_tack(head, tack); return res[0]}, `panic, tack must be valid-in-context`)
 
+        need(feet.length <= 1024, `vult not dealing with tacks with multiple chunks atm`) // todo
         let headhash = mash(roll(head))
-        if (this.full) {
-            return vult_tack(this.tree, tack, true)
-        } else {
-            return vult_tack(this.tree, tack)
+        let prevhash = mash(roll(prev))
+        this.rock.etch_one(rkey('tack', headhash, eye), roll(tack))
+
+        let tockroll = this.rock.read_one(rkey('tock', headhash))
+        if (bleq(t2b(''), tockroll)) {
+            debug('say/tacks tock not found, sending ask/tocks')
+            return [MemoType.AskTocks, prevhash]
         }
+
+        if (this.full) {
+            return vult_full(this.tree, head)
+        }
+
+        if (bleq(t2b(''), tockroll)) {
+            return vult_thin(this.tree, head, !this.full)
+        }
+
+        return [MemoType.AskTocks, headhash]
     }
 
     _ask_tacks(memo :MemoAskTacks) :MemoSayTacks {
@@ -272,10 +290,6 @@ class Djin {
             if (!res[0]) debug('err: ', res[2])
             return res[0]
         }, 'panic, tock must be valid-in-context')
-        aver(_ => {
-            let prevknow = know(this.tree, prevhash)
-            return 'PV' == prevknow || 'DV' == prevknow
-        }, `panic, say/tocks prev must be PV (${b2h(prevhash)})`)
 
         if (this.full) {
             return vult_full(this.tree, tock) as MemoAskTacks|MemoAskTocks|MemoAskTicks
