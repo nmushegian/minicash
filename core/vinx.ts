@@ -113,10 +113,11 @@ function vinx_tack(tock :Tock, tack :Tack) :Okay<void> {
                 ribs.length >= nchunks,
                 `len(ribs) must be ceil(len(feet)/1024) if ribs not empty`
             )
+            const eyenum = Number('0x' + eye.toString('hex'))
             for (let i = 0; i < nchunks; i++) {
-                let chunk = feet.slice(i, i + 1024)
-                const eyenum = Number('0x' + eye.toString('hex'))
-                need(bleq(merk(chunk), ribs[i + eyenum]), 'bad merkelization')
+                let chunkstart = i * 1024
+                let chunk = feet.slice(chunkstart, chunkstart + 1024)
+                need(bleq(merk(chunk), ribs[i + eyenum]), `bad merkelization`)
             }
             need(bleq(merk(ribs), root), 'bad rib merkelization')
         }

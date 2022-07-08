@@ -195,9 +195,9 @@ class Djin {
         let tack = tacks[0]
         let [head, eye, ribs, feet] = tack
         let prev = head[0]
+
         aver(_ => {let res = vinx_tack(head, tack); return res[0]}, `panic, tack must be valid-in-context`)
 
-        need(feet.length <= 1024, `vult not dealing with tacks with multiple chunks atm`) // todo
         let headhash = mash(roll(head))
         let prevhash = mash(roll(prev))
         this.rock.etch_one(rkey('tack', headhash, eye), roll(tack))

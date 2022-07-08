@@ -177,7 +177,8 @@ function vult_full(tree :Tree, tock :Tock) :MemoAskTacks|MemoAskTocks|MemoAskTic
     }
     let [head, , ribs, feet] = unroll(firsttack_blob) as Tack
     // ribs.length == 0 if tack has fewer than 512 feet
-    for (let eye = 1; eye < ribs.length; eye++) {
+    let hop = Math.ceil(feet.length / 1024)
+    for (let eye = hop; eye < ribs.length; hop = Math.ceil(feet.length / 1024), eye += hop) {
         let tack = tree.rock.read_one(rkey('tack', tockhash, n2b(BigInt(eye))))
         if (bleq(tack, t2b(''))) {
             debug("tack not found, asking tacks")

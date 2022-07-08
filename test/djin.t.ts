@@ -1,20 +1,35 @@
-import { test } from 'tapzero'
-import { jams } from 'jams.js'
+import {test} from 'tapzero'
+import {jams} from 'jams.js'
 
 import {Djin} from '../core/djin.js'
 
 import Debug from 'debug'
-const debug = Debug('djin::test')
-
 import {
-    Tick,
+    b2h,
+    bleq,
+    bnum,
+    extend,
+    h2b,
+    mash,
+    memo,
+    memo_close,
+    memo_open,
+    MemoType,
+    merk,
+    n2b,
+    need,
     okay,
-    roll, h2b,
-    mash, memo, merk, MemoType,
-    need, rmap, memo_open, bleq, b2h, t2b
+    rmap,
+    roll,
+    t2b,
+    Tack,
+    Tick,
+    Tock
 } from '../core/word.js'
 import {readdirSync, readFileSync} from "fs";
-import {dbgtick} from "./helpers.js";
+import {dbgtick, maketicks} from "./helpers.js";
+
+const debug = Debug('djin::test')
 
 const dbgmemo = (omemo) => {
     let type = omemo[0]
@@ -71,9 +86,55 @@ test('djin', t=>{ try {
     // djin asks for tack
 
     t.deepEqual(out, memo(MemoType.AskTocks, mash(roll(tock1))))
+    djin.kill()
+
+    djin = new Djin('./test/db', true, true)
+    let ticks = maketicks(mash(roll(djin.bang)), bnum(h2b('ffffffff')), 3075)
+    let feet  = ticks.map(t => mash(roll(t)))
+    let ribs = [
+        merk(feet.slice(0, 1024)),
+        merk(feet.slice(1024, 2048)),
+        merk(feet.slice(2048, 3072)),
+        merk(feet.slice(3072, 4096))
+    ]
+    let bigtock = [
+        mash(roll(djin.bang)),
+        merk(ribs),
+        extend(n2b(BigInt(57)), 7),
+        h2b('00'.repeat(7))
+    ] as Tock
+    let firstbigtack = [
+        bigtock,
+        h2b('00'),
+        ribs,
+        feet.slice(0, 2048)
+    ] as Tack
+    let secondbigtack = [
+        bigtock,
+        h2b('02'),
+        ribs,
+        feet.slice(2048, 4096)
+    ] as Tack
+    out = okay(djin.turn(memo_close([MemoType.SayTacks, [firstbigtack]])))
+    need(memo_open(out)[0] != MemoType.Err, 'say/tacks big chunks chunk0,1 returned error')
+    out = okay(djin.turn(memo_close([MemoType.SayTacks, [secondbigtack]])))
+    need(memo_open(out)[0] != MemoType.Err, 'say/tacks big chunks chunk2,3 returned error')
+    ticks.forEach(t => {
+        out = okay(djin.turn(memo_close([MemoType.SayTicks, [t]])))
+        need(memo_open(out)[0] != MemoType.Err, 'say/ticks big chunks error')
+    })
+    out = okay(djin.turn(memo_close([MemoType.SayTocks, [bigtock]])))
+    need(memo_open(out)[0] != MemoType.Err, 'say/tocks big chunks error')
+    let expected = memo_close([MemoType.AskTocks, mash(roll(bigtock))])
+    t.ok(
+        bleq(roll(out), roll(expected)),
+        `vulted a whole tock w/ big chunks act: ${rmap(out, b2h)} exp: ${rmap(expected, b2h)}`
+    )
+    t.ok(true, `first chunksize: ${firstbigtack[3].length}, second: ${secondbigtack[3].length}`)
 
     djin.kill()
 } catch(e) { console.log(e); t.ok(false, e.message); }})
+
 
 const runcase = (dir, name, full=false) => {
     if (!name.endsWith('.jams')) return

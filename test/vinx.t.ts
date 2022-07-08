@@ -76,11 +76,13 @@ const makefeet = x => {
 }
 test('vinx_tack', t=> {
     const eye = h2b('00')
+
+    const feet = makefeet(1536)
     const ribs = [
-        '83b4282db216b3261120d479ab6f0f70b50f4345d79c64c9',
-        'e53e9f9941199fd10480771ceb747af31da36d60b613e235',
-        '000000000000000000000000000000000000000000000000'
-    ].map(h2b)
+        merk(feet.slice(0, 1024)),
+        merk(feet.slice(1024)),
+        h2b('000000000000000000000000000000000000000000000000')
+    ]
     const tock = [
         '00'.repeat(24),
         b2h(merk(ribs)),
@@ -88,10 +90,8 @@ test('vinx_tack', t=> {
         '00'.repeat(7)
     ].map(h2b) as Tock
 
-
-    const feet = makefeet(1536)
     const [ok, val, err] = vinx_tack(tock, [tock, eye, ribs, feet])
-    t.equal(ok, true, `vinx_tack ${err}`)
+    t.equal(ok, true, `vinx_tack err=${err}`)
 })
 
 test('merk', t=> {
