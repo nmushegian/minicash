@@ -225,10 +225,9 @@ class Djin {
         let tacks = []
         for (let eye = 0; eye <= 128; eye++) {
             let tackroll = this.rock.read_one(rkey('tack', tockhash, n2b(BigInt(eye))))
-            if (bleq(tackroll, t2b(''))) {
-                break
+            if (!bleq(tackroll, t2b(''))) {
+                tacks.push(unroll(tackroll))
             }
-            tacks.push(unroll(tackroll))
         }
         return [MemoType.SayTacks, tacks]
     }

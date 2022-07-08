@@ -132,6 +132,12 @@ test('djin', t=>{ try {
     )
     t.ok(true, `first chunksize: ${firstbigtack[3].length}, second: ${secondbigtack[3].length}`)
 
+    out = okay(djin.turn(memo_close([MemoType.AskTacks, mash(roll(bigtock))])))
+    expected = memo_close([MemoType.SayTacks, [firstbigtack, secondbigtack]])
+    t.ok(
+        bleq(roll(out), roll(expected)),
+        `ask/tacks big chunks ${out[0][0]} ${expected[0][0]}`
+    )
     djin.kill()
 } catch(e) { console.log(e); t.ok(false, e.message); }})
 
