@@ -8,7 +8,9 @@ const ec = elliptic.ec('secp256k1')
 
 
 import Debug from 'debug'
-import {b2h, h2b, t2b} from "../core/word.js";
+import {b2h, bleq, h2b, mash, roll, t2b} from "../core/word.js";
+import {rkey} from "../core/tree.js";
+import {Rock} from "../core/rock.js";
 const debug = Debug('dmon::test')
 const keys = {
     ali: 'e4c90c881b372adf66e8f566de63f560f48ef16a31c2aef9b860023ff9ab634f',
@@ -25,12 +27,19 @@ test('dmon', async t => {
     let ali = new Dmon()
     let bob = new Dmon()
     let epoch = Date.now()
-    ali.init('ALI', './test/dbali', 10334, ALI, ['127.0.0.1:10335'], epoch, 57000, 10)
-    bob.init('BOB', './test/dbbob', 10335, BOB, ['127.0.0.1:10334'], epoch, 57000, 10)
+    ali.init('ALI', './test/dbali', 10334, ALI, ['127.0.0.1:10335'], epoch, 57000, 20, true)
     ali.play()
-    bob.play()
 
-    await Promise.all([ali.mine(), bob.mine()])
+    setTimeout(() => ali.kill(), 1000)
+    await ali.mine()
 
+    ali = new Dmon()
+    ali.init('ALI', './test/dbali', 10334, ALI, ['127.0.0.1:10335'], epoch, 57000, 20, false)
+    let prevbest = ali.djin.rock.read_one(rkey('best'))
+    t.ok(!bleq(mash(roll(ali.djin.bang)), prevbest), 'reconstructed')
+    ali.play()
+    setTimeout(() => ali.kill(), 1000)
+    let tockhash = await ali.mine()
+    t.ok(!bleq(h2b(tockhash), prevbest), `mined ${tockhash} ${b2h(prevbest)}`)
 
 })

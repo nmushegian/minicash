@@ -1,4 +1,4 @@
-import { rmSync, mkdirSync } from 'fs'
+import {rmSync, mkdirSync, readdirSync, existsSync} from 'fs'
 import { default as lmdb } from 'node-lmdb'
 import { default as process } from 'node:process'
 
@@ -55,8 +55,17 @@ class Rock {
     constructor(path, reset=false) {
         this.env = new lmdb.Env()
         if (reset) {
-            rmSync(path, {force:true, recursive:true})
-            mkdirSync(path)
+            if (existsSync(path)) {
+                let files = readdirSync(path)
+                files.forEach(f => {
+                    // leave reconstruct file(s)
+                    if (!f.endsWith('.jams')) {
+                        rmSync(path + '/' + f, {force:true, recursive:true})
+                    }
+                })
+            } else {
+                mkdirSync(path)
+            }
         }
         console.log('opening', path)
         this.env.open({ path })

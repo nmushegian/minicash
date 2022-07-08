@@ -2,15 +2,18 @@ import {
     b2h,
     bleq,
     bnum,
-    h2b, mash,
+    h2b,
+    mash,
     Memo,
     memo_close,
     memo_open,
     MemoType,
+    n2b,
     need,
     okay,
     rmap,
     roll,
+    t2b,
     Tock,
     unroll,
 } from './word.js'
@@ -18,9 +21,12 @@ import {
 import {Djin} from './djin.js'
 import {Plug} from './plug.js'
 import {Pool} from "./pool.js";
-import {Hexs, Roll} from "coreword";
+import {Hexs} from "coreword";
 import Debug from 'debug'
 import {rkey} from "./tree.js";
+import {readFileSync} from "fs";
+
+import {jams} from 'jams.js'
 
 export {Dmon}
 
@@ -35,10 +41,24 @@ class Dmon {
     speedup :number
     period :number
     name :string
+    shutdown :boolean
 
     // data dir, wss port
-    init(name :string, path :string, port :number, pubkey :Hexs, peers :string[], epoch :number, period: number, speedup :number) {
+    init(
+        name :string, path :string, port :number, pubkey :Hexs, peers :string[],
+        epoch :number, period: number, speedup :number, reset :boolean
+    ) {
         this.djin = new Djin(path, true, true)
+
+        if (!reset) {
+            let file = readFileSync(path+'/reconstruct.jams')
+            let data = jams(file.toString())
+            data.forEach(cmd => {
+                let memo = rmap(cmd[1], h2b)
+                try {this.djin.turn(memo)} catch (e) {console.log(e.message)}
+            })
+        }
+
         this.plug = new Plug(port, peers)
         this.pool = new Pool(this.djin, this.plug, pubkey)
         this.period = period
@@ -47,6 +67,7 @@ class Dmon {
         this.speedup = speedup
         this.minetime = 1000
         this.name = name
+        this.shutdown = false
     }
 
     play() {
@@ -54,10 +75,12 @@ class Dmon {
     }
 
     kill() {
-        this.plug.kill()
+        this.plug.kill() // no network triggers
+        this.shutdown = true // turn off miner
+        setImmediate(() => this.djin.kill())
     }
 
-    async mine() {
+    async mine() :Promise<string> {
 
         const spin = async (endtime) => {
             while (true) {
@@ -69,8 +92,15 @@ class Dmon {
             }
         }
 
+        let nexttockhash
         while (true) {
-            let [nexttockhash,] = this.pool.mine(this.minetime)
+            if (this.shutdown) {
+                debug(`got shutdown`)
+                return nexttockhash
+            }
+            debug(`${this.name} mining...best=${b2h(this.djin.tree.rock.read_one(rkey('best')))}`)
+
+            ;[nexttockhash,] = this.pool.mine(this.minetime)
 
             // adjust minetime if mining too slow or fast
             let besthash = this.djin.tree.rock.read_one(rkey('best'))
@@ -88,7 +118,6 @@ class Dmon {
                 this.minetime = 10
             }
             await spin(tocktime + this.period)
-
         }
     }
 

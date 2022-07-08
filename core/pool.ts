@@ -80,7 +80,6 @@ class Pool {
             let [fold, foldidx] = latest_fold(this.djin.tree, besthash)
             let [snap, _fees] = unroll(fold) as [Snap, Blob]
 
-
             //let oldcands = this.cands
             //this.cands = []
             //oldcands.forEach(c => this.addpool(c))
@@ -94,7 +93,7 @@ class Pool {
                 let bestment = twig.read(rkey('ment', besthash, h2b('07')))
                 ;[, cash] = unroll(bestment)
             })
-            need(cash != undefined, 'cash not found')
+            need(cash != undefined, `cash not found`)
             let cashandfees = bnum(cash)
             ticks.forEach(tick => {
                 cashandfees += this.fees[b2h(mash(roll(tick)))]

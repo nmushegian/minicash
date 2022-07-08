@@ -41,9 +41,10 @@ class Plug {
             let sock = io('http://' + peer)
             //sock.send(roll([t2b(this.addr), memo]))
             sock.timeout(2000).emit('minicash', [this.addr, memo])
+            sock.close()
         })
     }
-    async kill() {
+    kill() {
         this.server.close()
     }
 }

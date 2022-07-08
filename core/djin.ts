@@ -14,7 +14,7 @@ import {
     Mash, mash,
     need, Memo, OpenMemo, MemoType,
     MemoSayTocks, MemoSayTacks, MemoSayTicks,
-    MemoAskTocks, MemoAskTacks, MemoAskTicks, bnum, memo_open,
+    MemoAskTocks, MemoAskTacks, MemoAskTicks, bnum, memo_open, Bnum,
 } from './word.js'
 
 import {latest_fold, know, vult_full, vult_thin, vult_tack, vult_tick, subsidyleft} from './vult.js'
@@ -26,6 +26,7 @@ const debug = Debug('djin::test')
 import { Rock } from './rock.js'
 import { Tree, rkey } from './tree.js'
 import {form_memo, form_tick, form_tock} from "./well.js";
+import {writeFileSync} from "fs";
 
 export { Djin }
 
@@ -34,8 +35,11 @@ class Djin {
     tree :Tree   // per-tock view of state
     bang :Tock   // tock zero
     full :boolean
+    logs :Memo[]
+    outpath :string
 
     constructor(path :string, reset=false, full=false) {
+        this.outpath = path + '/reconstruct.jams'
         this.rock = new Rock(path, reset)
         this.tree = new Tree(this.rock)
         this.bang = [
@@ -59,10 +63,16 @@ class Djin {
             twig.etch(rkey('pyre', banghash), n2b(BigInt(536112000))) // 17y
         })
         this.full = full
+        this.logs = []
     }
 
     kill() {
         this.rock.shut()
+        let cmds = rmap(this.logs, b2h).map(log => ['send', log])
+        let slogs = JSON.stringify(cmds)
+            .replace(/\"/g, '')
+            .replace(/,/g, ' ')
+        writeFileSync(this.outpath, slogs)
     }
 
     async *spin(memo) {
@@ -98,6 +108,14 @@ class Djin {
         }
         let copy = memo_open(memo)
         let line = copy[0]
+
+        // log says so later djins can reconstruct state
+        if (MemoType.SayTocks == line
+            || MemoType.SayTicks == line
+            || MemoType.SayTacks == line) {
+            this.logs.push(memo)
+        }
+
         if (MemoType.AskTocks == line) {
             // -> say/tocks | err
             let memot = copy as MemoAskTocks
