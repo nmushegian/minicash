@@ -1,5 +1,5 @@
 import {form_tick} from "../core/well.js";
-import {addr, mash, roll, sign, t2b, okay} from "../core/word.js";
+import {addr, mash, roll, sign, t2b, okay, h2b, extend, n2b, Tick, b2h, rmap} from "../core/word.js";
 import Debug from 'debug'
 const debugkey = Debug('dbg::key')
 const debugtxin = Debug('dbg::txin')
@@ -13,8 +13,38 @@ const keys = {
     cat: '1d4d8c560879214483c8645fe4b60d0fb72033c0591716c7af2df787823cf3b7',
 }
 
-export const dbgtock = (tock) => {
-    debugkey
+// prevtockhash needs to be banghash
+export const maketicks = (prevtockhash, amt, n) :Tick[] => {
+    if (0 == n) return []
+    let seck = Buffer.from(keys.ali, 'hex')
+    let keypair = ec.keyFromPrivate(seck)
+    let pubkey = Buffer.from(keypair.getPublic().encodeCompressed())
+    let code = addr(pubkey)
+
+    let tick = [
+        [[prevtockhash, h2b('07'), h2b('00'.repeat(65))]],
+        [[code, extend(n2b(amt), 7)]]
+    ] as Tick
+    let txin = mash(roll(tick))
+    let ticks = [tick]
+    for (let i = 0; i < n - 1; i++) {
+        let tick = [
+            [[txin, h2b('00'), h2b('00'.repeat(65))]],
+            [[code, extend(n2b(amt), 7)]]
+        ]
+        const mask = roll([
+            t2b("minicash movement"),
+            [[txin, h2b('00'), t2b('')]],
+            tick[1]
+        ])
+        const sig = sign(mask, seck)
+        tick[0][0][2] = sig
+        okay(form_tick(tick))
+        ticks.push(tick as Tick)
+        txin = mash(roll(tick))
+    }
+
+    return ticks
 }
 
 export const dbgtick = (tick) => {

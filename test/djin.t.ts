@@ -1,21 +1,57 @@
-import { test } from 'tapzero'
-import { jams } from 'jams.js'
+import {test} from 'tapzero'
+import {jams} from 'jams.js'
 
 import {Djin} from '../core/djin.js'
 
 import Debug from 'debug'
-const debug = Debug('djin::test')
-
 import {
-    Tick,
+    b2h,
+    bleq,
+    bnum,
+    extend,
+    h2b,
+    mash,
+    memo,
+    memo_close,
+    memo_open,
+    MemoType,
+    merk,
+    n2b,
+    need,
     okay,
-    roll, h2b,
-    mash, memo, merk, MemoType,
-    need, rmap, memo_open, bleq, b2h
+    rmap,
+    roll,
+    t2b,
+    Tack,
+    Tick,
+    Tock
 } from '../core/word.js'
 import {readdirSync, readFileSync} from "fs";
-import {dbgtick, dbgtock} from "./helpers.js";
+import {dbgtick, maketicks} from "./helpers.js";
 
+const debug = Debug('djin::test')
+
+const dbgmemo = (omemo) => {
+    let type = omemo[0]
+    let body = omemo[1]
+    // only log on say/*
+    if (MemoType.SayTocks == type || MemoType.SayTacks == type || MemoType.SayTicks == type) {
+        body.forEach(t => {
+            const t_s = rmap(t, b2h)
+            const hash = mash(roll(t)).toString('hex')
+            debug('send', Number(type).toString(16), t_s, hash)
+            if (MemoType.SayTicks == type) dbgtick(t)
+            if (MemoType.SayTacks == type) debug(`merk: ${b2h(merk(t[3]))}`)
+        })
+    }
+}
+
+const flatten = x => {
+    if (isNaN(Number('0x'+x))) {
+        return t2b(x)
+    }
+    return h2b(x)
+}
 
 test('djin', t=>{ try {
     let djin = new Djin('test/db', true)
@@ -50,56 +86,107 @@ test('djin', t=>{ try {
     // djin asks for tack
 
     t.deepEqual(out, memo(MemoType.AskTocks, mash(roll(tock1))))
+    djin.kill()
 
+    djin = new Djin('./test/db', true, true)
+    let ticks = maketicks(mash(roll(djin.bang)), bnum(h2b('ffffffff')), 3075)
+    let feet  = ticks.map(t => mash(roll(t)))
+    let ribs = [
+        merk(feet.slice(0, 1024)),
+        merk(feet.slice(1024, 2048)),
+        merk(feet.slice(2048, 3072)),
+        merk(feet.slice(3072, 4096))
+    ]
+    let bigtock = [
+        mash(roll(djin.bang)),
+        merk(ribs),
+        extend(n2b(BigInt(57)), 7),
+        h2b('00'.repeat(7))
+    ] as Tock
+    let firstbigtack = [
+        bigtock,
+        h2b('00'),
+        ribs,
+        feet.slice(0, 2048)
+    ] as Tack
+    let secondbigtack = [
+        bigtock,
+        h2b('02'),
+        ribs,
+        feet.slice(2048, 4096)
+    ] as Tack
+    out = okay(djin.turn(memo_close([MemoType.SayTacks, [firstbigtack]])))
+    need(memo_open(out)[0] != MemoType.Err, 'say/tacks big chunks chunk0,1 returned error')
+    out = okay(djin.turn(memo_close([MemoType.SayTacks, [secondbigtack]])))
+    need(memo_open(out)[0] != MemoType.Err, 'say/tacks big chunks chunk2,3 returned error')
+    ticks.forEach(t => {
+        out = okay(djin.turn(memo_close([MemoType.SayTicks, [t]])))
+        need(memo_open(out)[0] != MemoType.Err, 'say/ticks big chunks error')
+    })
+    out = okay(djin.turn(memo_close([MemoType.SayTocks, [bigtock]])))
+    need(memo_open(out)[0] != MemoType.Err, 'say/tocks big chunks error')
+    let expected = memo_close([MemoType.AskTocks, mash(roll(bigtock))])
+    t.ok(
+        bleq(roll(out), roll(expected)),
+        `vulted a whole tock w/ big chunks act: ${rmap(out, b2h)} exp: ${rmap(expected, b2h)}`
+    )
+    t.ok(true, `first chunksize: ${firstbigtack[3].length}, second: ${secondbigtack[3].length}`)
+
+    out = okay(djin.turn(memo_close([MemoType.AskTacks, mash(roll(bigtock))])))
+    expected = memo_close([MemoType.SayTacks, [firstbigtack, secondbigtack]])
+    t.ok(
+        bleq(roll(out), roll(expected)),
+        `ask/tacks big chunks ${out[0][0]} ${expected[0][0]}`
+    )
     djin.kill()
 } catch(e) { console.log(e); t.ok(false, e.message); }})
 
-const dbgmemo = (omemo) => {
-    let type = omemo[0]
-    let body = omemo[1]
-    if (MemoType.SayTocks == type) {
-        body.forEach(tock => {
-            const tock_s = rmap(tock, b2h)
-            const hash = mash(roll(tock)).toString('hex')
-            debug('say/tocks in:', tock_s, hash)
-        })
-    }
+
+const runcase = (dir, name, full=false) => {
+    if (!name.endsWith('.jams')) return
+    test(`${full ? 'full' : 'thin'} ${name}`, t => {
+        debug(`TESTING: ${dir + name}`)
+        let djin = new Djin('./test/db', true, full)
+        let path = dir + name
+        let file = readFileSync(path)
+        let data = jams(file.toString())
+        let prev
+        for (let cmd of data) {
+            let func = cmd[0]
+            need(func == 'send' || func == 'want', 'only doing send and want for now...')
+            if ('send' == func) {
+                let memo = rmap(cmd[1], h2b)
+                dbgmemo(memo_open(memo))
+                let [ok, val, err] = djin.turn(memo)
+                let out = memo_open(val)
+                prev = val
+                t.equal(ok, true, `${name} send ${rmap(cmd[1], b2h)}`)
+            }
+            if ('want' == func) {
+                debug(`want (actual=[${rmap(prev, b2h)}]) expected=[${cmd[1]}`)
+                debug(bleq(roll(rmap(cmd[1], flatten)), roll(prev)))
+                if (!bleq(roll(rmap(cmd[1], flatten)), roll(prev))) {
+                    t.fail(`want fail expected=${cmd[1]} actual=${rmap(prev, b2h)}`)
+                    break
+                }
+            }
+        }
+        djin.kill()
+    })
 }
+
 test('djin jams', t=>{
-    let dir = './test/case/djin/'
+    let dir = './test/case/djin/thin/'
     let cases = readdirSync(dir)
 
-    cases.forEach(name => {
-        if (!name.endsWith('.jams')) return
-        test(`${name}`, t => {
-            debug(`TESTING: ${name}`)
-            let djin = new Djin('./test/db', true)
-            let path = dir + name
-            let file = readFileSync(path)
-            let data = jams(file.toString())
-            let prev
-            data.forEach((cmd, idx) => {
-                let func = cmd[0]
-                need(func == 'send' || func == 'want', 'only doing send and want for now...')
-                /*
-                let omemo = memo_open(memo)
-                let type = omemo[0]
-                if (MemoType.SayTocks)
-                 */
-                if ('send' == func) {
-                    let memo = rmap(cmd[1], h2b)
-                    dbgmemo(memo_open(memo))
-                    let [ok, val, err] = djin.turn(memo)
-                    let out = memo_open(val)
-                    t.equal(ok, true, `${name} send`)
-                    prev = val
-                }
-                if ('want' == func) {
-                    debug(`want (prev=[${rmap(prev, b2h)}])`)
-                    t.equal(bleq(roll(rmap(cmd[1], h2b)), roll(prev)), true, `${name} want`)
-                }
-            })
-            djin.kill()
-        })
-    })
+    cases.forEach(c => runcase(dir, c))
 })
+
+test('full djin jams', t=>{
+    let dir = './test/case/djin/full/'
+    let cases = readdirSync(dir)
+
+    cases.forEach(c => runcase(dir, c, true))
+})
+
+//runcase('./test/case/djin/full/', 'djin_fees.jams', true)

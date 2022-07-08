@@ -37,6 +37,7 @@ export {
     MemoType,// enum export as value not type
     memo_open,
     memo_close,
+    extend
 }
 
 function t2b(x :string) :Blob {
@@ -58,11 +59,25 @@ function mash(x :Blob) :Mash {
     return chop(hash(x), 24)
 }
 
+function extend(x :Blob, n) :Blob {
+    let head = n - x.length
+    if (head > 0) {
+        return Buffer.concat([Buffer.from('00'.repeat(head), 'hex'), x])
+    }
+    return x
+}
+
 function memo_open(m :Memo) :OpenMemo {
+    let line = m[0][0]
     return [m[0][0], m[1]] as OpenMemo
 }
 
 function memo_close(m :OpenMemo) :Memo {
+    let line = m[0]
+    if (MemoType.Err == line) {
+        let merr = m as MemoErr
+        return [Buffer.from([merr[0]]), [t2b(merr[1][0]), merr[1][1]]]
+    }
     return [Buffer.from([m[0]]), m[1]] as Memo
 }
 
@@ -79,12 +94,16 @@ function _merk(x :Mash[]) :Mash {
     if (x.length == 1) {
         return x[0]
     }
-    if (x.length % 2 == 1) {
+    let extended = x.length % 2 == 1
+    if (extended) {
         x.push(h2b('00'.repeat(24)))
     }
     let hops = []
     for (let i = 0; i < x.length; i += 2) { // ! +2
         hops.push(mash(Buffer.concat([x[i], x[i+1]])))
+    }
+    if (extended) {
+        x.pop()
     }
     return _merk(hops)
 }

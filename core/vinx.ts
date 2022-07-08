@@ -16,7 +16,7 @@ import {
     Bnum, bnum, bleq, mash, roll, t2b,
     Cash, Byte, Work, Fees, Code, Pubk, tuff,
     scry, addr,
-    Tick, Tock, Tack, b2h, merk
+    Tick, Tock, Tack, b2h, merk, rmap
 } from './word.js'
 
 import {
@@ -40,6 +40,7 @@ function _checksig(tick :Tick, i :number, lock :Code) :boolean {
         [ move ],  // blob[][]
         ments      // blob[][]
     ])
+    move[2] = sign
     let pubk = scry(mask, sign)
     let code = addr(pubk)
     return bleq(code, lock)
@@ -112,10 +113,11 @@ function vinx_tack(tock :Tock, tack :Tack) :Okay<void> {
                 ribs.length >= nchunks,
                 `len(ribs) must be ceil(len(feet)/1024) if ribs not empty`
             )
+            const eyenum = Number('0x' + eye.toString('hex'))
             for (let i = 0; i < nchunks; i++) {
-                let chunk = feet.slice(i, i + 1024)
-                const eyenum = Number('0x' + eye.toString('hex'))
-                need(bleq(merk(chunk), ribs[i + eyenum]), 'bad merkelization')
+                let chunkstart = i * 1024
+                let chunk = feet.slice(chunkstart, chunkstart + 1024)
+                need(bleq(merk(chunk), ribs[i + eyenum]), `bad merkelization`)
             }
             need(bleq(merk(ribs), root), 'bad rib merkelization')
         }
@@ -145,4 +147,3 @@ function vinx_tock(prev :Tock, tock :Tock) :Okay<Work> {
         return fail(e.message)
     }
 }
-
