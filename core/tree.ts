@@ -79,7 +79,6 @@ function rkey(s :string, ...args :Blob[]) :RKey {
 
 class Tree {
     rock :Rock
-    bang :Tock
     _snapc
     _snaps
 
