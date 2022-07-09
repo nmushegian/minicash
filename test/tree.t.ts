@@ -9,6 +9,10 @@ import {
 import { Rock } from '../core/rock.js'
 import { Tree } from '../core/tree.js'
 
+test.only('tree', t=>{
+    let rock = new Rock('test/db', true)
+})
+
 test('leaf keys', t=>{
     let rock = new Rock('test/db', true)
     let tree = new Tree(rock)

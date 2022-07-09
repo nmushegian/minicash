@@ -1,5 +1,7 @@
 // pure kvdb (later, parallel read / non-blocking write (mutable handles))
 
+// temporary in-memory implementation until we make the db
+
 import * as immu from 'immutable'
 
 import {
@@ -15,38 +17,6 @@ import {
 export {
     Tree, Twig, rkey
 }
-
-// This level of abstraction deals with the user's view of
-// both a direct map (`rock.rite(=>)`) and a pure map (`tree.grow(=>)`)
-// It provides typed interfaces for all of these records,
-// and translates them into blob keys/values to put in Rock. In the case
-// of the pure map (accessed via `twig`), it does some internal logic
-// to translate a single read/write into log(k) read/writes of the
-// pure map internal structure.
-
-//  ['tick', tickhash]         -> tick
-//  ['tack', tockhash,i]       -> tack
-//  ['tock', tockhash]         -> tock
-
-//  ['work', tockhash]         -> work // cumulative work
-//  ['fold', tockhash,i]       -> fold // [snap, fees]  partial utxo / fees
-//  ['know', tockhash]         -> know // validity state
-
-//  ['best']                   -> tock
-
-//  [(snap) 'ment', mark       -> ment // utxo put [code, cash]
-//  [(snap) 'pent', mark       -> pent // utxo use [tish, tosh] (by tick, in tock)
-//  [(snap) 'pyre', mark       -> time // utxo expires
-
-
-// A twig is a database transaction over Tree, similar to how
-// rite is a database transaction over Rock. In both cases, they
-// are distinct concepts from a minicash transaction, called a tick.
-// A twig is distinct from a rite because it manages a "virtual" mutable view
-// of an underlying immutable map. A tree is a layer of abstraction over a rock
-// for some parts of the databse. A twig uses a single rite, but a single
-// twig.grow(...) generates multiple rite.read(...) and rite.etch(...)
-// because it traverses and updates the trie used to represent the tree.
 
 class Twig {
     rite
@@ -90,11 +60,10 @@ class Tree {
         this._snaps = { "": immu.Map() } // todo, make it in lmdb
     }
 
-    look(copy :Snap, look :((Rock,Twig) => void)) :Okay<Blob> {
+    look(copy :Snap, look :((Rock,Twig) => void)) {
         let snap = this._snaps[b2h(copy)]
         if (!snap) return fail(`read_twig: no such snap: ${copy}`)
         else {
-            let ret
             this.rock.rite(rite => {
                 let twig = new Twig(snap, rite) // todo, readonly
                 look(this.rock, twig)
