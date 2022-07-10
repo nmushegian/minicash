@@ -83,7 +83,7 @@ function subsidyleft(rite :Rite, _time :Blob) :Bnum {
 
 // vult_thin grows possibly-valid state tree
 //   (could also invalidate tock)
-function vult_thin(tree :Tree, tock :Tock, updatebest :boolean =true) :MemoAskTocks|MemoErr {
+function vult_thin(tree :Tree, tock :Tock, updatebest :boolean) :MemoAskTocks|MemoErr {
     // aver prev tock must exist
     // aver well/vinx
     let [prev, root, time, fuzz] = tock

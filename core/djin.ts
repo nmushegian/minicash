@@ -193,30 +193,14 @@ class Djin {
         let [line, tacks] = memo
         aver(_ => tacks.length == 1, `only saying one tack at a time for now`)
         let tack = tacks[0]
-        let [head, eye, ribs, feet] = tack
-        let prev = head[0]
+        let [head, eye,,] = tack
 
         aver(_ => {let res = vinx_tack(head, tack); return res[0]}, `panic, tack must be valid-in-context`)
 
         let headhash = mash(roll(head))
-        let prevhash = mash(roll(prev))
         this.rock.etch_one(rkey('tack', headhash, eye), roll(tack))
 
-        let tockroll = this.rock.read_one(rkey('tock', headhash))
-        if (bleq(t2b(''), tockroll)) {
-            debug('say/tacks tock not found, sending ask/tocks')
-            return [MemoType.AskTocks, prevhash]
-        }
-
-        if (this.full) {
-            return vult_full(this.tree, head)
-        }
-
-        if (bleq(t2b(''), tockroll)) {
-            return vult_thin(this.tree, head, !this.full)
-        }
-
-        return [MemoType.AskTocks, headhash]
+        return this._say_tocks([MemoType.SayTocks, [head]])
     }
 
     _ask_tacks(memo :MemoAskTacks) :MemoSayTacks {
@@ -280,7 +264,7 @@ class Djin {
             return vult_full(this.tree, tock) as MemoAskTacks|MemoAskTocks|MemoAskTicks
         }
 
-        return vult_thin(this.tree, tock) as MemoAskTocks
+        return vult_thin(this.tree, tock, true) as MemoAskTocks
     }
 
 }
