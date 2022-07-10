@@ -55,17 +55,19 @@ export { Tree, Twig }
 // internal node ID, which also becomes the Snap when the trie root is updated.
 
 // The first type node is called a Leaf.
+// TODO: don't use RLP here, make it a flat buffer with fixed size slices
 type Leaf = [
     Blob // tag (leaf == 00)
   , Blob // prefix
   , Blob // value
 ]
 
-// The second is called a dive. This node represents that there are multiple
+// The second is called a limb. This node represents that there are multiple
 // distinct keys whose prefix is equal to current search prefix, but different
 // from that point forward.
 // In this implementation the branching factor is 2.
-type Dive = [
+// TODO: don't use RLP here, make it a flat buffer with fixed size slices
+type Limb = [
     Blob // tag (leaf == 01)
   , Blob // prefix
   , Blob // left
@@ -96,6 +98,8 @@ class Twig {
         throw err(`todo _lookup`)
     }
     _insert(k :Blob, v :Blob) {
+        console.log(`inserting ${b2h(k)} : ${b2h(v)}`)
+        let r = this.rite
         throw err(`todo _insert`)
     }
 }
@@ -125,8 +129,10 @@ class Tree {
             let next = this._aloc(rite, 1)
             grow(rite, twig, next)
             // now twig has set of diffs
-            console.log(twig.diff)
             // iterate through each and insert them into the prefix tree
+            for (let [k, v] of twig.diff.entries()) {
+                twig._insert(h2b(k), v)
+            }
         })
     }
     _aloc(r : Rite, n : number) :Snap {
