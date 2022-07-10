@@ -61,6 +61,9 @@ type Leaf = [
   , Blob // prefix
   , Blob // value
 ]
+function leaf(prefix :Blob, value :Blob) :Leaf {
+    return [h2b('00'), prefix, value]
+}
 
 // The second is called a limb. This node represents that there are multiple
 // distinct keys whose prefix is equal to current search prefix, but different
@@ -77,29 +80,34 @@ type Limb = [
 class Twig {
     rite // the underlying rock dbtx
     diff // we don't push writes to db until end of tx, keep them cached
-    constructor(rite) {
+    snap // the snap this twig was initialized with respect to
+    constructor(rite :Rite, snap :Snap) {
         this.rite = rite
         this.diff = new Map()
     }
-    read(k :Blob) :Blob {
-        if (this.diff.has(b2h(k))) {
-            return this.diff.get(b2h(k))
+    read(key :Blob) :Blob {
+        if (this.diff.has(b2h(key))) {
+            return this.diff.get(b2h(key))
         } else {
-            toss(`todo read/lookup`)
+            return this._lookup(this.snap, key)
         }
     }
-    etch(k :Blob, v :Blob) {
-        if (this.diff.has(b2h(k))) {
-            toss(`panic, modifying value already in tree: ${k}`)
+    etch(key :Blob, val :Blob) {
+        if (this.diff.has(b2h(key))) {
+            toss(`panic, modifying value already in tree: ${key}`)
         }
-        this.diff.set(b2h(k), v)
+        this.diff.set(b2h(key), val)
     }
-    _lookup(k :Blob) :Blob {
+    _aloc(n : number) :Snap {
+        let next = this.rite.read(t2b('aloc'))
+        this.rite.etch(t2b('aloc'), extend(n2b(bnum(next) + BigInt(n)), 8))
+        return next
+    }
+    _lookup(root :Snap, key :Blob) :Blob {
         throw err(`todo _lookup`)
     }
-    _insert(k :Blob, v :Blob) {
-        console.log(`inserting ${b2h(k)} : ${b2h(v)}`)
-        let r = this.rite
+    _insert(root :Snap, key :Blob, val :Blob) :Snap {
+        console.log(`inserting ${b2h(key)} : ${b2h(val)}`)
         throw err(`todo _insert`)
     }
 }
@@ -113,33 +121,32 @@ class Tree {
         this.rock.etch_one(h2b('00'.repeat(8)), roll(initleaf))
         this.rock.etch_one(t2b('aloc'), h2b('0000000000000001')) // 1
     }
-    look(copy :Snap, look :((Rock,Twig) =>void)) {
+    look(snap :Snap, look :((Rock,Twig) =>void)) {
         this.rock.rite(rite => {
-            let twig = new Twig(rite)
+            let twig = new Twig(rite, snap)
             look(this.rock, twig)
         })
     }
-    grow(copy :Snap, grow :((Rock,Twig,Snap) => void)) {
+    grow(snap :Snap, grow :((Rock,Twig,Snap) => void)) {
         this.rock.rite(rite => {
-            let twig = new Twig(rite)
+            let twig = new Twig(rite, snap)
             // `grow` is given the snap that these changes will be saved as (`next`)
             // before the transaction is complete. That's because a reference
             // to this snap might need to be saved somewhere by the grow function.
             // Because the entire dbtx is atomic, this is fine.
-            let next = this._aloc(rite, 1)
+            let next = twig._aloc(1)
             grow(rite, twig, next)
             // now twig has set of diffs
             // iterate through each and insert them into the prefix tree
+            // then replace the last root with the same value but nodeID `next`
+            let root = snap
             for (let [k, v] of twig.diff.entries()) {
-                twig._insert(h2b(k), v)
+                root = twig._insert(root, h2b(k), v)
             }
+            // TODO replace root with `next`, return it
         })
     }
-    _aloc(r : Rite, n : number) :Snap {
-        let next = r.read(t2b('aloc'))
-        r.etch(t2b('aloc'), extend(n2b(bnum(next) + BigInt(n)), 8))
-        return next
-    }
+
     // `snip` removes a snap from the tree, and garbage-collects
     // all internal nodes that no longer have references
     snip(snap :Snap) {

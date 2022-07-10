@@ -15,7 +15,7 @@ test.only('tree', t=>{
     let rock = new Rock('test/db', true)
     let tree = new Tree(rock)
 
-    // initialized with dummy entry 0 -> 0, next snap is 1
+    // initialized with dummy entry "" -> "", next snap is 1
     let zero = h2b('00'.repeat(8))
     let init = rock.read_one(zero)
     t.deepEqual(init, roll([h2b('00'), h2b(''), h2b('')]))
