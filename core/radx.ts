@@ -95,7 +95,7 @@ class Twig {
     _lookup(k :Blob) :Blob {
         throw err(`todo _lookup`)
     }
-    _insert() {
+    _insert(k :Blob, v :Blob) {
         throw err(`todo _insert`)
     }
 }
@@ -125,6 +125,7 @@ class Tree {
             let next = this._aloc(rite, 1)
             grow(rite, twig, next)
             // now twig has set of diffs
+            console.log(twig.diff)
             // iterate through each and insert them into the prefix tree
         })
     }

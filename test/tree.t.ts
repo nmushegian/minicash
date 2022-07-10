@@ -25,11 +25,12 @@ test.only('tree', t=>{
 
     tree.grow(zero, (rock, twig, snap) => {
         t.deepEqual(snap, one)
-        let key1 = rkey('ment', h2b('ff'.repeat(24)))
+        let key1 = h2b('ff'.repeat(24))
         twig.etch(key1, h2b('aa'))
         let aa = twig.read(key1)
         t.deepEqual(aa, h2b('aa'))
     })
+
 })
 
 
