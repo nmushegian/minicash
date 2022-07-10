@@ -6,10 +6,16 @@ import {
     Blob, aver, isblob, bleq,
     need, toss, err, Bnum, n2b, t2b, b2t, b2h
 } from './word.js'
-import {rkey, Tree} from "./tree";
+import { Tree } from "./tree";
 
 export {
-    Rock, Rite
+    Rock, Rite, RKey, rkey
+}
+
+type RKey = Blob
+
+function rkey(s :string, ...args :Blob[]) :RKey {
+    return Buffer.concat([t2b(s), ...args])
 }
 
 class Rite {

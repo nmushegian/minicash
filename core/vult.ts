@@ -7,6 +7,7 @@ import {
     bleq,
     Bnum,
     bnum,
+    Blob,
     Cash,
     Code,
     h2b, Mash,
@@ -31,9 +32,8 @@ import {
     unroll
 } from './word.js'
 
-import {rkey, Tree, Twig} from './tree.js'
-import {Blob} from "coreword";
-import {Rite} from "./rock";
+import { Tree, Twig } from './tree.js'
+import { Rite, rkey } from './rock.js';
 
 const debug = Debug('vult::test')
 

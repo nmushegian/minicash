@@ -29,7 +29,8 @@ import {
 } from './word.js'
 
 import elliptic from 'elliptic'
-import {rkey, Tree} from "./tree.js";
+import { Tree } from "./tree.js";
+import { rkey } from './rock.js'
 import {vinx_tack, vinx_tick, vinx_tock} from "./vinx.js";
 import {form_tack, form_tick, form_tock} from "./well.js";
 

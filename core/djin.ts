@@ -23,8 +23,8 @@ import {vinx_tack, vinx_tick, vinx_tock} from "./vinx.js";
 
 import Debug from 'debug'
 const debug = Debug('djin::test')
-import { Rock } from './rock.js'
-import { Tree, rkey } from './tree.js'
+import { Rock, rkey } from './rock.js'
+import { Tree } from './tree.js'
 import {form_memo, form_tick, form_tock} from "./well.js";
 
 export { Djin }

@@ -42,7 +42,7 @@ import {
     Blob, roll,
     Snap,
     bnum,
-    h2b, t2b, n2b,
+    b2h, h2b, t2b, n2b,
     aver, need, toss, err,
     extend
 } from './word.js'
@@ -80,17 +80,23 @@ class Twig {
         this.diff = new Map()
     }
     read(k :Blob) :Blob {
-        // check cache
-        // then do lookup
-        throw new Error('todo etch')
+        if (this.diff.has(b2h(k))) {
+            return this.diff.get(b2h(k))
+        } else {
+            toss(`todo read/lookup`)
+        }
     }
     etch(k :Blob, v :Blob) {
-        // if cached
-        //   aver not changed
-        // else
-        //   aver not changed in db
-        //   put in cache
-        throw new Error('todo etch')
+        if (this.diff.has(b2h(k))) {
+            toss(`panic, modifying value already in tree: ${k}`)
+        }
+        this.diff.set(b2h(k), v)
+    }
+    _lookup(k :Blob) :Blob {
+        throw err(`todo _lookup`)
+    }
+    _insert() {
+        throw err(`todo _insert`)
     }
 }
 
@@ -102,17 +108,6 @@ class Tree {
         let initleaf = [h2b('00'), h2b(''), h2b('')]
         this.rock.etch_one(h2b('00'.repeat(8)), roll(initleaf))
         this.rock.etch_one(t2b('aloc'), h2b('0000000000000001')) // 1
-    }
-    _aloc(n : number) :Snap {
-        let next
-        this.rock.rite(r => {
-            next = r.read(t2b('aloc'))
-            r.etch(t2b('aloc'), extend(n2b(bnum(next) + BigInt(n)), 8))
-        })
-        return next
-    }
-    _look(k :Blob) :Blob {
-        throw err(`todo _look`)
     }
     look(copy :Snap, look :((Rock,Twig) =>void)) {
         this.rock.rite(rite => {
@@ -127,11 +122,16 @@ class Tree {
             // before the transaction is complete. That's because a reference
             // to this snap might need to be saved somewhere by the grow function.
             // Because the entire dbtx is atomic, this is fine.
-            let next = this._aloc(1)
+            let next = this._aloc(rite, 1)
             grow(rite, twig, next)
             // now twig has set of diffs
             // iterate through each and insert them into the prefix tree
         })
+    }
+    _aloc(r : Rite, n : number) :Snap {
+        let next = r.read(t2b('aloc'))
+        r.etch(t2b('aloc'), extend(n2b(bnum(next) + BigInt(n)), 8))
+        return next
     }
     // `snip` removes a snap from the tree, and garbage-collects
     // all internal nodes that no longer have references
