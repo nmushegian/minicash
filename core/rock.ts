@@ -4,7 +4,7 @@ import { default as process } from 'node:process'
 
 import {
     Blob, aver, isblob, bleq,
-    need, toss, err, Bnum, n2b, t2b, b2h
+    need, toss, err, Bnum, n2b, t2b, b2t, b2h
 } from './word.js'
 import {rkey, Tree} from "./tree";
 
@@ -23,7 +23,7 @@ class Rite {
         aver(_=>isblob(key), `rite.etch key not a blob: ${key}`)
         aver(_=>isblob(val), `rite.etch val not a blob: ${val} (key was ${key})`)
         aver(_=> {
-            if (key.toString().startsWith('best')) {
+            if (b2t(key) == 'best' || b2t(key) == 'aloc') {
                 return true
             }
             let prev = this.dbtx.getBinary(this.dbi, key)

@@ -132,9 +132,9 @@ type Move = [
 // Concatenated utxo+txin, yields different croc32 checksum
 // when they are checked like this instead of checked mash ++ idx.
 // In the protocol spec they are separate items because it makes
-// no difference to the encoding and it is easier to specify.
-// These are the actual objects containing cash.
-//type Mark = Blob25
+// no difference to the size of encoded data and it is easier to specify.
+// >> These are the actual objects containing cash. <<
+type Mark = Blob25
 
 type Ment = [
     Code,  // pkeyhash
@@ -226,7 +226,7 @@ type OpenMemo
 // which is only supported for `string` and `number`.
 // Remember that `MemoType` (with numbers) and `OpenMemo` are implementation details,
 // whereas `Memo` (a roll, that means only blobs as leafs) is part of the core wire format.
-// In javascript, converting a MemoType to a Memo's `line` (item 0), which is a blob,bbbbbb
+// In javascript, converting a MemoType to a Memo's `line` (item 0), which is a blob,
 // is done with `Buffer.from( [ tag ] )`,  notice the argument is a list of bytes (length 1).
 // Your well-formed check should check the *actual concrete byte values*, do not use your
 // type system until after you check your form.
@@ -262,8 +262,9 @@ type Why
   | 'unspendable' // vult
 
 type Blob32 = Blob;
-type Blob20 = Blob;
+type Blob25 = Blob;
 type Blob24 = Blob;
+type Blob20 = Blob;
 type Blob8  = Blob;
 type Blob7  = Blob;
 type Blob1  = Blob;
