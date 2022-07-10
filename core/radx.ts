@@ -39,7 +39,8 @@
 //    [(snap) 'pyre', mark]      -> time  // utxo expires
 
 import {
-    Blob, roll,
+    Blob, bleq,
+    roll, unroll,
     Snap,
     bnum,
     b2h, h2b, t2b, n2b,
@@ -58,11 +59,12 @@ export { Tree, Twig }
 // TODO: don't use RLP here, make it a flat buffer with fixed size slices
 type Leaf = [
     Blob // tag (leaf == 00)
+  , Blob // bitlen
   , Blob // prefix
   , Blob // value
 ]
-function leaf(prefix :Blob, value :Blob) :Leaf {
-    return [h2b('00'), prefix, value]
+function isleaf(item :Blob[]) :boolean {
+    return bleq(item[0], h2b('00'))
 }
 
 // The second is called a limb. This node represents that there are multiple
@@ -72,10 +74,14 @@ function leaf(prefix :Blob, value :Blob) :Leaf {
 // TODO: don't use RLP here, make it a flat buffer with fixed size slices
 type Limb = [
     Blob // tag (leaf == 01)
+  , Blob // bitlen
   , Blob // prefix
-  , Blob // left
-  , Blob // right
+  , Snap // left
+  , Snap // right
 ]
+function islimb(item :Blob[]) {
+    return bleq(item[0], h2b('01'))
+}
 
 class Twig {
     rite // the underlying rock dbtx
@@ -104,11 +110,47 @@ class Twig {
         return next
     }
     _lookup(root :Snap, key :Blob) :Blob {
+        let snap = root
+        let bitidx = 0
+        // until found
+        while (true) {
+            // get item from rock
+            let blob = this.rite.read(snap)
+            aver(_=> blob.length > 0, `panic: no value for snap key ${snap}`)
+            let item = unroll(blob)
+            console.log(item)
+            //   if leaf, compare key
+            //     if equal, return it
+            //     else return emptyblob
+            //   if limb, follow the right branch
+        }
         throw err(`todo _lookup`)
     }
     _insert(root :Snap, key :Blob, val :Blob) :Snap {
         console.log(`inserting ${b2h(key)} : ${b2h(val)}`)
-        throw err(`todo _insert`)
+        let snap = root
+        let bitidx = 0
+        while (true) {
+            console.log(`looking up snap`, snap)
+            let blob = this.rite.read(snap)
+            aver(_=> blob.length > 0, `panic: no value for snap key ${snap}`)
+            let item = unroll(blob)
+            console.log(`got item`, item)
+            if (isleaf(item as Blob[])) {
+                console.log(`it's a leaf`)
+                // determine prefix
+                // make a limb and 2 leafs
+                // reassemble
+                // return
+            } else if (islimb(item as Blob[])) {
+                console.log(`it's a limb`)
+                // follow the right branch
+                // continue
+            } else {
+                throw err(`panic: unrecognized internal node type for item ${item}`)
+            }
+            throw err(`panic: unreachable`)
+        }
     }
 }
 
@@ -117,7 +159,7 @@ class Tree {
 
     constructor(rock :Rock) {
         this.rock = rock
-        let initleaf = [h2b('00'), h2b(''), h2b('')]
+        let initleaf = [h2b('00'), h2b('00'), h2b(''), h2b('00')]
         this.rock.etch_one(h2b('00'.repeat(8)), roll(initleaf))
         this.rock.etch_one(t2b('aloc'), h2b('0000000000000001')) // 1
     }

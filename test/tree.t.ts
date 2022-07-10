@@ -18,14 +18,14 @@ test.only('tree', t=>{
     // initialized with dummy entry "" -> "", next snap is 1
     let zero = h2b('00'.repeat(8))
     let init = rock.read_one(zero)
-    t.deepEqual(init, roll([h2b('00'), h2b(''), h2b('')]))
+    t.deepEqual(init, roll([h2b('00'), h2b('00'), h2b(''), h2b('00')]))
     let next = rock.read_one(t2b('aloc'))
     let one = h2b('00'.repeat(7) + '01')
     t.deepEqual(next, one)
 
     tree.grow(zero, (rock, twig, snap) => {
         t.deepEqual(snap, one)
-        let key1 = h2b('ff'.repeat(24))
+        let key1 = h2b('000000000000000001')
         twig.etch(key1, h2b('aa'))
         let aa = twig.read(key1)
         t.deepEqual(aa, h2b('aa'))
