@@ -53,7 +53,6 @@ const flatten = x => {
     return h2b(x)
 }
 
-/*
 test('djin', t=>{ try {
     let djin = new Djin('test/db', true)
     let out
@@ -141,8 +140,6 @@ test('djin', t=>{ try {
     )
     djin.kill()
 } catch(e) { console.log(e); t.ok(false, e.message); }})
-
- */
 
 
 const runcase = (dir, name, full=false) => {
