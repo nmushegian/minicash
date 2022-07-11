@@ -41,6 +41,8 @@ export {
     vult_full
 }
 
+// update best tock if input tock has more work
+// than current best
 function etch_best(rite, tockhash :Blob) {
     let this_work = rite.read(rkey('work', tockhash))
     let best = rite.read(rkey('best'))
@@ -51,6 +53,13 @@ function etch_best(rite, tockhash :Blob) {
     }
 }
 
+// calculate remaining block subsidy at time, cache the result
+// this function is only called by vult_full and vult_thin when
+// the previous tock has already been vulted, so prev should always
+// be cached
+//
+// left[0] = 2 ** 53 - 1 (set in djin)
+// left[time] = left[time-57] - floor(left[time-57] / (2 ** 21))
 function subsidyleft(rite :Rite, _time :Blob) :Bnum {
     let time = bnum(_time)
     if (time == BigInt(0)) {
@@ -67,57 +76,76 @@ function subsidyleft(rite :Rite, _time :Blob) :Bnum {
     return nextleft
 }
 
-// vult_thin grows possibly-valid state tree
+// vult_thin grows possibly-valid state tree ('' | PV -> PV)
 //   (could also invalidate tock)
 function vult_thin(tree :Tree, tock :Tock, updatebest :boolean =true) :MemoAskTocks {
-    // aver prev tock must exist
-    // aver well/vinx
-    let [prev_head,, time,] = tock
-    let head = mash(roll(tock))
-    debug('vult_thin', b2h(head), rmap(tock, b2h))
-    let prev_foldandidx = tree.rock.find_max(rkey('fold', prev_head))
-    if (!bleq(t2b(''), tree.rock.read_one(rkey('fold', head, h2b('00'))))) {
-        prev_foldandidx = tree.rock.find_max(rkey('fold', head))
+    let [prevtockhash,, time,] = tock
+    let tockhash = mash(roll(tock))
+    debug('vult_thin', b2h(tockhash), rmap(tock, b2h))
+
+    // it's possible vult_thin will be called more than once for the same
+    // tock (i.e. vult_full vult_thins, then fails later), so the tip can
+    // come from either the previous tockhash or the current tockhash
+    let foldandidx = tree.rock.find_max(rkey('fold', tockhash))
+    if (undefined == foldandidx) {
+        foldandidx = tree.rock.find_max(rkey('fold', prevtockhash))
     }
-    let [prev_fold,] = prev_foldandidx
-    aver(_ => !bleq(t2b(''), prev_fold), `prev fold must exist`)
+    aver(_ => undefined != foldandidx, `prev fold must exist (1)`)
+    let [fold,] = foldandidx
+    aver(_ => !bleq(t2b(''), fold), `prev fold must exist (2)`)
 
-    let [prev_snap, ,] = unroll(prev_fold)
-    let out
+    let [prev_snap, ,] = unroll(fold)
     tree.grow(prev_snap as Snap, (rite, twig, snap) => {
-        let prev_tock = unroll(rite.read(rkey('tock', prev_head)))
-        aver(_ => prev_tock.length > 0, `vulting a tock with unrecognized prev`)
-        let prev_work = rite.read(rkey('work', prev_head))
-        let this_work = n2b(bnum(prev_work) + tuff(head))
-
+        aver(
+            _ => !bleq(t2b(''), rite.read(rkey('tock', prevtockhash))),
+            `vulting a tock with unrecognized prev`
+        )
         aver(_ => {
-            let prevknow = b2t(twig.read(rkey('know', prev_head)))
+            let prevknow = b2t(twig.read(rkey('know', prevtockhash)))
             return 'PV' == prevknow || 'DV' == prevknow
-        }, `panic, say/tocks prev must be PV (${b2h(prev_head)})`)
+        }, `panic, say/tocks prev must be PV (${b2h(prevtockhash)})`)
 
-        let tockknow = b2t(twig.read(rkey('know', head)))
+        let tockknow = b2t(twig.read(rkey('know', tockhash)))
         if ('PV' == tockknow || 'DV' == tockknow) {
+            // tock has already been vult_thin'd
             return
         }
 
-        rite.etch(rkey('tock', head), roll(tock))
-        rite.etch(rkey('work', head), this_work)
-        rite.etch(rkey('fold', head, h2b('00')), roll([snap, h2b('00')])) // [snap, fees]
-        twig.etch(rkey('know', head), t2b('PV'))
-        twig.etch(rkey('pyre', head), n2b(bnum(time) + BigInt(536112000)))
+        // vult_thin can read the state tree from any foldidx,
+        // but will only ever grow the state tree to foldidx == 0
+        // (bails if current tock PV)
+        rite.etch(
+            rkey('fold', tockhash, h2b('00')),
+            roll([snap, h2b('00')])
+        ) // [snap, fees]
+
+        // this tockhash can be consumed by a mint tx, so it has pyre and ment
+        twig.etch(rkey('pyre', tockhash), n2b(bnum(time) + BigInt(536112000)))
+        // subsidy = nexttock.left - curtock.left
         let left = subsidyleft(rite, time)
         let nextleft = subsidyleft(rite, n2b(bnum(time) + BigInt(57)))
-        debug(`vult_thin etching ment at head=${b2h(head)}, ${left - nextleft}`)
-        twig.etch(rkey('ment', head, h2b('07')), roll([head, n2b(left - nextleft)])) // [code, cash]
+        debug(`vult_thin etching ment at head=${b2h(tockhash)}, ${left - nextleft}`)
+        twig.etch(
+            rkey('ment', tockhash, h2b('07')),
+            roll([tockhash, n2b(left - nextleft)])
+        ) // [code, cash]
         let pyre = bnum(time) + BigInt(536112000)
-        twig.etch(rkey('pyre', head), n2b(pyre))
+        twig.etch(rkey('pyre', tockhash), n2b(pyre))
+
+        // current tock work = prev tock work + tuff(current tock)
+        let prev_work = rite.read(rkey('work', prevtockhash))
+        let this_work = n2b(bnum(prev_work) + tuff(tockhash))
+        rite.etch(rkey('work', tockhash), this_work)
+
+        // success, set this tock to PV and update best tockhash if more work
+        twig.etch(rkey('know', tockhash), t2b('PV'))
         if (updatebest) {
-            etch_best(rite, head)
+            etch_best(rite, tockhash)
         }
     })
 
-    debug('vult_thin: grew', b2h(head), 'to PV')
-    return [MemoType.AskTocks, head]
+    debug('vult_thin: grew', b2h(tockhash), 'to PV')
+    return [MemoType.AskTocks, tockhash]
 }
 
 // vult_full grows definitely-valid state tree
@@ -156,9 +184,13 @@ function vult_full(tree :Tree, tock :Tock) :MemoAskTacks|MemoAskTocks|MemoAskTic
     vult_thin(tree, tock, false)
 
     // get tip of state tree
+    // this part needs to come before the grow block because of prev_snap,
+    // and stuff before it potentially grows the state tree, so it must also
     let foldandidx = tree.rock.find_max(rkey('fold', tockhash))
-    let foldidx = foldandidx[1]
-    let [prev_snap, _prev_fees] = unroll(foldandidx[0]) as [Snap, Blob]
+    aver(() => undefined != foldandidx, `fold must exist (1)`)
+    let [fold, foldidx] = foldandidx
+    aver(() => !bleq(t2b(''), fold), `fold must exist (2)`)
+    let [prev_snap, _prev_fees] = unroll(fold) as [Snap, Blob]
     let prev_fees = bnum(_prev_fees)
 
     let cur_snap // for setting new state tip
@@ -166,6 +198,8 @@ function vult_full(tree :Tree, tock :Tock) :MemoAskTacks|MemoAskTocks|MemoAskTic
     let tockfees = BigInt(0)
     let out
     tree.grow(prev_snap as Snap, (rite, twig, snap) => {
+        cur_snap = snap
+
         // should already have vulted prev to DV
         let prevknow = b2t(twig.read(rkey('know', prevtockhash)))
         aver(
@@ -173,7 +207,6 @@ function vult_full(tree :Tree, tock :Tock) :MemoAskTacks|MemoAskTocks|MemoAskTic
             `prevtock must be DV (${b2h(prevtockhash)} is ${prevknow})`
         )
 
-        cur_snap = snap
         try {
             // don't need to do anything if this tock is arleady DV
             // todo maybe don't need to save new snap
