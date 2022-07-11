@@ -24,10 +24,13 @@ import {
     t2b,
     Tack,
     Tick,
-    Tock
+    Tock, addr
 } from '../core/word.js'
 import {readdirSync, readFileSync} from "fs";
-import {dbgtick, maketicks} from "./helpers.js";
+import {dbgtick, maketicks, keys} from "./helpers.js";
+
+import elliptic from 'elliptic'
+const ec = elliptic.ec('secp256k1')
 
 const debug = Debug('djin::test')
 
@@ -38,7 +41,10 @@ const dbgmemo = (omemo) => {
     if (MemoType.SayTocks == type || MemoType.SayTacks == type || MemoType.SayTicks == type) {
         body.forEach(t => {
             const t_s = rmap(t, b2h)
-            const hash = mash(roll(t)).toString('hex')
+            let hash = b2h(mash(roll(t)))
+            if (MemoType.SayTacks == type) {
+                hash = b2h(mash(roll(t[0])))
+            }
             debug('send', Number(type).toString(16), t_s, hash)
             if (MemoType.SayTicks == type) dbgtick(t)
             if (MemoType.SayTacks == type) debug(`merk: ${b2h(merk(t[3]))}`)
@@ -57,7 +63,7 @@ test('djin', t=>{ try {
     let djin = new Djin('test/db', true)
     let out
     out = okay(djin.turn(memo(MemoType.AskTocks, mash(roll(djin.bang)))))
-    t.deepEqual(out, memo(MemoType.SayTocks, [djin.bang]))
+    t.deepEqual(out, memo_close([MemoType.Err, ['unavailable', mash(roll(djin.bang))]]))
 
     let tick1 = [[
         [] // no moves
@@ -89,8 +95,32 @@ test('djin', t=>{ try {
     djin.kill()
 
     djin = new Djin('./test/db', true, true)
-    let ticks = maketicks(mash(roll(djin.bang)), bnum(h2b('ffffffff')), 3075)
+    let seck = Buffer.from(keys.ali, 'hex')
+    let keypair = ec.keyFromPrivate(seck)
+    let pubkey = Buffer.from(keypair.getPublic().encodeCompressed())
+    let code = addr(pubkey)
+
+    let prevmint = [
+        [[mash(roll(djin.bang)), h2b('07'), h2b('00'.repeat(65))]],
+        [[code, h2b('00000100000000')]]
+    ] as Tick
+    let prevtack = [[
+        mash(roll(djin.bang)),
+        mash(roll(prevmint)),
+        extend(n2b(BigInt(57)), 7),
+        h2b('00'.repeat(7))], h2b('00'), [], [mash(roll(prevmint))]
+    ] as Tack
+    okay(djin.turn(memo_close([MemoType.SayTicks, [prevmint]])))
+    okay(djin.turn(memo_close([MemoType.SayTacks, [prevtack]])))
+
+    let ticks = maketicks(mash(roll(prevmint)), bnum(h2b('100000000')), 3075)
+    let mint = [
+        [[mash(roll(prevtack[0])), h2b('07'), h2b('00'.repeat(65))]],
+        [[h2b('11'.repeat(20)), h2b('000000fffff800')]]
+    ] as Tick
+    ticks.push(mint)
     let feet  = ticks.map(t => mash(roll(t)))
+
     let ribs = [
         merk(feet.slice(0, 1024)),
         merk(feet.slice(1024, 2048)),
@@ -98,9 +128,9 @@ test('djin', t=>{ try {
         merk(feet.slice(3072, 4096))
     ]
     let bigtock = [
-        mash(roll(djin.bang)),
+        mash(roll(prevtack[0])),
         merk(ribs),
-        extend(n2b(BigInt(57)), 7),
+        extend(n2b(BigInt(57*2)), 7),
         h2b('00'.repeat(7))
     ] as Tock
     let firstbigtack = [
@@ -121,10 +151,10 @@ test('djin', t=>{ try {
     need(memo_open(out)[0] != MemoType.Err, 'say/tacks big chunks chunk2,3 returned error')
     ticks.forEach(t => {
         out = okay(djin.turn(memo_close([MemoType.SayTicks, [t]])))
-        need(memo_open(out)[0] != MemoType.Err, 'say/ticks big chunks error')
+        need(memo_open(out)[0] != MemoType.Err, `say/ticks big chunks error ${rmap(t, b2h)}`)
     })
     out = okay(djin.turn(memo_close([MemoType.SayTocks, [bigtock]])))
-    need(memo_open(out)[0] != MemoType.Err, 'say/tocks big chunks error')
+    need(memo_open(out)[0] != MemoType.Err, `say/tocks big chunks error ${rmap(bigtock, b2h)}`)
     let expected = memo_close([MemoType.AskTocks, mash(roll(bigtock))])
     t.ok(
         bleq(roll(out), roll(expected)),
@@ -182,7 +212,6 @@ test('djin jams', t=>{
     cases.forEach(c => runcase(dir, c))
 })
 
-
 test('full djin jams', t=>{
     let dir = './test/case/djin/full/'
     let cases = readdirSync(dir)
@@ -190,6 +219,4 @@ test('full djin jams', t=>{
     cases.forEach(c => runcase(dir, c, true))
 })
 
-
-
-//runcase('./test/case/djin/full/', 'djin_realtx_pvnotbest.jams', true)
+//runcase('./test/case/djin/full/', 'djin_mintnotlast.jams', true)

@@ -3,18 +3,34 @@
 import {
     b2h,
     memo_close,
-    MemoErr, rmap, Snap,
-    Tack,
+    MemoErr,
+    rmap,
     Tick,
-    Okay, okay, pass, fail, toss, aver,
-    h2b, t2b, b2t,
-    Blob, isblob,
-    roll, unroll, bleq, islist,
-    Tock, tuff, n2b,
-    Mash, mash,
-    need, Memo, OpenMemo, MemoType,
-    MemoSayTocks, MemoSayTacks, MemoSayTicks,
-    MemoAskTocks, MemoAskTacks, MemoAskTicks, bnum, memo_open,
+    Okay,
+    pass,
+    fail,
+    toss,
+    aver,
+    h2b,
+    t2b,
+    Blob,
+    roll,
+    unroll,
+    bleq,
+    islist,
+    Tock,
+    tuff,
+    n2b,
+    mash,
+    Memo,
+    MemoType,
+    MemoSayTocks,
+    MemoSayTacks,
+    MemoSayTicks,
+    MemoAskTocks,
+    MemoAskTacks,
+    MemoAskTicks,
+    memo_open,
 } from './word.js'
 
 import {vult_full, vult_thin} from './vult.js'
@@ -22,10 +38,11 @@ import {vult_full, vult_thin} from './vult.js'
 import {vinx_tack, vinx_tick, vinx_tock} from "./vinx.js";
 
 import Debug from 'debug'
+import {Rock} from './rock.js'
+import {Tree, rkey} from './tree.js'
+import {form_memo, form_tock} from "./well.js";
+
 const debug = Debug('djin::test')
-import { Rock } from './rock.js'
-import { Tree, rkey } from './tree.js'
-import {form_memo, form_tick, form_tock} from "./well.js";
 
 export { Djin }
 
@@ -51,8 +68,8 @@ class Djin {
             rite.etch(rkey('tock', banghash), bangroll)
             rite.etch(rkey('work', banghash), n2b(tuff(bangroll)))
             rite.etch(rkey('fold', banghash, n2b(BigInt(0))), roll([snap, n2b(BigInt(0))]))
-            let left = BigInt(2) ** BigInt(53) - BigInt(1)
-            rite.etch(rkey('left', n2b(BigInt(0))), n2b(BigInt(2) ** BigInt(53) - BigInt(1)))
+            let left = BigInt(2) ** BigInt(53)
+            rite.etch(rkey('left', n2b(BigInt(0))), n2b(left))
             let nextleft = left - (left / (BigInt(2) ** BigInt(21)))
             twig.etch(rkey('ment', banghash, h2b('07')), roll([banghash, n2b(left - nextleft)])) // [code, cash]
             twig.etch(rkey('know', banghash), t2b('DV'))
@@ -216,12 +233,15 @@ class Djin {
 
     // ['ask/tocks tailhash ]  ->  'say/tocks tocks
     // ['ask/tocks Mash     ]  ->  'say/tocks Tock[]
-    _ask_tocks(memo :MemoAskTocks) :MemoSayTocks { // | MemoSayTacks  todo
+    _ask_tocks(memo :MemoAskTocks) :MemoSayTocks|MemoErr { // | MemoSayTacks  todo
         // todo need tail in history
         let [line, body] = memo;
         let tail = body as Blob
         let lead = []
         let best = this.rock.read_one(rkey('best'))
+        if (bleq(best, tail)) {
+            return [MemoType.Err, ['unavailable', best]]
+        }
         let prev = best as unknown as Blob // mash
         let banghash = mash(roll(this.bang))
         do {

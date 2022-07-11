@@ -56,10 +56,12 @@ function vinx_tick(conx :Tick[], tick :Tick, tock? :Tock) :Okay<Fees> {
 
         const moves = tick[0]
         let ticash = BigInt(0)
+        let ismint = false
         moves.forEach((move, moveidx) => {
             const [txin, indx, sign] = move
             const indxnum = Number('0x'+b2h(indx))
             if (indxnum == 7) {
+                ismint = true
                 const prev = txin
                 aver(_ => tock != undefined, 'panic: vinx_tick - indx 7 but tock undefined')
                 need(bleq(prev, mash(roll(tock))), 'bad prev tock hash')
@@ -80,6 +82,8 @@ function vinx_tick(conx :Tick[], tick :Tick, tock? :Tock) :Okay<Fees> {
             const cash = ment[1]
             tocash += BigInt('0x' + b2h(cash))
         })
+
+        need(ismint || ticash >= tocash, `non-mint tick fees must be >= 0`)
         return pass(tocash - ticash)
     } catch (e) {
         return fail(e.message)

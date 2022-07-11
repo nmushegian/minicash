@@ -260,15 +260,15 @@ function vult_full(tree :Tree, tock :Tock) :MemoAskTacks|MemoAskTocks|MemoAskTic
             // have all tocks/tacks/ticks
             // this block checks for double spends (pent),
             // moves with expired txin, (pyre)
-            // unspent/overspent fees (tickfees, tockfees) (todo no negative tickfees),
+            // unspent/overspent fees (tockfees) (todo no negative tickfees),
             // todo no future tocks allowed,
             let ticks = _ticks.filter(tick => tick != undefined).map(unroll) as Tick[]
-            ticks.forEach(tick => {
+            let ismint = false
+            ticks.forEach((tick, tickidx) => {
                 let tickhash = mash(roll(tick))
                 let [moves, ments] = tick
-                let tickfees = BigInt(0)
                 // check moves for double spends, expired txin
-                // add moved amount to tickfees
+                // add moved amount to tockfees
                 moves.forEach(move => {
                     // fail if input is spent or expired
                     let [txin, idx, sign] = move
@@ -291,34 +291,31 @@ function vult_full(tree :Tree, tock :Tock) :MemoAskTacks|MemoAskTocks|MemoAskTic
                     debug(`cash=${b2h(cash)} txin=${b2h(txin)}`)
 
                     // fees are calculated per-tick, not per-move
-                    tickfees += bnum(cash)
-                    if (bleq(idx, h2b('07')) && bleq(txin, prevtockhash)) {
-                        // the mint always consumes all fees
-                        // this implies that this tick's total cash == fees + ment cash's
-                        debug(`mint move, input cash = ${b2h(cash)}`)
-                        tickfees += tockfees
-                        tockfees = BigInt(0)
-                    }
+                    tockfees += bnum(cash)
+                    ismint = bleq(idx, h2b('07'))
                 })
+
                 // put ments in state tree
-                // subtract output amount from tickfees
+                // subtract output amount from tockfees
                 // what remains after goes to miner
                 ments.forEach((ment, idx) => {
                     twig.etch(rkey('ment', tickhash, n2b(BigInt(idx))), roll(ment))
                     let [code, cash] = ment
-                    tickfees -= bnum(cash)
+                    tockfees -= bnum(cash)
                 })
 
-                // add this tick's fees to tock's fees, set expiration time
-                tockfees += tickfees
                 let pyre = bnum(time) + BigInt(536112000)
                 twig.etch(rkey('pyre', tickhash), n2b(pyre))
             })
-            // miner can't leave any remaining fees
+
+            // the mint tick is last and must consume all fees
+            // -> mint tick's total cash == fees + prev tock's ment's cash
+            need(ismint, `last tick must be mint tickslen: ${ticks.length}`)
             need(
-                tockfees == BigInt(0),
+                BigInt(0) == tockfees,
                 `tock fees must equal 0 (tockfees=${tockfees})`
             )
+
             debug('vult_full SUCCESS, setting DV', b2h(tockhash))
             twig.etch(rkey('know', tockhash), t2b('DV'))
             // update best tock if this tock has more work
@@ -330,7 +327,6 @@ function vult_full(tree :Tree, tock :Tock) :MemoAskTacks|MemoAskTocks|MemoAskTic
             out = [MemoType.Err, ['unspendable', tock]]
             debug("vult_full invalid", b2h(tockhash), e.message)
         }
-
     })
 
     // save the current snap to db so future vults can build state from it
