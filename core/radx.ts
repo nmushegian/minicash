@@ -40,7 +40,7 @@
 
 import {
     Blob, bleq,
-    roll, unroll,
+    Roll, roll, unroll,
     Snap,
     bnum,
     b2h, h2b, t2b, n2b,
@@ -55,32 +55,35 @@ export { Tree, Twig }
 // The prefix tree has two kinds of internal nodes, they are keyed by an
 // internal node ID, which also becomes the Snap when the trie root is updated.
 
-// The first type node is called a Leaf.
-// TODO: don't use RLP here, make it a flat buffer with fixed size slices
+// The first type node is called a Leaf. This node type means there is only
+// one value with the given suffix from that point forward. The entire key
+// is copied because otherwise you end up with many duplicates that differ by
+// just one byte, it ends up saving space.
+// TODO: don't use RLP here, just slice a buffer
 type Leaf = [
     Blob // tag (leaf == 00)
-  , Blob // bitlen
-  , Blob // prefix
-  , Blob // value
+  , Blob // key
+  , Blob // val
 ]
-function isleaf(item :Blob[]) :boolean {
-    return bleq(item[0], h2b('00'))
+function isleaf(item :Roll) :boolean {
+    return bleq(item[0] as Blob, h2b('00'))
 }
 
 // The second is called a limb. This node represents that there are multiple
 // distinct keys whose prefix is equal to current search prefix, but different
 // from that point forward.
-// In this implementation the branching factor is 2.
-// TODO: don't use RLP here, make it a flat buffer with fixed size slices
+// In this implementation the branching factor is 256. As a hack to save some space
+// the length of `subtrees` is only as long as needed for the largest value.
+// Note that this representation doesn't have a way to represent "no next byte",
+// this still works because we know that all tree keys have the same length, so
+// you will never have a key that is a prefix of another key.
+// TODO: don't use RLP here, just slice a buffer
 type Limb = [
-    Blob // tag (leaf == 01)
-  , Blob // bitlen
-  , Blob // prefix
-  , Snap // left
-  , Snap // right
+    Blob   // tag (leaf == 01)
+  , Snap[] // subtrees
 ]
-function islimb(item :Blob[]) {
-    return bleq(item[0], h2b('01'))
+function islimb(item :Roll) :boolean {
+    return bleq(item[0] as Blob, h2b('01'))
 }
 
 class Twig {
@@ -109,49 +112,63 @@ class Twig {
         this.rite.etch(t2b('aloc'), extend(n2b(bnum(next) + BigInt(n)), 8))
         return next
     }
-    _lookup(root :Snap, key :Blob) :Blob {
+
+    _lookup(root :Snap, key :Blob, idx :number = 0) :Blob {
         let snap = root
-        let bitidx = 0
-        // until found
-        while (true) {
-            // get item from rock
-            let blob = this.rite.read(snap)
-            aver(_=> blob.length > 0, `panic: no value for snap key ${snap}`)
-            let item = unroll(blob)
-            console.log(item)
-            //   if leaf, compare key
-            //     if equal, return it
-            //     else return emptyblob
-            //   if limb, follow the right branch
+        // get item from rock
+        let blob = this.rite.read(snap)
+        aver(_=> blob.length > 0, `panic: no value for snap key ${snap}`)
+        let item = unroll(blob)
+        console.log(item)
+        if (isleaf(item)) {
+            // compare suffix
+            // if equal, return it
+            // else return emptyblob
+            throw err(`todo lookup isleaf`)
+        } else if (islimb(item)) {
+            // if limb key is too long, return empty
+            // if subkeys don't match, return empty
+            // else
+            //   branches = item[2]
+            //   nextbyte = key[idx]
+            //   snap = branches[nextbyte]
+            //   if snap is empty, return empty
+            //   else
+            //     return this._lookup(snap, key, idx + 1)
+            throw err(`todo lookup islimb`)
+        } else {
+            throw err(`panic: unrecognized tree node type`)
         }
-        throw err(`todo _lookup`)
     }
-    _insert(root :Snap, key :Blob, val :Blob) :Snap {
+
+    _insert(root :Snap, key :Blob, val :Blob, idx :number = 0) :Snap {
         console.log(`inserting ${b2h(key)} : ${b2h(val)}`)
         let snap = root
-        let bitidx = 0
-        while (true) {
-            console.log(`looking up snap`, snap)
-            let blob = this.rite.read(snap)
-            aver(_=> blob.length > 0, `panic: no value for snap key ${snap}`)
-            let item = unroll(blob)
-            console.log(`got item`, item)
-            if (isleaf(item as Blob[])) {
-                console.log(`it's a leaf`)
-                // determine prefix
-                // make a limb and 2 leafs
-                // reassemble
-                // return
-            } else if (islimb(item as Blob[])) {
-                console.log(`it's a limb`)
-                // follow the right branch
-                // continue
-            } else {
-                throw err(`panic: unrecognized internal node type for item ${item}`)
-            }
-            throw err(`panic: unreachable`)
+        console.log(`looking up snap`, snap)
+        let blob = this.rite.read(snap)
+        aver(_=> blob.length > 0, `panic: no value for snap key ${snap}`)
+        let item = unroll(blob)
+        console.log(`got item`, item)
+        if (isleaf(item)) {
+            console.log(`it's a leaf`)
+            // add a new leaf
+            // create new limb pointing to new leaf and old leaf
+            // return the new limb
+        } else if (islimb(item)) {
+            console.log(`it's a limb`)
+            // add a new leaf
+            // copy old limb to new limb
+            // get snap for the next byte
+            // if it doesn't exist, set it in the new limb
+            // if it does, get new subroot = _insert(snap, key, val, idx + 1)
+            //   and set it in the new limb
+            // return the new limb
+        } else {
+            throw err(`panic: unrecognized internal node type for item ${item}`)
         }
+        throw err(`panic: unreachable`)
     }
+
 }
 
 class Tree {
@@ -159,7 +176,8 @@ class Tree {
 
     constructor(rock :Rock) {
         this.rock = rock
-        let initleaf = [h2b('00'), h2b('00'), h2b(''), h2b('00')]
+        // represents "" -> ""
+        let initleaf = [h2b('00'), h2b(''), h2b('')]
         this.rock.etch_one(h2b('00'.repeat(8)), roll(initleaf))
         this.rock.etch_one(t2b('aloc'), h2b('0000000000000001')) // 1
     }
@@ -169,14 +187,15 @@ class Tree {
             look(this.rock, twig)
         })
     }
-    grow(snap :Snap, grow :((Rock,Twig,Snap) => void)) {
+    grow(snap :Snap, grow :((Rock,Twig,Snap) => void)) :Snap {
+        let next
         this.rock.rite(rite => {
             let twig = new Twig(rite, snap)
             // `grow` is given the snap that these changes will be saved as (`next`)
             // before the transaction is complete. That's because a reference
             // to this snap might need to be saved somewhere by the grow function.
             // Because the entire dbtx is atomic, this is fine.
-            let next = twig._aloc(1)
+            next = twig._aloc(1)
             grow(rite, twig, next)
             // now twig has set of diffs
             // iterate through each and insert them into the prefix tree
@@ -187,6 +206,7 @@ class Tree {
             }
             // TODO replace root with `next`, return it
         })
+        return next
     }
 
     // `snip` removes a snap from the tree, and garbage-collects
