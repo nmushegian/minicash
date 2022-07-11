@@ -260,6 +260,9 @@ class Djin {
             return res[0]
         }, 'panic, tock must be valid-in-context')
 
+        debug(`etching ${b2h(mash(roll(tock)))} banghash=${b2h(mash(roll(this.bang)))}`)
+        this.tree.rock.etch_one(rkey('tock', mash(roll(tock))), roll(tock))
+
         if (this.full) {
             return vult_full(this.tree, tock) as MemoAskTacks|MemoAskTocks|MemoAskTicks
         }

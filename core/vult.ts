@@ -9,15 +9,14 @@ import {
     bnum,
     Cash,
     Code,
-    h2b, Mash,
+    h2b,
     mash,
     memo_close,
     MemoAskTacks,
     MemoAskTicks,
     MemoAskTocks,
     MemoErr,
-    MemoSayTicks,
-    MemoType, Ment,
+    MemoType,
     n2b,
     need,
     rmap,
@@ -26,12 +25,12 @@ import {
     t2b,
     Tack,
     Tick,
-    Tock, toss,
+    Tock,
     tuff,
     unroll
 } from './word.js'
 
-import {rkey, Tree, Twig} from './tree.js'
+import {rkey, Tree} from './tree.js'
 import {Blob} from "coreword";
 import {Rite} from "./rock";
 
@@ -42,28 +41,15 @@ export {
     vult_full
 }
 
-
-function know(tree :Tree, tockhash :Blob) :string {
-    let res
-    let prev_tail_fold = tree.rock.find_max(rkey('fold', tockhash))[0]
-
-    let [snap,] = unroll(prev_tail_fold)
-    tree.look(snap as Snap, (rock, twig) => {
-        res = twig.read(rkey('know', tockhash))
-    })
-    return b2t(res)
-}
-
-function etch_best(tree :Tree, tockhash :Blob) {
-    let this_work = tree.rock.read_one(rkey('work', tockhash))
-    let best = tree.rock.read_one(rkey('best'))
-    let best_work = tree.rock.read_one(rkey('work', best))
+function etch_best(rite, tockhash :Blob) {
+    let this_work = rite.read(rkey('work', tockhash))
+    let best = rite.read(rkey('best'))
+    let best_work = rite.read(rkey('work', best))
     if (bnum(this_work) > bnum(best_work)) {
         debug(`new best block: ${b2h(tockhash)} (new work: ${b2h(this_work)}, old work: ${b2h(best_work)})`)
-        tree.rock.etch_one(rkey('best'), tockhash)
+        rite.etch(rkey('best'), tockhash)
     }
 }
-
 
 function subsidyleft(rite :Rite, _time :Blob) :Bnum {
     let time = bnum(_time)
@@ -83,34 +69,38 @@ function subsidyleft(rite :Rite, _time :Blob) :Bnum {
 
 // vult_thin grows possibly-valid state tree
 //   (could also invalidate tock)
-function vult_thin(tree :Tree, tock :Tock, updatebest :boolean) :MemoAskTocks|MemoErr {
+function vult_thin(tree :Tree, tock :Tock, updatebest :boolean =true) :MemoAskTocks {
     // aver prev tock must exist
     // aver well/vinx
-    let [prev, root, time, fuzz] = tock
+    let [prev_head,, time,] = tock
     let head = mash(roll(tock))
-    debug('vult_thin', b2h(head))
-    if (!bleq(t2b(''), tree.rock.read_one(rkey('tock', head)))) {
-        let tockknow = know(tree, head)
-        if ('PV' == tockknow || 'DV' == tockknow) {
-            return [MemoType.AskTocks, head]
-        }
-    }
-    let prev_head = tock[0]
-    let prev_tock = unroll(tree.rock.read_one(rkey('tock', prev_head)))
-    aver(_ => prev_tock.length > 0, `vulting a tock with unrecognized prev`)
-    let prev_work = tree.rock.read_one(rkey('work', prev_head))
-    let this_work = n2b(bnum(prev_work) + tuff(head))
+    debug('vult_thin', b2h(head), rmap(tock, b2h))
     let prev_foldandidx = tree.rock.find_max(rkey('fold', prev_head))
+    if (!bleq(t2b(''), tree.rock.read_one(rkey('fold', head, h2b('00'))))) {
+        prev_foldandidx = tree.rock.find_max(rkey('fold', head))
+    }
     let [prev_fold,] = prev_foldandidx
-    //let prev_fold = tree.rock.read_one(rkey('fold', prev_head, n2b(BigInt(0))))
-    aver(_ => prev_fold.length > 0, `prev fold must exist`)
-    aver(_ => {
-        let prevknow = know(tree, prev_head)
-        return 'PV' == prevknow || 'DV' == prevknow
-    }, `panic, say/tocks prev must be PV (${b2h(prev_head)})`)
+    aver(_ => !bleq(t2b(''), prev_fold), `prev fold must exist`)
 
     let [prev_snap, ,] = unroll(prev_fold)
+    let out
     tree.grow(prev_snap as Snap, (rite, twig, snap) => {
+        let prev_tock = unroll(rite.read(rkey('tock', prev_head)))
+        aver(_ => prev_tock.length > 0, `vulting a tock with unrecognized prev`)
+        let prev_work = rite.read(rkey('work', prev_head))
+        let this_work = n2b(bnum(prev_work) + tuff(head))
+
+        aver(_ => {
+            let prevknow = b2t(twig.read(rkey('know', prev_head)))
+            return 'PV' == prevknow || 'DV' == prevknow
+        }, `panic, say/tocks prev must be PV (${b2h(prev_head)})`)
+
+        let tockknow = b2t(twig.read(rkey('know', head)))
+        if ('PV' == tockknow || 'DV' == tockknow) {
+            out = [MemoType.AskTocks, head]
+            return
+        }
+
         rite.etch(rkey('tock', head), roll(tock))
         rite.etch(rkey('work', head), this_work)
         rite.etch(rkey('fold', head, h2b('00')), roll([snap, h2b('00')])) // [snap, fees]
@@ -122,10 +112,12 @@ function vult_thin(tree :Tree, tock :Tock, updatebest :boolean) :MemoAskTocks|Me
         twig.etch(rkey('ment', head, h2b('07')), roll([head, n2b(left - nextleft)])) // [code, cash]
         let pyre = bnum(time) + BigInt(536112000)
         twig.etch(rkey('pyre', head), n2b(pyre))
+        if (updatebest) {
+            etch_best(rite, head)
+        }
+        out = [MemoType.AskTocks, head]
     })
-    if (updatebest) {
-        etch_best(tree, head)
-    }
+
     debug('vult_thin: grew', b2h(head), 'to PV')
     return [MemoType.AskTocks, head]
 }
@@ -133,75 +125,31 @@ function vult_thin(tree :Tree, tock :Tock, updatebest :boolean) :MemoAskTocks|Me
 // vult_full grows definitely-valid state tree
 //   (could also invalidate tock)
 function vult_full(tree :Tree, tock :Tock) :MemoAskTacks|MemoAskTocks|MemoAskTicks|MemoErr { // :Memo
+    debug(`vult_full ${rmap(tock, b2h)}`)
+
     let [prevtockhash, root, time, fuzz] = tock
-    let prevtack = unroll(tree.rock.read_one(rkey('tack', prevtockhash)))
     let tockhash = mash(roll(tock))
-    debug('vult_full', b2h(tockhash))
-    aver(_ => {
-        let prevknow = know(tree, prevtockhash)
-        return 'PV' == prevknow || 'DV' == prevknow
-    }, `panic, say/tocks prev must be PV (${b2h(prevtockhash)})`)
-
-
-    if (!bleq(t2b(''), tree.rock.read_one(rkey('tock', tockhash)))) {
-        let tockknow = know(tree, tockhash)
-        debug("KNOW=", tockknow)
-
-        if ('DV' == tockknow) {
-            debug(`vult_full block is already DV, sending ask/tocks`, b2h(tockhash))
-            return [MemoType.AskTocks, tockhash]
-        }
+    if (bnum(time) == BigInt(0)) {
+        return [MemoType.AskTocks, tockhash]
     }
 
-    if ('PV' == know(tree, prevtockhash)) {
-        // todo need to do this in a loop
-        debug('vult_full last tock is PV, trying to vult it')
-        let prevtock = unroll(tree.rock.read_one(rkey('tock', prevtockhash))) as Tock
-        let prevmemo = vult_full(tree, prevtock)
-        debug('vult_full successfully vulted prev=', b2h(prevtockhash), prevmemo)
-        if (!(MemoType.AskTocks == prevmemo[0] && bleq(prevtockhash, prevmemo[1]))) {
-            debug('vult_full sending prev tock vult result...', prevmemo, b2h(prevtockhash), b2h(tockhash))
-            return prevmemo
-        }
+    aver(
+        () => !bleq(t2b(''), tree.rock.read_one(rkey('tock', mash(roll(tock))))),
+        'tock not found in rock'
+    )
+
+    let _prevtock = tree.rock.read_one(rkey('tock', prevtockhash))
+    need(!bleq(t2b(''), _prevtock), `vult_full prev tock not found ${b2h(prevtockhash)})`)
+    let prevmemo = vult_full(tree, unroll(_prevtock) as Tock)
+    let expectedprevmemo = memo_close([MemoType.AskTocks, prevtockhash])
+    if (!bleq(roll(expectedprevmemo), roll(memo_close(prevmemo)))) {
+        debug(`vult_full prev incomplete, returning prev memo`)
+        return prevmemo
     }
 
-    let thin = vult_thin(tree, tock, false)
-    if (MemoType.Err == thin[0]) {
-        return thin
-    }
+    vult_thin(tree, tock, false)
 
-    let firsttack_blob = tree.rock.read_one(rkey('tack', tockhash, h2b('00')))
-    if (bleq(firsttack_blob, t2b(''))) {
-        debug('first tack not found, asking tacks')
-        return [MemoType.AskTacks, tockhash]
-    }
-    let [head, , ribs, feet] = unroll(firsttack_blob) as Tack
-    // ribs.length == 0 if tack has fewer than 512 feet
-    let hop = Math.ceil(feet.length / 1024)
-    for (let eye = hop; eye < ribs.length; hop = Math.ceil(feet.length / 1024), eye += hop) {
-        let tack = tree.rock.read_one(rkey('tack', tockhash, n2b(BigInt(eye))))
-        if (bleq(tack, t2b(''))) {
-            debug("tack not found, asking tacks")
-            return [MemoType.AskTacks, tockhash]
-        }
-        let feet = (unroll(tack) as Tack)[3]
-        feet.push(...feet)
-    }
-
-    let leftfeet = []
-    let ticks = feet.map(foot => {
-        let tick = tree.rock.read_one(rkey('tick', foot))
-        if (bleq(tick, t2b(''))) {
-            leftfeet.push(foot)
-            return undefined
-        }
-        return unroll(tick) as Tick
-    })
-
-    if (leftfeet.length != 0) {
-        debug('some feet not found, asking ticks')
-        return [MemoType.AskTicks, leftfeet]
-    }
+    let prevtack = unroll(tree.rock.read_one(rkey('tack', prevtockhash)))
 
     let fold = tree.rock.read_one(rkey('fold', tockhash, n2b(BigInt(0))))
     let foldandidx = tree.rock.find_max(rkey('fold', tockhash))
@@ -209,16 +157,67 @@ function vult_full(tree :Tree, tock :Tock) :MemoAskTacks|MemoAskTocks|MemoAskTic
     let [prev_snap, _prev_fees] = unroll(foldandidx[0]) as [Snap, Blob]
     let prev_fees = bnum(_prev_fees)
 
-    let valid = false
+    let valid = true
     let cur_snap
     // todo do this per tack...init fees can be nonzero then
     let fees = BigInt(0)
     let err
+    let out
     tree.grow(prev_snap as Snap, (rite, twig, snap) => {
         try {
             let prevknow = b2t(twig.read(rkey('know', prevtockhash)))
             need('DV' == prevknow, `prevtock must be DV (${b2h(prevtockhash)} is ${prevknow})`)
-            let mintfound = false
+
+            cur_snap = snap
+            aver(
+                _ => !bleq(t2b(''), rite.read(rkey('tock', tockhash))),
+                'vult_full: tock not found'
+            )
+
+            let tockknow = b2t(twig.read(rkey('know', tockhash)))
+            if ('DV' == tockknow) {
+                debug(`vult_full block is already DV, sending ask/tocks`, b2h(tockhash))
+                out = [MemoType.AskTocks, tockhash]
+                return
+            }
+
+
+            let firsttack_blob = rite.read(rkey('tack', tockhash, h2b('00')))
+            if (bleq(firsttack_blob, t2b(''))) {
+                debug('first tack not found, asking tacks')
+                out = [MemoType.AskTacks, tockhash]
+                return
+            }
+            let [head, , ribs, feet] = unroll(firsttack_blob) as Tack
+            // ribs.length == 0 if tack has fewer than 512 feet
+            let hop = Math.ceil(feet.length / 1024)
+            for (let eye = hop; eye < ribs.length; hop = Math.ceil(feet.length / 1024), eye += hop) {
+                let tack = rite.read(rkey('tack', tockhash, n2b(BigInt(eye))))
+                if (bleq(tack, t2b(''))) {
+                    debug("tack not found, asking tacks")
+                    out = [MemoType.AskTacks, tockhash]
+                    return
+                }
+                let feet = (unroll(tack) as Tack)[3]
+                feet.push(...feet)
+            }
+
+            let leftfeet = []
+            let ticks = feet.map(foot => {
+                let tick = rite.read(rkey('tick', foot))
+                if (bleq(tick, t2b(''))) {
+                    leftfeet.push(foot)
+                    return undefined
+                }
+                return unroll(tick) as Tick
+            })
+
+            if (leftfeet.length != 0) {
+                debug('some feet not found, asking ticks')
+                out = [MemoType.AskTicks, leftfeet]
+                return
+            }
+
             ticks.forEach(tick => {
                 let tickhash = mash(roll(tick))
                 let [moves, ments] = tick
@@ -255,22 +254,18 @@ function vult_full(tree :Tree, tock :Tock) :MemoAskTacks|MemoAskTocks|MemoAskTic
             need(fees == BigInt(0), `total block fees must equal 0 (fees=${fees}) block=${b2h(tockhash)}`)
             debug('vult_full SUCCESS, setting DV', b2h(tockhash))
             twig.etch(rkey('know', tockhash), t2b('DV'))
-            cur_snap = snap
             valid = true
+            out = [MemoType.AskTocks, tockhash]
+            etch_best(rite, tockhash)
         } catch (e) {
             valid = false
             err = e
+            twig.etch(rkey('know', tockhash), t2b('DN'))
+            out = [MemoType.Err, ['unspendable', tock]]
+            debug("vult_full invalid", b2h(tockhash), err.message)
         }
     })
 
-    if (!valid) {
-        debug("vult_full invalid", b2h(tockhash), err.message)
-        tree.rock.etch_one(rkey('know', tockhash), t2b('DN'))
-        return [MemoType.Err, ['unspendable', tock]]
-    }
-
-    etch_best(tree, tockhash)
-
     tree.rock.etch_one(rkey('fold', tockhash, n2b(foldidx + BigInt(1))), roll([cur_snap, n2b(prev_fees + fees)]))
-    return [MemoType.AskTocks, tockhash]
+    return out
 }
