@@ -182,6 +182,7 @@ test('djin jams', t=>{
     cases.forEach(c => runcase(dir, c))
 })
 
+
 test('full djin jams', t=>{
     let dir = './test/case/djin/full/'
     let cases = readdirSync(dir)
@@ -189,4 +190,6 @@ test('full djin jams', t=>{
     cases.forEach(c => runcase(dir, c, true))
 })
 
-//runcase('./test/case/djin/full/', 'djin_fees.jams', true)
+
+
+//runcase('./test/case/djin/full/', 'djin_realtx_pvnotbest.jams', true)

@@ -51,7 +51,7 @@ class Rite {
             i++
             prev_tail = tail
         }
-        need(prev_tail != undefined, `no folds at tockhash ${b2h(key)}`)
+        if (prev_tail == undefined) return undefined
         return [prev_tail, i - BigInt(1)]
     }
     find_min(key :Blob) :Blob {
