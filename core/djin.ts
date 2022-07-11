@@ -90,12 +90,10 @@ class Djin {
     }
 
     turn(memo :Memo) :Okay<Memo> {
-        aver(_ => okay(form_memo(memo))[0], 'memo not well-formed')
-        let [wellformed, ,] = form_memo(memo)
-        if (!wellformed) {
-            // todo is this ok?
-            return pass(memo)
+        if (!form_memo(memo)[0]) {
+            return pass(memo_close([MemoType.Err, ['invalid', memo]]))
         }
+
         let copy = memo_open(memo)
         let line = copy[0]
         if (MemoType.AskTocks == line) {
