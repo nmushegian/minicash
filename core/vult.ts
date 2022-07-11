@@ -183,28 +183,29 @@ function vult_full(tree :Tree, tock :Tock) :MemoAskTacks|MemoAskTocks|MemoAskTic
                 return
             }
 
-            // todo do...while
             // check that all tacks are in the db, return AskTacks if not
             // should have already been well'd and vinx'd
-            let firsttack_blob = rite.read(rkey('tack', tockhash, h2b('00')))
-            if (bleq(firsttack_blob, t2b(''))) {
-                debug('first tack not found, asking tacks')
-                out = [MemoType.AskTacks, tockhash]
-                return
-            }
-            let [head, , ribs, feet] = unroll(firsttack_blob) as Tack
-            // ribs.length == 0 if tack has fewer than 512 feet
-            let hop = Math.ceil(feet.length / 1024)
-            for (let eye = hop; eye < ribs.length; hop = Math.ceil(feet.length / 1024), eye += hop) {
-                let tack = rite.read(rkey('tack', tockhash, n2b(BigInt(eye))))
-                if (bleq(tack, t2b(''))) {
+            let eye = 0
+            let ribs
+            let feet = []
+            do {
+                let _tack = rite.read(rkey('tack', tockhash, n2b(BigInt(eye))))
+                if (bleq(_tack, t2b(''))) {
                     debug("tack not found, asking tacks")
                     out = [MemoType.AskTacks, tockhash]
                     return
                 }
-                let feet = (unroll(tack) as Tack)[3]
-                feet.push(...feet)
-            }
+
+                // one chunk is 1024 feet
+                // next eye = cur eye + num_chunks
+                let tack = unroll(_tack) as Tack
+                let chunks
+                [, , ribs, chunks] = tack
+                feet.push(...chunks)
+                let nchunks = Math.ceil(chunks.length / 1024)
+                eye += nchunks
+            } while (eye < ribs.length)
+
 
             // check that all ticks are in the db, return AskTicks if not
             let leftfeet = []
