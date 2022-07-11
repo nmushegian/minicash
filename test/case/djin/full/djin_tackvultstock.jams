@@ -1,0 +1,36 @@
+[
+  [ send [ ca
+    [[[ f60510a769d62eaf8535dc58f8dcccb1404415023e2196f1
+        32f93467d296b6d7cbb840201424545bb972da0af4c505a7
+        00000000000039
+        00000000000000 ]
+        00
+        []
+        [ 32f93467d296b6d7cbb840201424545bb972da0af4c505a7 ]]]
+  ]]
+  [ want [ a1 [ 32f93467d296b6d7cbb840201424545bb972da0af4c505a7 ] ]]
+  [ send [ c1 [
+    [[[ f60510a769d62eaf8535dc58f8dcccb1404415023e2196f1
+        07 00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff112233445566778899001122334455667788990011223344556677889900112233 ]
+    ][
+      [ 788a3a0576fd2892bbaa53718c940ea13ecaff9b
+        000000ffffffff ]]]
+  ]]]
+  [ want [ c1 [
+    [[[ f60510a769d62eaf8535dc58f8dcccb1404415023e2196f1
+        07 00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff112233445566778899001122334455667788990011223344556677889900112233 ]
+    ][
+      [ 788a3a0576fd2892bbaa53718c940ea13ecaff9b
+        000000ffffffff ]]]
+  ]]]
+  [ send [ ca
+    [[[ ba979995c48a71e698eb41183426a12e3a504228d028fcbb
+       ffffffffffffffffffffffffffffffffffffffffffffffff
+       00000000000072
+       00000000000000 ]
+       00
+       []
+       [ ffffffffffffffffffffffffffffffffffffffffffffffff ]]]
+  ]]
+  [ want [ a1 [ ffffffffffffffffffffffffffffffffffffffffffffffff ]]]
+]

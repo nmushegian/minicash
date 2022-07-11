@@ -6,7 +6,8 @@
     "setup": "git submodule update --init --recursive",
     "build": "npx tsc",
     "pretest": "npm run build",
-    "test": "node --loader ts-node/esm test/test.ts | tap-arc"
+    "test": "node --loader ts-node/esm test/test.ts | tap-arc",
+    "pooltest": "node --loader ts-node/esm test/pool.t.ts | tap-arc"
   },
   "dependencies": {
     "coreword": "^0.0.18",
