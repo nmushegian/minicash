@@ -115,7 +115,8 @@ function form_tack(x :Roll) :Okay<Tack> {
         need(feet.every(b=>b.length == 24), `feet must be list of hashes`)
         need(feet.length <= 2**17, `feet must have len <= 2^17`)
         let zero = h2b('00'.repeat(24))
-        feet.forEach(foot => need(!bleq(zero, foot), `foot must not be zero`))
+        need(ribs.every(rib => !bleq(zero, rib)), `rib must not be zero`)
+        need(feet.every(foot => !bleq(zero, foot)), `foot must not be zero`)
         return pass(x)
         // merkle root checked in vinx_tack
     } catch (e) {

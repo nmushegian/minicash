@@ -38,7 +38,7 @@ test('form_tack', t=> {
     const eye = h2b('00')
     let ribs = []
     for (let i = 0; i < 128; i++) {
-        let hex = Number(i).toString(16)
+        let hex = Number(i+1).toString(16)
         if (hex.length == 1) {
             hex = '0' + hex
         }
@@ -48,7 +48,7 @@ test('form_tack', t=> {
 
     let feet = []
     for (let i = 0; i < 1024; i++) {
-        let hex = Number(i).toString(16)
+        let hex = Number(i+1).toString(16)
         if (hex.length == 1) {
             hex = '0' + hex
         }
