@@ -80,6 +80,7 @@ test('not both empty', t=>{
 let $ = {
     form_tick,
     form_tock,
+    form_tack,
     form_memo
 }
 
