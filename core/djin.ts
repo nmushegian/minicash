@@ -222,7 +222,7 @@ class Djin {
         let [line, tockhash] = memo
 
         let tacks = []
-        for (let eye = 0; eye <= 128; eye++) {
+        for (let eye = 0; eye < 128; eye++) {
             let tackroll = this.rock.read_one(rkey('tack', tockhash, n2b(BigInt(eye))))
             if (!bleq(tackroll, t2b(''))) {
                 tacks.push(unroll(tackroll))
