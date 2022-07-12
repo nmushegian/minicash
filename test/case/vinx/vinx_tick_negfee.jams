@@ -1,0 +1,28 @@
+{
+  note "vinx_tick negative fee"
+  func vinx_tick
+  args [
+    [   
+      [   
+        [   
+          [ 00112233445566778899aabbccddeeff0011223344556678
+            00 07bdfb85d74359c64f66498cb3bc4adf7c7ed8de99ba1d33d58dc79375bc23634b28b9b4a1c12f8ece6615d76911ac480ca7f3265e31809a8e52f4eddc2af40200] 
+        ][  
+          [ 07cb562f7d7a49dd178554057375d077be2a0a2f
+            0000ff00000000 ]
+        ]   
+      ]   
+    ]   
+
+    [[[ 9e6518024d07f708756dd4f3e35233b6b2c97e180bcd9cc0
+        00 6e1b35f5cc2856be101f885b2648f7bb63fc515615a2f1febd6a79c51349314a5d081aae2f660463ef755ba7f4604cfe86b97d644a32d1063720d4f21467ac3600 ]
+    ][
+      [ d5de996a3d6f2415db929a0b5864535744b6198c
+        0000ff00000001 ]
+    ]]
+
+
+  ]
+  want [ false "non-mint tick fees must be >= 0" ]
+}
+
