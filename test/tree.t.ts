@@ -23,7 +23,7 @@ test.only('tree', t=>{
     let one = h2b('00'.repeat(7) + '01')
     t.deepEqual(next, one)
 
-    let key1 = h2b('ff'.repeat(25))
+    let key1 = h2b('01'.repeat(25))
     let inner // to check the snap given in grow function equals returned snap
     let snap1 = tree.grow(zero, (rock, twig, snap) => {
         t.deepEqual(snap, one)
@@ -41,4 +41,15 @@ test.only('tree', t=>{
         t.deepEqual(val1, h2b('aa'))
     })
 
+    console.log('========')
+    let key2 = h2b('0101' + '00'.repeat(23))
+    let snap2 = tree.grow(snap1, (rock, twig, snap) => {
+        // same first 2 bytes as prior entry, then different
+        twig.etch(key2, h2b('bb'))
+        let bb = twig.read(key2)
+        t.deepEqual(bb, h2b('bb'))
+
+        let aa = twig.read(key1)
+        t.deepEqual(aa, h2b('aa'))
+    })
 })

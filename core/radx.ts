@@ -124,9 +124,8 @@ class Twig {
         return next
     }
 
-    _lookup(root :Snap, key :Blob, idx :number = 0) :Blob {
-        console.log('twig._lookup (root key idx)', root, key, idx)
-        let snap = root
+    _lookup(snap :Snap, key :Blob, idx :number = 0) :Blob {
+        console.log('twig._lookup (snap key idx)', snap, key, idx)
         // get item from rock
         let blob = this.rite.read(snap)
         aver(_=> blob.length > 0, `panic: no value for snap key ${snap}`)
@@ -154,9 +153,8 @@ class Twig {
         }
     }
 
-    _insert(root :Snap, key :Blob, val :Blob, idx :number = 0) :Snap {
+    _insert(snap :Snap, key :Blob, val :Blob, idx :number = 0) :Snap {
         console.log(`inserting ${b2h(key)} : ${b2h(val)}`)
-        let snap = root
         console.log(`looking up snap`, snap)
         let blob = this.rite.read(snap)
         aver(_=> blob.length > 0, `panic: no value for snap key ${snap}`)
@@ -172,7 +170,12 @@ class Twig {
             console.log('oldbyte', oldbyte)
             console.log('newbyte', newbyte)
             if (oldbyte == newbyte) {
-                throw err(`todo oldbyte == newbyte`)
+                let subsnap = this._insert(snap, key, val, idx + 1)
+                let newlimb = make_limb((new Array(256).fill(h2b(''))))
+                newlimb[1][oldbyte] = subsnap
+                let limbnode = this._aloc()
+                this.rite.etch(limbnode, roll(newlimb))
+                return limbnode
             } else {
                 let newleaf = make_leaf(key, val)
                 let leafnode = this._aloc()
@@ -189,15 +192,31 @@ class Twig {
 
                 return limbnode
             }
+
         } else if (islimb(item)) {
             console.log(`it's a limb`)
-            // add new leaf
-            // copy old limb to new limb
-            // get snap for the next byte
-            // if it doesn't exist, set it in the new limb
-            // if it does, get new subroot = _insert(snap, key, val, idx + 1)
-            //   and set it in the new limb
-            // return the new limb
+            let limb = item as Limb
+            let subs = limb[1]
+            let byte = key[idx]
+            let next = subs[byte]
+            if (next.length == 0) {
+                // no keys with this next byte -- add a leaf and put it there
+                let newleaf = make_leaf(key, val)
+                let leafnode = this._aloc()
+                this.rite.etch(leafnode, roll(newleaf))
+
+                let copysubs = []
+                subs.forEach(x => copysubs.push(x))
+                copysubs[byte] = leafnode
+                let newlimb = make_limb(copysubs)
+                let limbnode = this._aloc()
+                this.rite.etch(limbnode, roll(newlimb))
+
+                return limbnode
+            } else {
+                // one or more keys with this next byte -- recurse
+                return this._insert(next, key, val, idx + 1)
+            }
         } else {
             throw err(`panic: unrecognized internal node type for item ${item}`)
         }
