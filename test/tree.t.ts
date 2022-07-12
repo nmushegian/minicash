@@ -52,4 +52,13 @@ test.only('tree', t=>{
         let aa = twig.read(key1)
         t.deepEqual(aa, h2b('aa'))
     })
+
+    // look back at snap1, new value shouldn't be present, old value should
+    tree.look(snap1, (rock, twig) => {
+        let aa = twig.read(key1)
+        t.deepEqual(aa, h2b('aa'))
+
+        let no = twig.read(key2)
+        t.deepEqual(no, h2b(''))
+    })
 })
