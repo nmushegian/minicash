@@ -68,12 +68,15 @@ type Leaf = [
 function isleaf(item :Roll) :boolean {
     return bleq(item[0] as Blob, h2b('00'))
 }
+function make_leaf(key :Blob, val :Blob) :Leaf {
+    return [h2b('00'), key, val]
+}
 
 // The second is called a limb. This node represents that there are multiple
 // distinct keys whose prefix is equal to current search prefix, but different
 // from that point forward.
 // In this implementation the branching factor is 256. As a hack to save some space
-// the length of `subtrees` is only as long as needed for the largest value.
+// the length of `subtrees` is only as long as needed for the largest value (TODO).
 // Note that this representation doesn't have a way to represent "no next byte",
 // this still works because we know that all tree keys have the same length, so
 // you will never have a key that is a prefix of another key.
@@ -85,19 +88,27 @@ type Limb = [
 function islimb(item :Roll) :boolean {
     return bleq(item[0] as Blob, h2b('01'))
 }
+function make_limb(subs :Snap[]) :Limb {
+    return [h2b('01'), subs]
+}
 
 class Twig {
     rite // the underlying rock dbtx
     diff // we don't push writes to db until end of tx, keep them cached
     snap // the snap this twig was initialized with respect to
     constructor(rite :Rite, snap :Snap) {
+        console.log('twig init with snap', snap)
         this.rite = rite
         this.diff = new Map()
+        this.snap = snap
     }
     read(key :Blob) :Blob {
+        console.log('twig.read key', key)
         if (this.diff.has(b2h(key))) {
+            console.log('cached in diff')
             return this.diff.get(b2h(key))
         } else {
+            console.log('not cached, looking up')
             return this._lookup(this.snap, key)
         }
     }
@@ -107,35 +118,37 @@ class Twig {
         }
         this.diff.set(b2h(key), val)
     }
-    _aloc(n : number) :Snap {
+    _aloc(n : number = 1) :Snap {
         let next = this.rite.read(t2b('aloc'))
         this.rite.etch(t2b('aloc'), extend(n2b(bnum(next) + BigInt(n)), 8))
         return next
     }
 
     _lookup(root :Snap, key :Blob, idx :number = 0) :Blob {
+        console.log('twig._lookup (root key idx)', root, key, idx)
         let snap = root
         // get item from rock
         let blob = this.rite.read(snap)
         aver(_=> blob.length > 0, `panic: no value for snap key ${snap}`)
         let item = unroll(blob)
-        console.log(item)
+        console.log('item exists and unrolled')
         if (isleaf(item)) {
-            // compare suffix
-            // if equal, return it
-            // else return emptyblob
-            throw err(`todo lookup isleaf`)
+            let leaf = item as Leaf
+            let leafkey = leaf[1]
+            if (bleq(key, leafkey)) {
+                return leaf[2]
+            } else {
+                return h2b('') // emptyblob initialized
+            }
         } else if (islimb(item)) {
-            // if limb key is too long, return empty
-            // if subkeys don't match, return empty
-            // else
-            //   branches = item[2]
-            //   nextbyte = key[idx]
-            //   snap = branches[nextbyte]
-            //   if snap is empty, return empty
-            //   else
-            //     return this._lookup(snap, key, idx + 1)
-            throw err(`todo lookup islimb`)
+            let limb = item as Limb
+            let nextbyte = key[idx]
+            let nextsnap = limb[1][nextbyte]
+            if (nextsnap.length == 0) {
+                return h2b('') // emptyblob initialized
+            } else {
+                return this._lookup(nextsnap, key, idx + 1)
+            }
         } else {
             throw err(`panic: unrecognized tree node type`)
         }
@@ -150,13 +163,35 @@ class Twig {
         let item = unroll(blob)
         console.log(`got item`, item)
         if (isleaf(item)) {
+            let oldleaf = item as Leaf
             console.log(`it's a leaf`)
-            // add a new leaf
-            // create new limb pointing to new leaf and old leaf
-            // return the new limb
+            let oldkey = oldleaf[1]
+            aver(_=> !bleq(oldkey, key), `inserting duplicate key`)
+            let oldbyte = oldkey[idx]
+            let newbyte = key[idx]
+            console.log('oldbyte', oldbyte)
+            console.log('newbyte', newbyte)
+            if (oldbyte == newbyte) {
+                throw err(`todo oldbyte == newbyte`)
+            } else {
+                let newleaf = make_leaf(key, val)
+                let leafnode = this._aloc()
+                this.rite.etch(leafnode, roll(newleaf))
+
+                let newlimb = make_limb((new Array(256)).fill(h2b('')))
+                newlimb[1][oldbyte] = snap
+                newlimb[1][newbyte] = leafnode
+                let limbnode = this._aloc()
+                this.rite.etch(limbnode, roll(newlimb))
+
+//                console.log('new leaf', newleaf)
+//                console.log('new limb', newlimb)
+
+                return limbnode
+            }
         } else if (islimb(item)) {
             console.log(`it's a limb`)
-            // add a new leaf
+            // add new leaf
             // copy old limb to new limb
             // get snap for the next byte
             // if it doesn't exist, set it in the new limb
@@ -176,12 +211,15 @@ class Tree {
 
     constructor(rock :Rock) {
         this.rock = rock
-        // represents "" -> ""
-        let initleaf = [h2b('00'), h2b(''), h2b('')]
+        // initialize with dummy value 000... -> 00
+        // make it the same key length as ment/pent keys because
+        // that is an invariant for this simplified version
+        let initleaf = [h2b('00'), h2b('00'.repeat(25)), h2b('00')]
         this.rock.etch_one(h2b('00'.repeat(8)), roll(initleaf))
         this.rock.etch_one(t2b('aloc'), h2b('0000000000000001')) // 1
     }
     look(snap :Snap, look :((Rock,Twig) =>void)) {
+        console.log(`tree.look snap`, snap)
         this.rock.rite(rite => {
             let twig = new Twig(rite, snap)
             look(this.rock, twig)
@@ -204,7 +242,8 @@ class Tree {
             for (let [k, v] of twig.diff.entries()) {
                 root = twig._insert(root, h2b(k), v)
             }
-            // TODO replace root with `next`, return it
+            let lastnode = rite.read(root)
+            rite.etch(next, lastnode)
         })
         return next
     }

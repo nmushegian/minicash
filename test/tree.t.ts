@@ -15,19 +15,18 @@ test.only('tree', t=>{
     let rock = new Rock('test/db', true)
     let tree = new Tree(rock)
 
-    // initialized with dummy entry "" -> "", next snap is 1
+    // initialized with dummy entry "00"x25 -> "00", next snap is 1
     let zero = h2b('00'.repeat(8))
     let init = rock.read_one(zero)
-    t.deepEqual(init, roll([h2b('00'), h2b(''), h2b('')]))
+    t.deepEqual(init, roll([h2b('00'), h2b('00'.repeat(25)), h2b('00')]))
     let next = rock.read_one(t2b('aloc'))
     let one = h2b('00'.repeat(7) + '01')
     t.deepEqual(next, one)
 
-    // check the snap given in grow function equals returned snap
-    let inner
+    let key1 = h2b('ff'.repeat(25))
+    let inner // to check the snap given in grow function equals returned snap
     let snap1 = tree.grow(zero, (rock, twig, snap) => {
         t.deepEqual(snap, one)
-        let key1 = h2b('ff0011')
         twig.etch(key1, h2b('aa'))
         let aa = twig.read(key1) // check value is cached
         t.deepEqual(aa, h2b('aa'))
@@ -35,5 +34,11 @@ test.only('tree', t=>{
         inner = snap
     })
     t.deepEqual(inner, snap1)
+    console.log('snap1', snap1)
+
+    tree.look(snap1, (rock, twig) => {
+        let val1 = twig.read(key1)
+        t.deepEqual(val1, h2b('aa'))
+    })
 
 })
