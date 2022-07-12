@@ -34,6 +34,9 @@ class Rite {
             }
             let prev = this.dbtx.getBinary(this.dbi, key)
             if (prev && prev.length > 0 && !bleq(prev, val)) {
+                console.log(`key`, b2h(key), b2t(key))
+                console.log(`prev val`, b2h(prev))
+                console.log(`next val`, b2h(val))
                 return false
             }
             return true // todo usage

@@ -37,28 +37,31 @@ class Djin {
 
     constructor(path :string, reset=false, full=false) {
         this.rock = new Rock(path, reset)
-        this.tree = new Tree(this.rock)
+        this.tree = new Tree(this.rock, reset)
+        this.full = full
         this.bang = [
             h2b('00'.repeat(24)),
             h2b('00'.repeat(24)),
             h2b('00'.repeat(7)),
             h2b('00'.repeat(7)),
         ]
-        let bangroll = roll(this.bang)
-        let banghash = mash(bangroll)
-        this.tree.grow(h2b(''), (rite,twig,snap) => {
-            rite.etch(rkey('best'), banghash)
-            rite.etch(rkey('tock', banghash), bangroll)
-            rite.etch(rkey('work', banghash), n2b(tuff(bangroll)))
-            rite.etch(rkey('fold', banghash, n2b(BigInt(0))), roll([snap, n2b(BigInt(0))]))
-            let left = BigInt(2) ** BigInt(53) - BigInt(1)
-            rite.etch(rkey('left', n2b(BigInt(0))), n2b(BigInt(2) ** BigInt(53) - BigInt(1)))
-            let nextleft = left - (left / (BigInt(2) ** BigInt(21)))
-            twig.etch(rkey('ment', banghash, h2b('07')), roll([banghash, n2b(left - nextleft)])) // [code, cash]
-            twig.etch(rkey('know', banghash), t2b('DV'))
-            twig.etch(rkey('pyre', banghash), n2b(BigInt(536112000))) // 17y
-        })
-        this.full = full
+        if (reset) {
+            let bangroll = roll(this.bang)
+            let banghash = mash(bangroll)
+            this.tree.grow(h2b('00'.repeat(8)), (rite,twig,snap) => {
+                rite.etch(rkey('best'), banghash)
+                rite.etch(rkey('tock', banghash), bangroll)
+                rite.etch(rkey('work', banghash), n2b(tuff(bangroll)))
+                rite.etch(rkey('fold', banghash, n2b(BigInt(0))), roll([snap, n2b(BigInt(0))]))
+                let left = BigInt(2) ** BigInt(53) - BigInt(1)
+                rite.etch(rkey('left', n2b(BigInt(0))), n2b(BigInt(2) ** BigInt(53) - BigInt(1)))
+                let nextleft = left - (left / (BigInt(2) ** BigInt(21)))
+                twig.etch(rkey('ment', banghash, h2b('07')), roll([banghash, n2b(left - nextleft)])) // [code, cash]
+                twig.etch(rkey('know', banghash), t2b('DV'))
+                twig.etch(rkey('pyre', banghash), n2b(BigInt(536112000))) // 17y
+            })
+        }
+
     }
 
     kill() {

@@ -115,13 +115,11 @@ function vult_thin(tree :Tree, tock :Tock, updatebest :boolean) :MemoAskTocks|Me
         rite.etch(rkey('work', head), this_work)
         rite.etch(rkey('fold', head, h2b('00')), roll([snap, h2b('00')])) // [snap, fees]
         twig.etch(rkey('know', head), t2b('PV'))
-        twig.etch(rkey('pyre', head), n2b(bnum(time) + BigInt(536112000)))
+//        twig.etch(rkey('pyre', head), n2b(bnum(time) + BigInt(536112000)))
         let left = subsidyleft(rite, time)
         let nextleft = subsidyleft(rite, n2b(bnum(time) + BigInt(57)))
         debug(`vult_thin etching ment at head=${b2h(head)}, ${left - nextleft}`)
         twig.etch(rkey('ment', head, h2b('07')), roll([head, n2b(left - nextleft)])) // [code, cash]
-        let pyre = bnum(time) + BigInt(536112000)
-        twig.etch(rkey('pyre', head), n2b(pyre))
     })
     if (updatebest) {
         etch_best(tree, head)

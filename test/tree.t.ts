@@ -8,17 +8,16 @@ import {
 } from '../core/word.js'
 
 import { Rock, rkey } from '../core/rock.js'
+import { Tree } from '../core/tree.js'
 
-import { Tree } from '../core/radx.js'
-
-test.only('tree', t=>{
+test('tree', t=>{
     let rock = new Rock('test/db', true)
-    let tree = new Tree(rock)
+    let tree = new Tree(rock, true)
 
-    // initialized with dummy entry "00"x25 -> "00", next snap is 1
+    // initialized with dummy entry "00"x29 -> "00", next snap is 1
     let zero = h2b('00'.repeat(8))
     let init = rock.read_one(zero)
-    t.deepEqual(init, roll([h2b('00'), h2b('00'.repeat(25)), h2b('00')]))
+    t.deepEqual(init, roll([h2b('00'), h2b('00'.repeat(29)), h2b('00')]))
     let next = rock.read_one(t2b('aloc'))
     let one = h2b('00'.repeat(7) + '01')
     t.deepEqual(next, one)
