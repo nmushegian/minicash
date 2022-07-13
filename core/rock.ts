@@ -40,8 +40,6 @@ class Rite {
         if (val) return val
         else return Buffer.from('')
     }
-    // WARNING, this makes a hard assumption that the keys with the given
-    // prefix all have the same length
     find_min(prefix :Blob, keylen :number) :[Blob, Blob] {
         // first possible key with given prefix
         let first = bcat(prefix, h2b('00'.repeat(keylen - prefix.length)))
@@ -63,9 +61,54 @@ class Rite {
         }
         return [h2b(''), h2b('')]
     }
-    find_max(key :Blob) :Blob {
-        toss(`todo rock.find_max`)
-        return Buffer.from('')
+
+    find_max(prefix :Blob, keylen :number) :[Blob, Blob] {
+        // last possible key with given prefix
+        let last = bcat(prefix, h2b('ff'.repeat(keylen - prefix.length)))
+        let cursor = new lmdb.Cursor(this.dbtx, this.dbi, {keyIsBuffer:true})
+        // see note in find_min about this type cast
+        cursor.goToRange(last as unknown as string)
+        let pair
+        cursor.getCurrentBinary((dbkey, dbval) => {
+            pair = [dbkey, dbval]
+        })
+        // LMDB only provides `goToRange`, which finds the minimum key greater than argument.
+        // We can use this to get the last value in constant time by overshooting and
+        // stepping back one key.
+
+        // It could be that the last possible valid key (suffix ...ffff) is actually present,
+        // but more likely goToRange overshoots by 1. It could also return empty,
+        // in which case we check goToLast.
+        if (pair) {
+            // if `pair` is defined, we might have hit the exact key (suffix ...ffff)
+            // but more likely we overshot by 1
+            let dbprefix = pair[0].slice(0, prefix.length)
+            if (bleq(dbprefix, prefix)) {
+                return pair
+            } else {
+                cursor.goToPrev()
+                cursor.getCurrentBinary((dbkey, dbval) => {
+                    pair = [dbkey, dbval]
+                })
+                let dbprefix = pair[0].slice(0, prefix.length)
+                if (bleq(dbprefix, prefix)) {
+                    return pair
+                } else {
+                    return [h2b(''), h2b('')]
+                }
+            }
+        } else {
+            // if `pair` is undefined, then we overshot the whole db, in this
+            // case the only possibility is that it is the very last key
+            cursor.goToLast()
+            let dbprefix = pair[0].slice(0, prefix.length)
+            if (bleq(dbprefix, prefix)) {
+                return pair
+            } else {
+                return [h2b(''), h2b('')]
+            }
+        }
+
     }
 }
 

@@ -42,6 +42,9 @@ test.only('rock', t=>{ try {
         r.etch(h2b('bb11'), h2b('0003'))
         r.etch(h2b('ccaa'), h2b('0004'))
         r.etch(h2b('ccbb'), h2b('0005'))
+        r.etch(h2b('dd'), h2b('0006'))
+        r.etch(h2b('dd00'), h2b('0007'))
+        r.etch(h2b('dd11'), h2b('0008'))
     })
 
     rock.rite(r => {
@@ -51,8 +54,17 @@ test.only('rock', t=>{ try {
         let [key2, val2] = r.find_min(h2b('cc'), 2)
         t.deepEqual(val2, h2b('0004'))
 
-        let [key3, val3] = r.find_min(h2b('dd'), 2)
+        let [key3, val3] = r.find_min(h2b('ff'), 2)
         t.deepEqual(val3, h2b('')) // emptyblob initialized
+
+        let [k4, v4] = r.find_min(h2b('ccbb'), 2)
+        t.deepEqual(v4, h2b('0005'))
+
+        let [k5, v5] = r.find_min(h2b('aa00'), 2)
+        t.deepEqual(v5, h2b('0000'))
+
+        let [k6, v6] = r.find_min(h2b('dd'), 2)
+        t.deepEqual(v6, h2b('0007'))
     })
 
     rock.shut()
