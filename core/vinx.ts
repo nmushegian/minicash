@@ -51,40 +51,49 @@ function _checksig(tick :Tick, i :number, lock :Code) :boolean {
 // returns total fees if ok
 function vinx_tick(conx :Tick[], tick :Tick, tock? :Tock) :Okay<Fees> {
     try {
-        conx.forEach(x => form_tick(x as Roll))
-        form_tick(tick)
+        aver(_=> {
+            conx.forEach(x => okay(form_tick(x as Roll)))
+            okay(form_tick(tick))
+            if (tock) {
+                okay(form_tock(tock))
+            }
+            return true
+        }, `vinx_tick args not well-formed`)
 
         const moves = tick[0]
-        let ticash = BigInt(0)
+        const ments = tick[1]
+        let fees = BigInt(0)
+
         let ismint = false
         moves.forEach((move, moveidx) => {
             const [txin, indx, sign] = move
-            const indxnum = Number('0x'+b2h(indx))
+            const indxnum = parseInt(b2h(indx), 16)
             if (indxnum == 7) {
+                // TODO some can be `aver` based on well-formed check
+                need(moves.length == 1, `mint tick must have only 1 move`)
+                need(ments.length == 1, `mint tick must have only 1 ment`)
+                need(tock != undefined, 'panic: vinx_tick - indx 7 but tock undefined')
+                need(bleq(txin, mash(roll(tock))), 'bad prev tock hash')
                 ismint = true
-                const prev = txin
-                aver(_ => tock != undefined, 'panic: vinx_tick - indx 7 but tock undefined')
-                need(bleq(prev, mash(roll(tock))), 'bad prev tock hash')
                 return
             }
-            const intx = conx.find(x => mash(roll(x)).equals(txin)) // stupid
+            const intx = conx.find( x => bleq(txin, mash(roll(x))) )
             const iments  = intx[1]
             need(indxnum < iments.length, 'indx out of bounds')
-            const iment = intx[1][Number(indxnum)]
+            const iment = iments[indxnum]
             const [icode, icash] = iment
             need(_checksig(tick, moveidx, icode), 'bad sign')
-            ticash += BigInt('0x' + b2h(icash))
+            fees += bnum(icash)
         })
 
-        const ments = tick[1]
-        let tocash = BigInt(0)
         ments.forEach((ment, mentidx) => {
             const cash = ment[1]
-            tocash += BigInt('0x' + b2h(cash))
+            fees -= bnum(cash)
         })
 
-        need(ismint || ticash >= tocash, `non-mint tick fees must be >= 0`)
-        return pass(tocash - ticash)
+        need(ismint || fees >= 0, `non-mint tick fees must be >= 0`)
+        return pass(fees)
+
     } catch (e) {
         return fail(e.message)
     }
