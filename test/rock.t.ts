@@ -41,19 +41,7 @@ test('rock', t=>{ try {
         r.etch(h2b('bb00'), h2b('0002'))
         r.etch(h2b('bb11'), h2b('0003'))
     })
-    let min
-    rock.rite(r => { // reed
-        min = r.find_min(h2b('bb'))
-    })
-    t.deepEqual(min, [h2b('bb00'), h2b('0002')])
 
-    // TODO event loop stuff
-    // can't modify it
-//    t.throws(()=>{
-//        rock.rite(r => {
-//          r.etch(h2b('ff'), h2b('00'))
-//        })
-//    }, 'must not modify same key with new value')
     rock.shut()
 } catch (e) { t.ifError(e, 'rock test throw') } } )
 
