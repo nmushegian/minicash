@@ -10,7 +10,7 @@ import {
 import { Rock, rkey } from '../core/rock.js'
 import { Tree } from '../core/tree.js'
 
-test('tree', t=>{
+test.only('tree', t=>{
     let rock = new Rock('test/db', true)
     let tree = new Tree(rock, true)
 
