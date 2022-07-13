@@ -16,7 +16,7 @@ import {
     Bnum, bnum, bleq, mash, roll, t2b,
     Cash, Byte, Work, Fees, Code, Pubk, tuff,
     scry, addr,
-    Tick, Tock, Tack, b2h, merk
+    Tick, Tock, Tack, b2h, merk, rmap
 } from './word.js'
 
 import {
@@ -40,6 +40,7 @@ function _checksig(tick :Tick, i :number, lock :Code) :boolean {
         [ move ],  // blob[][]
         ments      // blob[][]
     ])
+    move[2] = sign
     let pubk = scry(mask, sign)
     let code = addr(pubk)
     return bleq(code, lock)
@@ -55,10 +56,12 @@ function vinx_tick(conx :Tick[], tick :Tick, tock? :Tock) :Okay<Fees> {
 
         const moves = tick[0]
         let ticash = BigInt(0)
+        let ismint = false
         moves.forEach((move, moveidx) => {
             const [txin, indx, sign] = move
             const indxnum = Number('0x'+b2h(indx))
             if (indxnum == 7) {
+                ismint = true
                 const prev = txin
                 aver(_ => tock != undefined, 'panic: vinx_tick - indx 7 but tock undefined')
                 need(bleq(prev, mash(roll(tock))), 'bad prev tock hash')
@@ -79,6 +82,8 @@ function vinx_tick(conx :Tick[], tick :Tick, tock? :Tock) :Okay<Fees> {
             const cash = ment[1]
             tocash += BigInt('0x' + b2h(cash))
         })
+
+        need(ismint || ticash >= tocash, `non-mint tick fees must be >= 0`)
         return pass(tocash - ticash)
     } catch (e) {
         return fail(e.message)
@@ -107,17 +112,19 @@ function vinx_tack(tock :Tock, tack :Tack) :Okay<void> {
             need(feet.length < 512, `len(feet) must be <512 if ribs empty`)
             need(bleq(merk(feet), root), 'merkelization failed')
         } else { // ribs len > 0
+            let nchunks = Math.ceil(feet.length / 1024)
             need(
-                ribs.length == Math.ceil(feet.length / 1024),
+                ribs.length >= nchunks,
                 `len(ribs) must be ceil(len(feet)/1024) if ribs not empty`
             )
-            for (let i = 0; i < ribs.length; i++) {
-                let chunk = feet.slice(i, i + 1024)
-                const eyenum = Number('0x' + eye.toString('hex'))
-                need(bleq(merk(chunk), ribs[i + eyenum]), 'bad merkelization')
+            const eyenum = Number('0x' + eye.toString('hex'))
+            for (let i = 0; i < nchunks; i++) {
+                let chunkstart = i * 1024
+                let chunk = feet.slice(chunkstart, chunkstart + 1024)
+                need(bleq(merk(chunk), ribs[i + eyenum]), `bad merkelization`)
             }
+            need(bleq(merk(ribs), root), 'bad rib merkelization')
         }
-        need(bleq(merk(ribs), root), 'bad rib merkelization')
         return pass(undefined)
     } catch (e) {
         return fail(e.message)
@@ -144,4 +151,3 @@ function vinx_tock(prev :Tock, tock :Tock) :Okay<Work> {
         return fail(e.message)
     }
 }
-

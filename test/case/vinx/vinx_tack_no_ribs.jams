@@ -1,0 +1,19 @@
+{
+  note "vinx_tack no ribs"
+  func vinx_tack
+  args [
+    [ f60510a769d62eaf8535dc58f8dcccb1404415023e2196f1
+        4599da9cd7a6247f7391b8bfe4b3372c65dd39f455631dae
+        00000000000039
+        00000000000000 ]
+    [[ f60510a769d62eaf8535dc58f8dcccb1404415023e2196f1
+        4599da9cd7a6247f7391b8bfe4b3372c65dd39f455631dae
+        00000000000039
+        00000000000000 ]
+        00
+        []
+        [ 4599da9cd7a6247f7391b8bfe4b3372c65dd39f455631dae ]]
+  ]
+  want [ true "" ]
+}
+
