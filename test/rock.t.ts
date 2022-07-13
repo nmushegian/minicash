@@ -82,6 +82,9 @@ test.only('rock', t=>{ try {
 
         let [k4, v4] = r.find_max(h2b('aa'), 2)
         t.deepEqual(v4, h2b('0001'))
+
+        let [k5, v5] = r.find_max(h2b('aa00'), 2)
+        t.deepEqual(v5, h2b('0000'))
     })
 
 } catch (e) { t.ifError(e, 'rock test throw') } } )

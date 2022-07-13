@@ -40,6 +40,7 @@ class Rite {
         if (val) return val
         else return Buffer.from('')
     }
+
     find_min(prefix :Blob, keylen :number) :[Blob, Blob] {
         // first possible key with given prefix
         let first = bcat(prefix, h2b('00'.repeat(keylen - prefix.length)))
