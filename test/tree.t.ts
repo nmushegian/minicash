@@ -72,11 +72,15 @@ test('tree2', t=>{
     let snap0 = h2b('00'.repeat(8))
 
     let set1 = {}
+    let set2 = {}
     for (let i = 0; i < 10; i++) {
-        let k = randomBytes(tree.keysize)
-        let v = randomBytes(12)
-        set1[b2h(k)] = v
-        console.log(b2h(k), b2h(v))
+        let k1 = randomBytes(tree.keysize)
+        let v1 = randomBytes(12)
+        set1[b2h(k1)] = v1
+
+        let k2 = randomBytes(tree.keysize)
+        let v2 = randomBytes(12)
+        set2[b2h(k2)] = v2
     }
 
     let inner1 // sanity check
@@ -93,6 +97,32 @@ test('tree2', t=>{
             t.deepEqual(got, v)
         }
     })
+
+    let snap2 = tree.grow(snap1, (rock, twig, snap) => {
+        for (let [k, v] of Object.entries(set2)) {
+            twig.etch(h2b(k), v)
+        }
+    })
+
+    tree.look(snap2, (rock, twig) => {
+        for (let [k, v] of Object.entries(set2)) {
+            let got = twig.read(h2b(k))
+            t.deepEqual(got, v)
+        }
+    })
+
+    // snap1 has all originals, but none of the new ones
+    tree.look(snap1, (rock, twig) => {
+        for (let [k, v] of Object.entries(set1)) {
+            let got = twig.read(h2b(k))
+            t.deepEqual(got, v)
+        }
+        for (let [k, v] of Object.entries(set2)) {
+            let got = twig.read(h2b(k))
+            t.deepEqual(got, h2b(''))
+        }
+    })
+
     rock.shut()
 })
 
