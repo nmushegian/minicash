@@ -47,6 +47,7 @@ test.only('rock', t=>{ try {
         r.etch(h2b('dd11'), h2b('0008'))
     })
 
+    // find_min
     rock.rite(r => {
         let [key,val] = r.find_min(h2b('bb'), 2)
         t.deepEqual(val, h2b('0002'))
@@ -65,8 +66,20 @@ test.only('rock', t=>{ try {
 
         let [k6, v6] = r.find_min(h2b('dd'), 2)
         t.deepEqual(v6, h2b('0007'))
+
     })
 
-    rock.shut()
+    // find_max
+    rock.rite(r => {
+        let [k1, v1] = r.find_max(h2b('cc'), 2)
+        t.deepEqual(v1, h2b('0005'))
+
+        let [k2, v2] = r.find_max(h2b('dd'), 2)
+        t.deepEqual(v2, h2b('0008'))
+
+        let [k3, v3] = r.find_max(h2b('dd11'), 2)
+        t.deepEqual(v3, h2b('0008'))
+    })
+
 } catch (e) { t.ifError(e, 'rock test throw') } } )
 

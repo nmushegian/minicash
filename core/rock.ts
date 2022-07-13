@@ -101,6 +101,9 @@ class Rite {
             // if `pair` is undefined, then we overshot the whole db, in this
             // case the only possibility is that it is the very last key
             cursor.goToLast()
+            cursor.getCurrentBinary((dbkey, dbval) => {
+                pair = [dbkey, dbval]
+            })
             let dbprefix = pair[0].slice(0, prefix.length)
             if (bleq(dbprefix, prefix)) {
                 return pair
