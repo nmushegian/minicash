@@ -85,12 +85,14 @@ class Rite {
             // but more likely we overshot by 1
             let dbprefix = pair[0].slice(0, prefix.length)
             if (bleq(dbprefix, prefix)) {
+                cursor.close()
                 return pair
             } else {
                 cursor.goToPrev()
                 cursor.getCurrentBinary((dbkey, dbval) => {
                     pair = [dbkey, dbval]
                 })
+                cursor.close()
                 let dbprefix = pair[0].slice(0, prefix.length)
                 if (bleq(dbprefix, prefix)) {
                     return pair
@@ -105,6 +107,7 @@ class Rite {
             cursor.getCurrentBinary((dbkey, dbval) => {
                 pair = [dbkey, dbval]
             })
+            cursor.close()
             let dbprefix = pair[0].slice(0, prefix.length)
             if (bleq(dbprefix, prefix)) {
                 return pair

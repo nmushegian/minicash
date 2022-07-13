@@ -5,7 +5,7 @@ import {
 } from '../core/word.js'
 import { Rock } from '../core/rock.js'
 
-test.only('rock', t=>{ try {
+test('rock', t=>{ try {
     let rock = new Rock('test/db', true)
     let empty
     rock.rite(r=> {
@@ -87,5 +87,6 @@ test.only('rock', t=>{ try {
         t.deepEqual(v5, h2b('0000'))
     })
 
+    rock.shut()
 } catch (e) { t.ifError(e, 'rock test throw') } } )
 
