@@ -44,3 +44,4 @@ test('rock', t=>{ try {
 
     rock.shut()
 } catch (e) { t.ifError(e, 'rock test throw') } } )
+

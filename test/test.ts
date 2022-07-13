@@ -8,7 +8,6 @@ import * as vinxtest from './vinx.t.js'
 import * as vulttest from './vult.t.js'
 import * as welltest from './well.t.js'
 import * as wordtest from './word.t.js'
-import * as pooltest from './pool.t.js'
 
 djintest
 rocktest
@@ -17,3 +16,5 @@ vinxtest
 vulttest
 welltest
 wordtest
+
+
