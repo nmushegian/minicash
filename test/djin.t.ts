@@ -59,7 +59,7 @@ const flatten = x => {
     return h2b(x)
 }
 
-test('djin', t=>{ try {
+test.skip('djin', t=>{ try {
     let djin = new Djin('test/db', true)
     let out
     out = okay(djin.turn(memo(MemoType.AskTocks, mash(roll(djin.bang)))))

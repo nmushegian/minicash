@@ -1,48 +1,28 @@
 // engine
 
+import Debug from 'debug'
+const debug = Debug('djin::test')
+
 import {
-    b2h,
-    memo_close,
-    MemoErr,
-    rmap,
-    Tick,
-    Okay,
-    pass,
-    fail,
-    toss,
-    aver,
-    h2b,
-    t2b,
-    Blob,
-    roll,
-    unroll,
-    bleq,
-    islist,
-    Tock,
-    tuff,
-    n2b,
-    mash,
-    Memo,
-    MemoType,
-    MemoSayTocks,
-    MemoSayTacks,
-    MemoSayTicks,
-    MemoAskTocks,
-    MemoAskTacks,
-    MemoAskTicks,
-    memo_open,
+    Okay, pass, fail, toss, aver,
+    b2h, h2b, n2b, t2b,
+    Blob, bleq,
+    roll, unroll,
+    islist, rmap,
+    Tick, Tock,
+    mash, tuff,
+    memo_open, memo_close,
+    Memo, MemoType, MemoErr,
+    MemoSayTicks, MemoSayTacks, MemoSayTocks,
+    MemoAskTicks, MemoAskTacks, MemoAskTocks,
 } from './word.js'
 
-import {vult_full, vult_thin} from './vult.js'
+import { vult_full, vult_thin } from './vult.js'
+import { vinx_tack, vinx_tick, vinx_tock } from "./vinx.js";
 
-import {vinx_tack, vinx_tick, vinx_tock} from "./vinx.js";
-
-import Debug from 'debug'
-import {Rock} from './rock.js'
-import {Tree, rkey} from './tree.js'
-import {form_memo, form_tock} from "./well.js";
-
-const debug = Debug('djin::test')
+import { Rock, rkey } from './rock.js'
+import { Tree } from './tree.js'
+import { form_memo, form_tock } from "./well.js";
 
 export { Djin }
 
@@ -64,12 +44,13 @@ class Djin {
         let bangroll = roll(this.bang)
         let banghash = mash(bangroll)
         this.tree.grow(h2b(''), (rite,twig,snap) => {
-            rite.etch(rkey('best'), banghash)
-            rite.etch(rkey('tock', banghash), bangroll)
-            rite.etch(rkey('work', banghash), n2b(tuff(bangroll)))
-            rite.etch(rkey('fold', banghash, n2b(BigInt(0))), roll([snap, n2b(BigInt(0))]))
+            rite.etch_best(banghash)
+            rite.etch_tock(banghash, this.bang)
+            rite.etch_work(banghash, tuff(bangroll))
+            rite.etch_fold(banghash, 0, [snap, n2b(BigInt(0))])
             let left = BigInt(2) ** BigInt(53)
-            rite.etch(rkey('left', n2b(BigInt(0))), n2b(left))
+            rite.etch_left(n2b(BigInt(0)), n2b(left))
+//            rite.etch(rkey('left', n2b(BigInt(0))), n2b(left))
             let nextleft = left - (left / (BigInt(2) ** BigInt(21)))
             twig.etch(rkey('ment', banghash, h2b('07')), roll([banghash, n2b(left - nextleft)])) // [code, cash]
             twig.etch(rkey('know', banghash), t2b('DV'))

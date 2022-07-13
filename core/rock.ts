@@ -4,12 +4,16 @@ import { default as process } from 'node:process'
 
 import {
     Blob, aver, isblob, bleq,
-    need, toss, err, Bnum, n2b, t2b, b2h
+    need, toss, err, Bnum, n2b, t2b, b2h,
+    Tock,
+    Work, Fold, Time, Cash,
+    Mash, mash, roll,
 } from './word.js'
-import {rkey, Tree} from "./tree";
+
+import { rkey, Tree } from "./tree.js";
 
 export {
-    Rock, Rite
+    Rock, Rite, rkey
 }
 
 class Rite {
@@ -19,6 +23,22 @@ class Rite {
         this.dbi = dbi
         this.dbtx = dbtx
     }
+    etch_tock(tockhash :Mash, tock :Tock) {
+        this.etch(rkey('tock', tockhash), roll(tock))
+    }
+    etch_work(tockhash :Mash, work :Work) {
+        this.etch(rkey('work', tockhash), n2b(work))
+    }
+    etch_best(tockhash :Mash) {
+        this.etch(rkey('best'), tockhash)
+    }
+    etch_fold(tockhash :Mash, foldidx :number, fold :Fold) {
+        this.etch(rkey('fold', tockhash, n2b(BigInt(foldidx))), roll(fold))
+    }
+    etch_left(time :Time, left :Cash) {
+        this.etch(rkey('left', time), left)
+    }
+
     etch(key :Blob, val :Blob) {
         aver(_=>isblob(key), `rite.etch key not a blob: ${key}`)
         aver(_=>isblob(val), `rite.etch val not a blob: ${val} (key was ${key})`)
