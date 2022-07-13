@@ -27,7 +27,7 @@ import {
     Tick,
     Tock,
     tuff,
-    unroll
+    unroll, Know
 } from './word.js'
 
 import {rkey, Tree} from './tree.js'
@@ -76,6 +76,14 @@ function subsidyleft(rite :Rite, _time :Blob) :Bnum {
     return nextleft
 }
 
+function know(rite, twig, tockhash) :Know|'' {
+    let rockknow = b2t(rite.read(rkey('know', tockhash)))
+    if ('' != rockknow) {
+        return rockknow as Know
+    }
+    return b2t(twig.read(rkey('know', tockhash))) as Know|''
+}
+
 // vult_thin grows possibly-valid state tree ('' | PV -> PV)
 //   (could also invalidate tock)
 function vult_thin(tree :Tree, tock :Tock, updatebest :boolean =true) :MemoAskTocks {
@@ -101,7 +109,7 @@ function vult_thin(tree :Tree, tock :Tock, updatebest :boolean =true) :MemoAskTo
             `vulting a tock with unrecognized prev`
         )
         aver(_ => {
-            let prevknow = b2t(twig.read(rkey('know', prevtockhash)))
+            let prevknow = know(rite, twig, prevtockhash)
             return 'PV' == prevknow || 'DV' == prevknow
         }, `panic, say/tocks prev must be PV (${b2h(prevtockhash)})`)
 
@@ -201,7 +209,7 @@ function vult_full(tree :Tree, tock :Tock) :MemoAskTacks|MemoAskTocks|MemoAskTic
         cursnap = snap
 
         // should already have vulted prev to DV
-        let prevknow = b2t(twig.read(rkey('know', prevtockhash)))
+        let prevknow = know(rite, twig, prevtockhash)
         aver(
             () => 'DV' == prevknow,
             `prevtock must be DV (${b2h(prevtockhash)} is ${prevknow})`
@@ -210,7 +218,7 @@ function vult_full(tree :Tree, tock :Tock) :MemoAskTacks|MemoAskTocks|MemoAskTic
         try {
             // don't need to do anything if this tock is arleady DV
             // todo maybe don't need to save new snap
-            if ('DV' == b2t(twig.read(rkey('know', tockhash)))) {
+            if ('DV' == know(rite, twig, tockhash)) {
                 debug(`vult_full block is already DV, sending ask/tocks`, b2h(tockhash))
                 out = [MemoType.AskTocks, tockhash]
                 return
@@ -317,13 +325,13 @@ function vult_full(tree :Tree, tock :Tock) :MemoAskTacks|MemoAskTocks|MemoAskTic
             )
 
             debug('vult_full SUCCESS, setting DV', b2h(tockhash))
-            twig.etch(rkey('know', tockhash), t2b('DV'))
+            rite.etch(rkey('know', tockhash), t2b('DV'))
             // update best tock if this tock has more work
             etch_best(rite, tockhash)
             // ask for next tocks
             out = [MemoType.AskTocks, tockhash]
         } catch (e) {
-            twig.etch(rkey('know', tockhash), t2b('DN'))
+            rite.etch(rkey('know', tockhash), t2b('DN'))
             out = [MemoType.Err, ['unspendable', tock]]
             debug("vult_full invalid", b2h(tockhash), e.message)
         }
