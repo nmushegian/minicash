@@ -1,4 +1,4 @@
-// pure state tree
+// pure map abstraction for per-branch items
 
 // This level of abstraction deals with the user's view of the state at each snapshot.
 // In other words, when we switch branches due to reorg, it just "checks out"
@@ -37,6 +37,9 @@
 //    [(snap) 'ment', mark]      -> ment  // utxo put [code, cash]
 //    [(snap) 'pent', mark]      -> pent  // utxo use [tish, tosh] (by tick, in tock)
 //    [(snap) 'pyre', mark]      -> time  // utxo expires
+
+import Debug from 'debug'
+const dub = Debug('cash:tree')
 
 import {
     Blob, bleq,
@@ -106,26 +109,26 @@ class Twig {
     diff // we don't push writes to db until end of tx, keep them cached
     snap // the snap this twig was initialized with respect to
     constructor(rite :Rite, snap :Snap) {
-        console.log('twig init with snap', snap)
+        dub('twig init with snap', snap)
         this.rite = rite
         this.diff = new Map()
         this.snap = snap
     }
     read(key :Blob) :Blob {
-        console.log('twig.read key', key)
+        dub('twig.read key', key)
         if (this.diff.has(b2h(key))) {
-            console.log('cached in diff')
+            dub('cached in diff')
             return this.diff.get(b2h(key))
         } else {
-            console.log('not cached, looking up')
+            dub('not cached, looking up')
             return this._lookup(this.snap, key)
         }
     }
     etch(key :Blob, val :Blob) {
         if (this.diff.has(b2h(key))) {
-            console.log('key', b2h(key))
-            console.log('new val', b2h(val))
-            console.log('old val', b2h(this.diff.get(b2h(key))))
+            //console.log('key', b2h(key))
+            dub('new val', b2h(val))
+            dub('old val', b2h(this.diff.get(b2h(key))))
             toss(`panic, modifying value already in tree: ${b2h(key)}`)
         }
         this.diff.set(b2h(key), val)
@@ -137,14 +140,14 @@ class Twig {
     }
 
     _lookup(snap :Snap, key :Blob, idx :number = 0) :Blob {
-        console.log('twig._lookup (snap idx key)', snap, idx, key)
+        dub('twig._lookup (snap idx key)', snap, idx, key)
         // get item from rock
         let blob = this.rite.read(snap)
         aver(_=> blob.length > 0, `panic: no value for snap key ${snap}`)
         let item = unroll(blob)
-        console.log('look/ item exists and unrolled')
+        dub('look/ item exists and unrolled')
         if (isleaf(item)) {
-            console.log('look/ its a leaf')
+            dub('look/ its a leaf')
             let leaf = item as Leaf
             let leafkey = leaf[1]
             if (bleq(key, leafkey)) {
@@ -153,11 +156,11 @@ class Twig {
                 return h2b('') // emptyblob initialized
             }
         } else if (islimb(item)) {
-            console.log('look/ its a limb')
+            dub('look/ its a limb')
             let limb = item as Limb
-            console.log(show_limb(limb))
+            dub(show_limb(limb))
             let nextbyte = key[idx]
-            console.log('nextbyte', nextbyte.toString(16))
+            dub('nextbyte', nextbyte.toString(16))
             let nextsnap = limb[1][nextbyte]
             if (nextsnap.length == 0) {
                 return h2b('') // emptyblob initialized
@@ -170,22 +173,22 @@ class Twig {
     }
 
     _insert(snap :Snap, key :Blob, val :Blob, idx :number = 0) :Snap {
-        console.log(`inserting ${b2h(key)} idx ${idx} : ${b2h(val)}`)
-        console.log(`looking up snap`, snap)
+        dub(`inserting ${b2h(key)} idx ${idx} : ${b2h(val)}`)
+        dub(`looking up snap`, snap)
         let blob = this.rite.read(snap)
         aver(_=> blob.length > 0, `panic: no value for snap key ${snap}`)
         let item = unroll(blob)
         if (isleaf(item)) {
             let oldleaf = item as Leaf
-            console.log(`it's a leaf`)
+            dub(`it's a leaf`)
             let oldkey = oldleaf[1]
             aver(_=> !bleq(oldkey, key), `inserting duplicate key`)
             let oldbyte = oldkey[idx]
             let newbyte = key[idx]
-            console.log('oldbyte', oldbyte.toString(16))
-            console.log('newbyte', newbyte.toString(16))
+            dub('oldbyte', oldbyte.toString(16))
+            dub('newbyte', newbyte.toString(16))
             if (oldbyte == newbyte) {
-                console.log('same bytes, dive')
+                dub('same bytes, dive')
                 let subsnap = this._insert(snap, key, val, idx + 1)
                 let newlimb = make_limb((new Array(256).fill(h2b(''))))
                 newlimb[1][oldbyte] = subsnap
@@ -193,30 +196,30 @@ class Twig {
                 this.rite.etch(limbnode, roll(newlimb))
                 return limbnode
             } else {
-                console.log('distinct bytes, splitting')
+                dub('distinct bytes, splitting')
                 let newleaf = make_leaf(key, val)
                 let leafnode = this._aloc()
-                console.log('inserting new leaf', leafnode, newleaf)
+                dub('inserting new leaf', leafnode, newleaf)
                 this.rite.etch(leafnode, roll(newleaf))
 
                 let newlimb = make_limb((new Array(256)).fill(h2b('')))
                 newlimb[1][oldbyte] = snap
                 newlimb[1][newbyte] = leafnode
                 let limbnode = this._aloc()
-                console.log('inserting new limb')
+                dub('inserting new limb')
                 this.rite.etch(limbnode, roll(newlimb))
 
-                console.log('old leaf', snap, rmap(oldleaf, b2h))
-                console.log('new leaf', leafnode, rmap(newleaf, b2h))
-                console.log('new limb', limbnode, show_limb(newlimb))
+                dub('old leaf', snap, rmap(oldleaf, b2h))
+                dub('new leaf', leafnode, rmap(newleaf, b2h))
+                dub('new limb', limbnode, show_limb(newlimb))
 
                 return limbnode
             }
 
         } else if (islimb(item)) {
-            console.log(`it's a limb`)
+            dub(`it's a limb`)
             let limb = item as Limb
-            console.log(show_limb(limb))
+            dub(show_limb(limb))
             let subs = limb[1]
             let byte = key[idx]
             let next = subs[byte]
@@ -272,7 +275,7 @@ class Tree {
         }
     }
     look(snap :Snap, look :((Rock,Twig) =>void)) {
-        //console.log(`tree.look snap`, snap)
+        dub(`tree.look snap`, snap)
         this.rock.rite(rite => {
             let twig = new Twig(rite, snap)
             look(this.rock, twig)
@@ -296,7 +299,7 @@ class Tree {
                 root = twig._insert(root, h2b(k), v)
             }
             let lastnode = rite.read(root)
-            console.log('re-rooting with given snap', b2h(root), b2h(next))
+            dub('re-rooting with given snap', b2h(root), b2h(next))
             rite.etch(next, lastnode)
         })
         return next
