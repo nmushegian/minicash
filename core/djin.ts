@@ -154,30 +154,27 @@ class Djin {
         let [moves, ments] = tick
         let tock
         let conx
-        aver(
-            _ => {
-                conx = moves
-                    .filter(move => {
-                        if (Number('0x' + b2h(move[1])) == 7) {
-                            tock = unroll(this.rock.read_one(rkey('tock', move[0]))) as Tock
-                            return false
-                        }
-                        return true
-                    })
-                    .map(move => unroll(this.rock.read_one(rkey('tick', move[0]))) as Tick)
-                // todo multiple block reward/subsidy transactions?
-                let res = vinx_tick(conx, tick, tock)
-                //console.error(res[2])
-                return res[0]
-            }
-            , `panic, tick must be valid-in-context`
-        )
+        aver(_ => {
+            conx = moves
+                .filter(move => {
+                    if (Number('0x' + b2h(move[1])) == 7) {
+                        tock = unroll(this.rock.read_one(rkey('tock', move[0]))) as Tock
+                        return false
+                    }
+                    return true
+                })
+                .map(move => unroll(this.rock.read_one(rkey('tick', move[0]))) as Tick)
+            // todo multiple block reward/subsidy transactions?
+            let res = vinx_tick(conx, tick, tock)
+            //console.error(res[2])
+            return res[0]
+        }, `panic, tick must be valid-in-context`)
 
         debug(`say/ticks ${rmap(tick, b2h)} hash=${b2h(mash(roll(tick)))}`)
         const tickhash = mash(roll(tick))
         const key = rkey('tick', tickhash)
         if (bleq(this.tree.rock.read_one(key), h2b(''))) {
-            this.tree.rock.etch_one(rkey('tick', tickhash), roll(tick))
+            this.tree.rock.etch_one(key, roll(tick))
             return [MemoType.SayTicks, [tick]]
         }
 
@@ -243,7 +240,7 @@ class Djin {
     _say_tocks(memo :MemoSayTocks) :(MemoAskTocks|MemoAskTacks|MemoAskTicks) {
         let [line, body] = memo
         aver(_=>islist(body), `panic, say/tocks takes a list`)
-        body.forEach(b => aver(_=>form_tock(b)[0], `panic, say/tocks takes a list of tocks`))
+        aver(_=> body.forEach(b => form_tock(b)[0]), `panic, say/tocks takes a list of tocks`)
         aver(_ => body.length == 1, `panic, say/tocks memos can only hold one tock for now`) // TODO
         let tocks = body as Tock[]
         let tock = tocks[0]

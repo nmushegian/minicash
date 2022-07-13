@@ -1,38 +1,22 @@
 // state transition critical path
 import Debug from 'debug'
 import {
-    aver,
-    b2h,
-    b2t,
-    bleq,
-    Bnum,
-    bnum,
-    Cash,
-    Code,
-    h2b,
+    aver, need,
+    b2h, h2b, b2t, t2b, n2b,
+    roll, unroll, rmap,
+    Blob, bleq,
+    Bnum, bnum,
+    Cash, Code,
     mash,
-    memo_close,
-    MemoAskTacks,
-    MemoAskTicks,
-    MemoAskTocks,
-    MemoErr,
-    MemoType,
-    n2b,
-    need,
-    rmap,
-    roll,
+    MemoErr, MemoType, memo_close,
+    MemoAskTicks, MemoAskTacks, MemoAskTocks,
     Snap,
-    t2b,
-    Tack,
-    Tick,
-    Tock,
+    Tick, Tack, Tock,
     tuff,
-    unroll
 } from './word.js'
 
 import {rkey, Tree} from './tree.js'
-import {Blob} from "coreword";
-import {Rite} from "./rock";
+import { Rite, rkey } from "./rock";
 
 const debug = Debug('vult::test')
 
