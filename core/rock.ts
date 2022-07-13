@@ -3,8 +3,9 @@ import { default as lmdb } from 'node-lmdb'
 import { default as process } from 'node:process'
 
 import {
-    Blob, aver, isblob, bleq,
-    need, toss, err
+    aver, need, toss, err,
+    Blob, isblob, bleq, bcat,
+    b2t, h2b,
 } from './word.js'
 
 export {
@@ -39,12 +40,31 @@ class Rite {
         if (val) return val
         else return Buffer.from('')
     }
-    find_min(key :Blob) :Blob {
-        toss(`todo rock.find_min`)
-        return Buffer.from('')
+    // WARNING, this makes a hard assumption that the keys with the given
+    // prefix all have the same length
+    find_min(prefix :Blob, keylen :number) :[Blob, Blob] {
+        // first possible key with given prefix
+        let first = bcat(prefix, h2b('00'.repeat(keylen - prefix.length)))
+        let cursor = new lmdb.Cursor(this.dbtx, this.dbi, {keyIsBuffer:true})
+        // this is a typescript binding issue, it thinks goToRange must take
+        // a string, but we gave cursor `keyIsBuffer: true`, so
+        // it actually takes a buffer. node-lmdb does the right thing here.
+        cursor.goToRange(first as unknown as string)
+        let pair
+        cursor.getCurrentBinary((dbkey, dbval) => {
+            pair = [dbkey, dbval]
+        })
+        cursor.close()
+        if (pair) {
+            let dbprefix = pair[0].slice(0, prefix.length)
+            if (bleq(dbprefix, prefix)) {
+                return pair
+            }
+        }
+        return [h2b(''), h2b('')]
     }
     find_max(key :Blob) :Blob {
-        toss(`todo rock.find_min`)
+        toss(`todo rock.find_max`)
         return Buffer.from('')
     }
 }

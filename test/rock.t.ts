@@ -5,7 +5,7 @@ import {
 } from '../core/word.js'
 import { Rock } from '../core/rock.js'
 
-test('rock', t=>{ try {
+test.only('rock', t=>{ try {
     let rock = new Rock('test/db', true)
     let empty
     rock.rite(r=> {
@@ -40,6 +40,19 @@ test('rock', t=>{ try {
         r.etch(h2b('aa11'), h2b('0001'))
         r.etch(h2b('bb00'), h2b('0002'))
         r.etch(h2b('bb11'), h2b('0003'))
+        r.etch(h2b('ccaa'), h2b('0004'))
+        r.etch(h2b('ccbb'), h2b('0005'))
+    })
+
+    rock.rite(r => {
+        let [key,val] = r.find_min(h2b('bb'), 2)
+        t.deepEqual(val, h2b('0002'))
+
+        let [key2, val2] = r.find_min(h2b('cc'), 2)
+        t.deepEqual(val2, h2b('0004'))
+
+        let [key3, val3] = r.find_min(h2b('dd'), 2)
+        t.deepEqual(val3, h2b('')) // emptyblob initialized
     })
 
     rock.shut()
