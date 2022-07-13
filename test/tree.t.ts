@@ -1,27 +1,63 @@
 import { test } from 'tapzero'
 
 import {
+    roll,
     okay,
     h2b, t2b, bleq,
     Snap
 } from '../core/word.js'
 
-import { Rock } from '../core/rock.js'
+import { Rock, rkey } from '../core/rock.js'
 import { Tree } from '../core/tree.js'
 
-test('leaf keys', t=>{
+test('tree', t=>{
     let rock = new Rock('test/db', true)
-    let tree = new Tree(rock)
-    let next
-    tree.grow(h2b(''), (rock,twig,next_) => {
-        twig.etch(h2b('ff'), h2b('ff'))
-        next = next_
-    })
-    let val
-    tree.look(next, (rock,twig) => {
-        val = twig.read(h2b('ff'))
-    })
-    t.ok(bleq(val, h2b('ff')), `must return same key as was set`)
-    rock.shut()
-})
+    let tree = new Tree(rock, true)
 
+    // initialized with dummy entry "00"x29 -> "00", next snap is 1
+    let zero = h2b('00'.repeat(8))
+    let init = rock.read_one(zero)
+    t.deepEqual(init, roll([h2b('00'), h2b('00'.repeat(29)), h2b('00')]))
+    let next = rock.read_one(t2b('aloc'))
+    let one = h2b('00'.repeat(7) + '01')
+    t.deepEqual(next, one)
+
+    let key1 = h2b('01'.repeat(25))
+    let inner // to check the snap given in grow function equals returned snap
+    let snap1 = tree.grow(zero, (rock, twig, snap) => {
+        t.deepEqual(snap, one)
+        twig.etch(key1, h2b('aa'))
+        let aa = twig.read(key1) // check value is cached
+        t.deepEqual(aa, h2b('aa'))
+
+        inner = snap
+    })
+    t.deepEqual(inner, snap1)
+    console.log('snap1', snap1)
+
+    tree.look(snap1, (rock, twig) => {
+        let val1 = twig.read(key1)
+        t.deepEqual(val1, h2b('aa'))
+    })
+
+    console.log('========')
+    let key2 = h2b('0101' + '00'.repeat(23))
+    let snap2 = tree.grow(snap1, (rock, twig, snap) => {
+        // same first 2 bytes as prior entry, then different
+        twig.etch(key2, h2b('bb'))
+        let bb = twig.read(key2)
+        t.deepEqual(bb, h2b('bb'))
+
+        let aa = twig.read(key1)
+        t.deepEqual(aa, h2b('aa'))
+    })
+
+    // look back at snap1, new value shouldn't be present, old value should
+    tree.look(snap1, (rock, twig) => {
+        let aa = twig.read(key1)
+        t.deepEqual(aa, h2b('aa'))
+
+        let no = twig.read(key2)
+        t.deepEqual(no, h2b(''))
+    })
+})

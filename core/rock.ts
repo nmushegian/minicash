@@ -5,11 +5,17 @@ import { default as process } from 'node:process'
 import {
     aver, need, toss, err,
     Blob, isblob, bleq, bcat,
-    b2t, h2b,
+    b2t, t2b, h2b,
 } from './word.js'
 
 export {
-    Rock, Rite
+    Rock, Rite, RKey, rkey
+}
+
+type RKey = Blob
+
+function rkey(s :string, ...args :Blob[]) :RKey {
+    return Buffer.concat([t2b(s), ...args])
 }
 
 class Rite {
@@ -23,7 +29,8 @@ class Rite {
         aver(_=>isblob(key), `rite.etch key not a blob: ${key}`)
         aver(_=>isblob(val), `rite.etch val not a blob: ${val} (key was ${key})`)
         aver(_=> {
-            if (key.toString().startsWith('best')) {
+            let tkey = b2t(key)
+            if (tkey == 'best' || tkey == 'aloc') {
                 return true
             }
             let prev = this.dbtx.getBinary(this.dbi, key)

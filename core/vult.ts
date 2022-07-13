@@ -10,7 +10,8 @@ import {
     Tick, Tock, Tack,
 } from './word.js'
 
-import { Tree, Twig, rkey } from './tree.js'
+import { Tree, Twig } from './tree.js'
+import { rkey } from './rock.js'
 
 export {
     vult_thin,
