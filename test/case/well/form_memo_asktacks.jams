@@ -3,7 +3,7 @@
   func form_memo
   args [
     [ aa
-      00112233445566778899aabbccddeeff0011223344556677
+      [00112233445566778899aabbccddeeff0011223344556677 00]
     ]
   ]
   want [ true "" ]
