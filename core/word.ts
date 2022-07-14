@@ -15,7 +15,7 @@ export type {
     Mash, Code, Cash,
     Tick, Tock, Tack,
     Move, Ment,
-    Know,
+    Know, Time,
     Snap, Fees, Work,
     Peer, Mail, Memo,
     OpenMemo, MemoErr,
@@ -240,20 +240,21 @@ enum MemoType {  // mnemonic
     Err      = 0xee,  // Err
 }
 
-type MemoAskTacks
-  =  [MemoType.AskTacks, Mash]    // head: get tacks for this head
-type MemoAskTicks
-  =  [MemoType.AskTicks, Mash[]]  // tickhashes you want ticks for
 type MemoAskTocks
-  =  [MemoType.AskTocks, Mash]    // tail: get tocks from this tock forward to best
+  =  [MemoType.AskTocks, Mash]          // get tocks from this tock forward to best
+type MemoAskTacks
+  =  [MemoType.AskTacks, [Mash, Blob1]] // get tack for this tockhash,idx
+type MemoAskTicks
+  =  [MemoType.AskTicks, Mash[]]        // tickhashes you want ticks for
+
 type MemoSayTocks
-  =  [MemoType.SayTocks, Tock[]]  // chain of tocks, first to last
+  =  [MemoType.SayTocks, Tock[]]        // chain of tocks, first to last
 type MemoSayTacks
-  =  [MemoType.SayTacks, Tack[]]  // set of tacks for a tock
+  =  [MemoType.SayTacks, Tack[]]        // set of tacks for a tock
 type MemoSayTicks
-  =  [MemoType.SayTicks, Tick[]]  // ticks you requested, in topological order
+  =  [MemoType.SayTicks, Tick[]]        // ticks you requested, in topological order
 type MemoErr
-  =  [MemoType.Err, [Why, Roll]]   // typed reason, untyped subreason / info
+  =  [MemoType.Err, [Why, Roll]]        // typed reason, untyped subreason / info
 
 type Why
   = 'malformed'   // well

@@ -45,9 +45,11 @@ function form_memo(x :Roll) :Okay<Memo> {
             return pass(x)
         }
         if (line == MemoType.AskTacks) {
-            let tackhash = body
-            need(isblob(tackhash), 'tack hash must be a blob')
-            need(tackhash.length == 24, 'tack hash must be len 24')
+            let [tockhash, idx] = body
+            need(isblob(tockhash), 'tock hash must be a blob')
+            need(tockhash.length == 24, 'tock hash must be len 24')
+            need(isblob(idx), `tack idx must be a blob`)
+            need(idx.length == 1, `tack idx must be len 1`)
             return pass(x)
         }
         if (line == MemoType.AskTicks) {
