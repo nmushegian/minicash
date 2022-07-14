@@ -114,7 +114,7 @@ function vinx_tack(tock :Tock, tack :Tack) :Okay<void> {
 
         aver(_ => bleq(roll(head), roll(tock)), 'panic: vinx_tack precondition - head tock mismatch')
         aver(_ => ribs.length <= 128, 'panic: vinx_tack precondition - len(ribs) must be <= 128')
-        aver(_ => feet.length <= 2 ** 17, 'panic: vinx_tack precondition - feet.length must be <= 2^17')
+        aver(_ => feet.length <= 1024, 'panic: vinx_tack precondition - feet.length must be <= 1024')
 
         if (ribs.length == 0) {
             need(bnum(eye) == BigInt(0), `eye must be 0 if ribs empty`)
@@ -127,11 +127,8 @@ function vinx_tack(tock :Tock, tack :Tack) :Okay<void> {
                 `len(ribs) must be ceil(len(feet)/1024) if ribs not empty`
             )
             const eyenum = Number('0x' + eye.toString('hex'))
-            for (let i = 0; i < nchunks; i++) {
-                let chunkstart = i * 1024
-                let chunk = feet.slice(chunkstart, chunkstart + 1024)
-                need(bleq(merk(chunk), ribs[i + eyenum]), `bad merkelization`)
-            }
+            let rib = merk(feet)
+            need(bleq(rib, ribs[eyenum]), `tack feet do not merk to specified rib`)
             need(bleq(merk(ribs), root), 'bad rib merkelization')
         }
         return pass(undefined)

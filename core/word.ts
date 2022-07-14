@@ -192,7 +192,7 @@ type Know
 
 type Tack = [
     Tock   // head  tock these ticks belong to
-  , Byte   // eye   which chunk is the first chunk in this tack
+  , Byte   // eye   which chunk is in this tack (ticks eye*1024 thru (eye+1)*1024)
   , Mash[] // ribs  chunk roots (merkle nodes at depth 7, empty if <1024 ticks in tock)
   , Mash[] // feet  tickhashes
 ]
@@ -243,7 +243,7 @@ enum MemoType {  // mnemonic
 type MemoAskTocks
   =  [MemoType.AskTocks, Mash]          // get tocks from this tock forward to best
 type MemoAskTacks
-  =  [MemoType.AskTacks, [Mash, Blob1]] // get tack for this tockhash,idx
+  =  [MemoType.AskTacks, [Mash, Blob]] // get tack for this tockhash,idx
 type MemoAskTicks
   =  [MemoType.AskTicks, Mash[]]        // tickhashes you want ticks for
 
