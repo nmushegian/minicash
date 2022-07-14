@@ -3,8 +3,8 @@
   func form_memo
   args [
     [ aa
-      00112233445566778899aabbccddeeff001122334455667700
+      [ 00112233445566778899aabbccddeeff001122334455667700 00]
     ]
   ]
-  want [ false "tack hash must be len 24" ]
+  want [ false "tock hash must be len 24" ]
 }

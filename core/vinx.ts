@@ -121,12 +121,7 @@ function vinx_tack(tock :Tock, tack :Tack) :Okay<void> {
             need(feet.length < 512, `len(feet) must be <512 if ribs empty`)
             need(bleq(merk(feet), root), 'merkelization failed')
         } else { // ribs len > 0
-            let nchunks = Math.ceil(feet.length / 1024)
-            need(
-                ribs.length >= nchunks,
-                `len(ribs) must be ceil(len(feet)/1024) if ribs not empty`
-            )
-            const eyenum = Number('0x' + eye.toString('hex'))
+            const eyenum = parseInt(b2h(eye), 16)
             let rib = merk(feet)
             need(bleq(rib, ribs[eyenum]), `tack feet do not merk to specified rib`)
             need(bleq(merk(ribs), root), 'bad rib merkelization')
