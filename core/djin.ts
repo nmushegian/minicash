@@ -71,7 +71,6 @@ class Djin {
             let left = BigInt(2) ** BigInt(53)
             rite.etch(rkey('left', n2b(BigInt(0))), n2b(left))
             rite.etch(rkey('know', banghash), t2b('DV'))
-            twig.etch(rkey('pyre', banghash), n2b(BigInt(536112000))) // 17y
         })
         this.full = full
     }
