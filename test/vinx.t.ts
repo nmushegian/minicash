@@ -74,14 +74,13 @@ const makefeet = x => {
     }
     return feet
 }
+
 test('vinx_tack', t=> {
     const eye = h2b('00')
 
-    const feet = makefeet(1536)
+    const feet = makefeet(1024)
     const ribs = [
-        merk(feet.slice(0, 1024)),
-        merk(feet.slice(1024)),
-        h2b('000000000000000000000000000000000000000000000000')
+        merk(feet),
     ]
     const tock = [
         '00'.repeat(24),
