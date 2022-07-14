@@ -270,6 +270,7 @@ function vult_full(tree :Tree, tock :Tock) :MemoAskTacks|MemoAskTocks|MemoAskTic
                 moves.forEach(move => {
                     // fail if input is spent or expired
                     let [txin, idx, sign] = move
+                    need(!ismint, `tock must not have more than one mint`)
                     ismint = bleq(idx, h2b('07'))
                     if (ismint) {
                         let prevleft = subsidyleft(rite, n2b(bnum(time) - BigInt(57)))
