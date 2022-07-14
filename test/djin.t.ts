@@ -60,7 +60,7 @@ const runcase = (dir, name) => {
 }
 
 test('djin', t=>{
-    let dir = './test/case/djin/thin/'
+    let dir = './test/case/djin/'
     let cases = readdirSync(dir)
 
     cases.forEach(c => runcase(dir, c))

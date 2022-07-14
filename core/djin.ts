@@ -1,26 +1,24 @@
 // engine
 
-
-
 import Debug from 'debug'
-const debug = Debug('cash:djin')
+const dub = Debug('cash:djin')
 
 import {
     Okay, pass, fail, toss, aver, need, err,
     b2h, h2b, n2b, b2t, t2b,
-    Blob, bleq,
+    Blob, bleq, blen, extend,
     roll, unroll, rmap, islist,
     mash, tuff,
     Tick, Tock,
     Memo, MemoType, MemoErr,
     MemoSayTicks, MemoSayTacks, MemoSayTocks,
     MemoAskTicks, MemoAskTacks, MemoAskTocks,
-    memo_open, memo_close,
+    OpenMemo, memo_open, memo_close,
 } from './word.js'
 
 import { form_memo, form_tock } from "./well.js";
 import { vinx_tick, vinx_tack, vinx_tock} from "./vinx.js";
-import { vult_thin, vult_full } from './vult.js'
+import { vult } from './vult.js'
 
 import { Rock } from './rock.js'
 import { Tree, rkey } from './tree.js'
@@ -44,15 +42,14 @@ class Djin {
         let bangroll = roll(this.bang)
         let banghash = mash(bangroll)
         this.tree.grow(h2b(''), (rite,twig,snap) => {
-            /*
             rite.etch(rkey('best'), banghash)
             rite.etch(rkey('tock', banghash), bangroll)
             rite.etch(rkey('work', banghash), n2b(tuff(bangroll)))
             rite.etch(rkey('fold', banghash, n2b(BigInt(0))), roll([snap, n2b(BigInt(0))]))
-            let left = BigInt(2) ** BigInt(53)
-            rite.etch(rkey('left', n2b(BigInt(0))), n2b(left))
+            let leftkey = extend(n2b(BigInt(0)), 7)
+            dub('leftkey', leftkey)
+            rite.etch(rkey('left', leftkey), n2b(BigInt(2)**BigInt(53)))
             rite.etch(rkey('know', banghash), t2b('DV'))
-            */
         })
     }
 
@@ -221,9 +218,8 @@ class Djin {
         */
     }
 
-    // ['ask/tocks tailhash ]  ->  'say/tocks tocks
-    // ['ask/tocks Mash     ]  ->  'say/tocks Tock[]
-    _ask_tocks(memo :MemoAskTocks) :MemoSayTocks|MemoErr { // | MemoSayTacks  todo
+    // ['ask/tocks tailhash:Mash ]  ->  'say/tocks tocks:Tock[]
+    _ask_tocks(memo :MemoAskTocks) :OpenMemo {
         throw err(`ask_tocks`)
         /*
         // todo need tail in history
@@ -250,38 +246,22 @@ class Djin {
         */
     }
 
-    // 'say/tocks Tock[]  ->  'ask/tocks tock:Mash
-    //                    ->  'ask/tacks tock:Mash,i:num
-    _say_tocks(memo :MemoSayTocks) :(MemoAskTocks|MemoAskTacks|MemoAskTicks) {
-        throw err(`say_tocks`)
-        /*
+    // 'say/tocks Tock[]  ->  'ask/tocks tock:Mash          (progress)
+    //                    ->  'ask/tacks tock:Mash,i:num    (missing tacks)
+    //                    ->  'ask/ticks tickhashes:Mash[]  (missing ticks)
+    _say_tocks(memo :MemoSayTocks) :OpenMemo {
         let [line, body] = memo
-        aver(_=>islist(body), `panic, say/tocks takes a list`)
-        body.forEach(b => aver(_=>form_tock(b)[0], `panic, say/tocks takes a list of tocks`))
-        aver(_ => body.length == 1, `panic, say/tocks memos can only hold one tock for now`) // TODO
         let tocks = body as Tock[]
         let tock = tocks[0]
         let prevhash = tock[0]
-        aver(_ => {
-            let prev = this.rock.read_one(rkey('tock', prevhash))
-            if (bleq(prev, t2b(''))) {
-                console.error(`panic, _say_tocks: prev not found ${b2h(prevhash)}`)
-                return false
-            }
-            let res = vinx_tock(unroll(prev) as Tock, tock)
-            if (!res[0]) debug('err: ', res[2])
-            return res[0]
-        }, 'panic, tock must be valid-in-context')
 
-        debug(`etching ${b2h(mash(roll(tock)))} banghash=${b2h(mash(roll(this.bang)))}`)
-        this.tree.rock.etch_one(rkey('tock', mash(roll(tock))), roll(tock))
-
-        if (true) { // this.full
-            return vult_full(this.tree, tock) as MemoAskTacks|MemoAskTocks|MemoAskTicks
+        // TODO aver / vinx thread write
+        let prevroll = this.rock.read_one(rkey('tock', prevhash))
+        if (blen(prevroll) == 0) {
+            return [MemoType.Err, ['unavailable', prevhash]]
         }
 
-        return vult_thin(this.tree, tock) as MemoAskTocks
-        */
+        return vult(this.tree, tock)
     }
 
 }

@@ -1,10 +1,14 @@
 // state transition critical path
 
+import Debug from 'debug'
+const dub = Debug('cash:vult')
+
 import {
-    Okay, pass, fail, aver,
+    Okay, pass, fail, aver, err,
     Work, Snap, Fees, Know, tuff,
-    mash, roll, unroll, bnum,
-    h2b, n2b, bcat,
+    mash,
+    roll, unroll, bnum, blen, extend,
+    h2b, b2h, n2b, b2t, bcat,
     Memo, memo,
     MemoType, OpenMemo,
     Tick, Tock, Tack,
@@ -13,10 +17,69 @@ import {
 import { Tree, Twig, rkey } from './tree.js'
 
 export {
-    vult_thin,
-    vult_full
+    vult
+//    vult_thin,
+//    vult_full
 }
 
+function vult(tree :Tree, tock :Tock) :OpenMemo {
+    dub(`vult tock`, tock)
+    let tockhash = mash(roll(tock))
+    let [prevhash, root, time, fuzz] = tock
+
+
+    // first check if we have already finished validating this tock
+    let know = tree.rock.read_one(rkey('know', tockhash))
+    if ('DV' == b2t(know)) {
+        return [MemoType.AskTocks, tockhash]
+    }
+    if ('DN' == b2t(know)) {
+        return [MemoType.Err, ['invalid', tockhash]]
+    }
+    // haven't validated it before, proceed
+
+
+    // first apply the "thin" state -- this might be redundant, but no values should change
+    // - work, the total work
+    // - left, a running counter of remaining subsidy
+    // (aver that the prev is present and its thin state was set)
+    aver(_=> {
+        let prevwork = tree.rock.read_one(rkey('work', prevhash))
+        if (blen(prevwork) == 0) return false
+        let time = bnum(tock[2])
+        let prevtime = time - BigInt(57)
+        let prevleft = tree.rock.read_one(rkey('left', extend(n2b(prevtime), 7)))
+        if (blen(prevleft) == 0) return false
+        return true
+    }, `panic: in vult, has no prev tock info`)
+
+    tree.rock.rite(r => {
+        // work is previous work plus `tuff(tockhash)`
+        let prevwork = r.read(rkey('work', prevhash))
+        let work = prevwork + tuff(tockhash)
+        r.etch(rkey('work', tockhash),  n2b(work))
+        // left is indexed by timestamp bc its the same regardless of branch
+        let time = bnum(tock[2])
+        let prevtime = time - BigInt(57)
+        let prevleft = r.read(rkey('left', extend(n2b(prevtime), 7)))
+        let left = bnum(prevleft) / (BigInt(2)**BigInt(21))
+        r.etch(rkey('left', tockhash), n2b(left))
+    })
+    // TODO, insert tockhash as ment?
+
+
+    // now try to apply the "full" state
+    // - get the last applied state (fold)
+    // - get the next tack to apply
+    // - get all the ticks for that tack
+    // - attempt to apply them, either marking tock invalid, or requesting next tack
+    // - if it is the last tack, mark the tock valid
+
+
+    throw err(`todo vult`)
+}
+
+/*
 // vult_thin grows possibly-valid state tree
 //   (could also invalidate tock)
 function vult_thin(tree :Tree, tock :Tock) :OpenMemo {
@@ -41,11 +104,13 @@ function vult_thin(tree :Tree, tock :Tock) :OpenMemo {
     })
     return [MemoType.AskTocks, head]
 }
+*/
 
+    /*
 // vult_full grows definitely-valid state tree
 //   (could also invalidate tock)
 function vult_full(tree :Tree, tock :Tock) { // :Memo
-    /*
+
     let last = rock.read ... last applied tack
     let tack = rock.read ... this tack
     let ticks = rock.read ...
@@ -96,7 +161,8 @@ function vult_full(tree :Tree, tock :Tock) { // :Memo
     } else {
         return memo( ask/tack ... )
     }
-    */
+
     return fail(`todo vult_full`)
 
 }
+    */
