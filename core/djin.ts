@@ -42,14 +42,12 @@ class Djin {
         let bangroll = roll(this.bang)
         let banghash = mash(bangroll)
         this.tree.grow(h2b(''), (rite,twig,snap) => {
-            rite.etch(rkey('best'), banghash)
-            rite.etch(rkey('tock', banghash), bangroll)
-            rite.etch(rkey('work', banghash), n2b(tuff(bangroll)))
-            rite.etch(rkey('fold', banghash, n2b(BigInt(0))), roll([snap, n2b(BigInt(0))]))
-            let leftkey = extend(n2b(BigInt(0)), 7)
-            dub('leftkey', leftkey)
-            rite.etch(rkey('left', leftkey), n2b(BigInt(2)**BigInt(53)))
-            rite.etch(rkey('know', banghash), t2b('DV'))
+            rite.etch_best(banghash)
+            rite.etch_tock(this.bang)
+            rite.etch_work(banghash, tuff(bangroll))
+            rite.etch_fold(banghash, 0, snap, 0)
+            rite.etch_left(BigInt(0), BigInt(2)**BigInt(53))
+            rite.etch_know(banghash, t2b('DV'))
         })
     }
 

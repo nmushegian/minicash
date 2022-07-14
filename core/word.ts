@@ -15,7 +15,7 @@ export type {
     Mash, Code, Cash,
     Tick, Tock, Tack,
     Move, Ment,
-    Know,
+    Know, Time,
     Snap, Fees, Work,
     Peer, Mail, Memo,
     OpenMemo, MemoErr,

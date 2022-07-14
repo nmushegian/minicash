@@ -9,7 +9,7 @@ import {
 } from './word.js'
 
 import {
-    Rock
+    Rock, rkey
 } from './rock.js'
 
 export {
@@ -71,11 +71,6 @@ class Twig {
     }
 }
 
-type RKey = Blob
-
-function rkey(s :string, ...args :Blob[]) :RKey {
-    return Buffer.concat([t2b(s), ...args])
-}
 
 class Tree {
     rock :Rock
