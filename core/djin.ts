@@ -41,6 +41,7 @@ class Djin {
         ]
         let bangroll = roll(this.bang)
         let banghash = mash(bangroll)
+        console.log('banghash', banghash)
         this.tree.grow(h2b(''), (rite,twig,snap) => {
             rite.etch_best(banghash)
             rite.etch_tock(this.bang)
@@ -58,7 +59,6 @@ class Djin {
     async *spin(memo) {
         // todo aver well-formed
         // todo aver valid-in-context
-
 
         // split up memo into units
         // turn/reflect/yield K turns at a time

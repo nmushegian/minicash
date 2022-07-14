@@ -42,7 +42,9 @@ class Rite {
     }
     etch_left(time :bigint, left :bigint) {
         // extend time to 7 bytes so we can just use the `time` field from tock to get it
-        this.etch(rkey('left', extend(n2b(time), 7)),  n2b(left))
+        let key = extend(n2b(time), 7)
+        let val = n2b(left)
+        this.etch(rkey('left', key),  val)
     }
     etch_know(tockhash :Mash, know :Know) {
         this.etch(rkey('know', tockhash),  t2b(know))

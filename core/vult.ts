@@ -22,10 +22,11 @@ export {
 //    vult_full
 }
 
-function vult(tree :Tree, tock :Tock) :OpenMemo {
+function vult(tree :Tree, tock :Tock, thin :boolean = false) :OpenMemo {
     dub(`vult tock`, tock)
     let tockhash = mash(roll(tock))
     let [prevhash, root, time, fuzz] = tock
+    dub(`tockhash`, tockhash)
 
 
     // first check if we have already finished validating this tock
@@ -57,23 +58,55 @@ function vult(tree :Tree, tock :Tock) :OpenMemo {
         // work is previous work plus `tuff(tockhash)`
         let prevwork = r.read(rkey('work', prevhash))
         let work = prevwork + tuff(tockhash)
-        r.etch(rkey('work', tockhash),  n2b(work))
+        r.etch_work(tockhash, work)
         // left is indexed by timestamp bc its the same regardless of branch
         let time = bnum(tock[2])
         let prevtime = time - BigInt(57)
         let prevleft = r.read(rkey('left', extend(n2b(prevtime), 7)))
         let left = bnum(prevleft) / (BigInt(2)**BigInt(21))
-        r.etch(rkey('left', tockhash), n2b(left))
+        r.etch_left(time, left)
     })
     // TODO, insert tockhash as ment?
 
 
     // now try to apply the "full" state
-    // - get the last applied state (fold)
-    // - get the next tack to apply
-    // - get all the ticks for that tack
-    // - attempt to apply them, either marking tock invalid, or requesting next tack
-    // - if it is the last tack, mark the tock valid
+    // 1. get the last applied state (fold)
+    // 2. get the next tack to apply
+    //    if not available, request it
+    // 3. get all the ticks for that tack
+    //    if not available, request them
+    // 4. apply them
+    //    if success, set fold, if last fold, set know=DV
+    //    if fail, set know=DN
+
+    // 1. Get the last applied state (fold)
+    // the last fold is either in this tock, or the prior one
+    // key length is 29:  4 ('fold') + 24 (tockhash) + 1 (foldidx)
+    // prefix is ('fold' ++ tockhash)
+    let snap, fees
+    let foldkey, fold
+    let next_tack
+    tree.rock.rite(r => {
+        [foldkey, fold] = r.find_max(rkey('fold', tockhash), 29)
+    })
+    if (blen(fold) != 0) {
+        dub('fold is in this tock')
+        // it's in this tock
+        ;[snap, fees] = unroll(fold)
+        next_tack = Buffer.from(foldkey)
+        next_tack[28] = next_tack[28] + 1
+    } else {
+        dub('fold is in prior tock')
+        // it's in the prior tock
+        tree.rock.rite(r => {
+            [foldkey, fold] = r.find_max(rkey('fold', prevhash), 29)
+        })
+        aver(_=> blen(fold) > 0, `panic: no fold in current or prior tock`)
+        ;[snap, fees] = unroll(fold)
+        next_tack = bcat(tockhash, h2b('00'))
+    }
+    dub('snap, fees', snap, fees)
+    dub('next_tack', next_tack)
 
 
     throw err(`todo vult`)
