@@ -84,15 +84,15 @@ function know(rite, twig, tockhash) :Know|'' {
     return b2t(twig.read(rkey('know', tockhash))) as Know|''
 }
 
-// vult_thin grows possibly-valid state tree ('' | PV -> PV)
+// vult_full_rock grows possibly-valid state tree ('' | PV -> PV)
 //   (could also invalidate tock)
-function vult_thin(tree :Tree, tock :Tock, updatebest :boolean =true) :MemoAskTocks {
+function vult_full_rock(tree :Tree, tock :Tock, updatebest :boolean =true) :MemoAskTocks {
     let [prevtockhash,, time,] = tock
     let tockhash = mash(roll(tock))
-    debug('vult_thin', b2h(tockhash), rmap(tock, b2h))
+    debug('vult_full_rock', b2h(tockhash), rmap(tock, b2h))
 
-    // it's possible vult_thin will be called more than once for the same
-    // tock (i.e. vult_full vult_thins, then fails later), so the tip can
+    // it's possible vult_full_rock will be called more than once for the same
+    // tock (i.e. vult_full vult_full_rocks, then fails later), so the tip can
     // come from either the previous tockhash or the current tockhash
     let foldandidx = tree.rock.find_max(rkey('fold', tockhash))
     if (undefined == foldandidx) {
@@ -115,11 +115,11 @@ function vult_thin(tree :Tree, tock :Tock, updatebest :boolean =true) :MemoAskTo
 
         let tockknow = b2t(twig.read(rkey('know', tockhash)))
         if ('PV' == tockknow || 'DV' == tockknow) {
-            // tock has already been vult_thin'd
+            // tock has already been vult_full_rock'd
             return
         }
 
-        // vult_thin can read the state tree from any foldidx,
+        // vult_full_rock can read the state tree from any foldidx,
         // but will only ever grow the state tree to foldidx == 0
         // (bails if current tock PV)
         rite.etch(
@@ -132,7 +132,7 @@ function vult_thin(tree :Tree, tock :Tock, updatebest :boolean =true) :MemoAskTo
         // subsidy = nexttock.left - curtock.left
         let left = subsidyleft(rite, time)
         let nextleft = subsidyleft(rite, n2b(bnum(time) + BigInt(57)))
-        debug(`vult_thin etching ment at head=${b2h(tockhash)}, ${left - nextleft}`)
+        debug(`vult_full_rock etching ment at head=${b2h(tockhash)}, ${left - nextleft}`)
         twig.etch(
             rkey('ment', tockhash, h2b('07')),
             roll([tockhash, n2b(left - nextleft)])
@@ -147,6 +147,50 @@ function vult_thin(tree :Tree, tock :Tock, updatebest :boolean =true) :MemoAskTo
 
         // success, set this tock to PV and update best tockhash if more work
         twig.etch(rkey('know', tockhash), t2b('PV'))
+        if (updatebest) {
+            etch_best(rite, tockhash)
+        }
+    })
+
+    debug('vult_full_rock: grew', b2h(tockhash), 'to PV')
+    return [MemoType.AskTocks, tockhash]
+}
+
+// vult_thin grows possibly-valid state tree ('' | PV -> PV)
+//   (could also invalidate tock)
+function vult_thin(tree :Tree, tock :Tock, updatebest :boolean =true) :MemoAskTocks {
+    let [prevtockhash,, time,] = tock
+    let tockhash = mash(roll(tock))
+    debug('vult_thin', b2h(tockhash), rmap(tock, b2h))
+
+    tree.rock.rite(rite => {
+        aver(
+            _ => !bleq(t2b(''), rite.read(rkey('tock', prevtockhash))),
+            `vult_thining a tock with unrecognized prev`
+        )
+        aver(_ => {
+            let prevknow = rite.read(rkey('know', prevtockhash))
+            return 'PV' == prevknow || 'DV' == prevknow
+        }, `panic, say/tocks prev must be PV (${b2h(prevtockhash)})`)
+
+        let tockknow = b2t(rite.read(rkey('know', tockhash)))
+        if ('PV' == tockknow || 'DV' == tockknow) {
+            // tock has already been vult_thin'd
+            return
+        }
+
+        // subsidy = nexttock.left - curtock.left
+        let left = subsidyleft(rite, time)
+        let nextleft = subsidyleft(rite, n2b(bnum(time) + BigInt(57)))
+        debug(`vult_thin etching ment at head=${b2h(tockhash)}, ${left - nextleft}`)
+
+        // current tock work = prev tock work + tuff(current tock)
+        let prevwork = rite.read(rkey('work', prevtockhash))
+        let curwork = n2b(bnum(prevwork) + tuff(tockhash))
+        rite.etch(rkey('work', tockhash), curwork)
+
+        // success, set this tock to PV and update best tockhash if more work
+        rite.etch(rkey('know', tockhash), t2b('PV'))
         if (updatebest) {
             etch_best(rite, tockhash)
         }
@@ -189,7 +233,7 @@ function vult_full(tree :Tree, tock :Tock) :MemoAskTacks|MemoAskTocks|MemoAskTic
     }
 
     // vult current tock ('' | 'PV') -> 'PV'
-    vult_thin(tree, tock, false)
+    vult_full_rock(tree, tock, false)
 
     // get tip of state tree
     // this part needs to come before the grow block because of prevsnap,
