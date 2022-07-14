@@ -207,7 +207,6 @@ const runcase = (dir, name, full=false) => {
     })
 }
 
-/*
 test('djin jams', t=>{
     let dir = './test/case/djin/thin/'
     let cases = readdirSync(dir)
@@ -222,6 +221,4 @@ test('full djin jams', t=>{
     cases.forEach(c => runcase(dir, c, true))
 })
 
- */
-
-runcase('./test/case/djin/full/', 'djin_minttxinnotprevtock.jams', true)
+//runcase('./test/case/djin/full/', 'djin_minttxinnotprevtock.jams', true)
