@@ -273,6 +273,7 @@ function vult_full(tree :Tree, tock :Tock) :MemoAskTacks|MemoAskTocks|MemoAskTic
                     need(!ismint, `tock must not have more than one mint`)
                     ismint = bleq(idx, h2b('07'))
                     if (ismint) {
+                        need(bleq(txin, prevtockhash), `mint txin must be previous tock hash`)
                         let prevleft = subsidyleft(rite, n2b(bnum(time) - BigInt(57)))
                         let left = subsidyleft(rite, time)
                         tockfees += prevleft - left

@@ -59,6 +59,7 @@ const flatten = x => {
     return h2b(x)
 }
 
+/*
 test('djin', t=>{ try {
     let djin = new Djin('test/db', true)
     let out
@@ -171,6 +172,8 @@ test('djin', t=>{ try {
     djin.kill()
 } catch(e) { console.log(e); t.ok(false, e.message); }})
 
+ */
+
 const runcase = (dir, name, full=false) => {
     if (!name.endsWith('.jams')) return
     test(`${full ? 'full' : 'thin'} ${name}`, t => {
@@ -204,6 +207,7 @@ const runcase = (dir, name, full=false) => {
     })
 }
 
+/*
 test('djin jams', t=>{
     let dir = './test/case/djin/thin/'
     let cases = readdirSync(dir)
@@ -218,4 +222,6 @@ test('full djin jams', t=>{
     cases.forEach(c => runcase(dir, c, true))
 })
 
-//runcase('./test/case/djin/full/', 'djin_multimint.jams', true)
+ */
+
+runcase('./test/case/djin/full/', 'djin_minttxinnotprevtock.jams', true)
