@@ -195,19 +195,6 @@ function vult_full(tree :Tree, tock :Tock) :MemoAskTacks|MemoAskTocks|MemoAskTic
                 roll([snap, h2b('00')])
             ) // [snap, fees]
 
-            // this tockhash can be consumed by a mint tx, so it has pyre and ment
-            twig.etch(rkey('pyre', tockhash), n2b(bnum(time) + BigInt(536112000)))
-            // subsidy = nexttock.left - curtock.left
-            let left = subsidyleft(rite, time)
-            let nextleft = subsidyleft(rite, n2b(bnum(time) + BigInt(57)))
-            debug(`vult_full etching tock ment at head=${b2h(tockhash)}, ${left - nextleft}`)
-            twig.etch(
-                rkey('ment', tockhash, h2b('07')),
-                roll([tockhash, n2b(left - nextleft)])
-            ) // [code, cash]
-            let pyre = bnum(time) + BigInt(536112000)
-            twig.etch(rkey('pyre', tockhash), n2b(pyre))
-
             // current tock work = prev tock work + tuff(current tock)
             let prevwork = rite.read(rkey('work', prevtockhash))
             let curwork = n2b(bnum(prevwork) + tuff(tockhash))
@@ -283,6 +270,14 @@ function vult_full(tree :Tree, tock :Tock) :MemoAskTacks|MemoAskTocks|MemoAskTic
                 moves.forEach(move => {
                     // fail if input is spent or expired
                     let [txin, idx, sign] = move
+                    ismint = bleq(idx, h2b('07'))
+                    if (ismint) {
+                        let prevleft = subsidyleft(rite, n2b(bnum(time) - BigInt(57)))
+                        let left = subsidyleft(rite, time)
+                        tockfees += prevleft - left
+                        return
+                    }
+
                     let ment = twig.read(rkey('ment', txin, idx))
                     need(
                         !bleq(ment, t2b('')),
@@ -303,7 +298,6 @@ function vult_full(tree :Tree, tock :Tock) :MemoAskTacks|MemoAskTocks|MemoAskTic
 
                     // fees are calculated per-tick, not per-move
                     tockfees += bnum(cash)
-                    ismint = bleq(idx, h2b('07'))
                 })
 
                 // put ments in state tree

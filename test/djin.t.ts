@@ -171,7 +171,6 @@ test('djin', t=>{ try {
     djin.kill()
 } catch(e) { console.log(e); t.ok(false, e.message); }})
 
-
 const runcase = (dir, name, full=false) => {
     if (!name.endsWith('.jams')) return
     test(`${full ? 'full' : 'thin'} ${name}`, t => {
@@ -219,4 +218,4 @@ test('full djin jams', t=>{
     cases.forEach(c => runcase(dir, c, true))
 })
 
-//runcase('./test/case/djin/full/', 'djin_mintnotlast.jams', true)
+//runcase('./test/case/djin/full/', 'djin.jams', true)
