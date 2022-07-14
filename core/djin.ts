@@ -285,7 +285,7 @@ class Djin {
             return vult_full(this.tree, tock) as MemoAskTacks|MemoAskTocks|MemoAskTicks
         }
 
-        return vult_thin(this.tree, tock, true) as MemoAskTocks
+        return vult_thin(this.tree, tock) as MemoAskTocks
     }
 
 }
