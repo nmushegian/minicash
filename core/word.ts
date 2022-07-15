@@ -243,7 +243,7 @@ enum MemoType {  // mnemonic
 type MemoAskTocks
   =  [MemoType.AskTocks, Mash]          // get tocks from this tock forward to best
 type MemoAskTacks
-  =  [MemoType.AskTacks, [Mash, Blob] ] // get tacks starting from tockhash,idx
+  =  [MemoType.AskTacks, [Mash, Blob] ] // get tack for [tockhash,idx]
 type MemoAskTicks
   =  [MemoType.AskTicks, Mash[]]        // tickhashes you want ticks for
 

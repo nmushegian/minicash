@@ -9,7 +9,7 @@ import {
 } from './word.js'
 
 import {
-    Rock
+    Rock, rkey
 } from './rock.js'
 
 export {
@@ -36,7 +36,6 @@ export {
 
 //  [(snap) 'ment', mark       -> ment // utxo put [code, cash]
 //  [(snap) 'pent', mark       -> pent // utxo use [tish, tosh] (by tick, in tock)
-//  [(snap) 'pyre', mark       -> time // utxo expires
 
 
 // A twig is a database transaction over Tree, similar to how
@@ -71,11 +70,6 @@ class Twig {
     }
 }
 
-type RKey = Blob
-
-function rkey(s :string, ...args :Blob[]) :RKey {
-    return Buffer.concat([t2b(s), ...args])
-}
 
 class Tree {
     rock :Rock

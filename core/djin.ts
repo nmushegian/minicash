@@ -1,20 +1,24 @@
 // engine
 
-import {
-    Okay, okay, pass, fail, toss, aver,
-    h2b, t2b, b2t,
-    Blob, isblob,
-    roll, unroll, bleq, islist,
-    Tock, tuff, n2b,
-    Mash, mash,
-    Memo, OpenMemo, MemoType,
-    MemoSayTocks, MemoSayTacks, MemoSayTicks,
-    MemoAskTocks, MemoAskTacks, MemoAskTicks, bnum, memo_open,
-} from './word.js'
+import Debug from 'debug'
+const dub = Debug('cash:djin')
 
 import {
-    vult_thin
-} from './vult.js'
+    Okay, pass, fail, toss, aver, need, err,
+    b2h, h2b, n2b, b2t, t2b,
+    Blob, bleq, blen, extend,
+    roll, unroll, rmap, islist,
+    Mash, mash, tuff,
+    Tick, Tack, Tock,
+    Memo, MemoType, MemoErr,
+    MemoSayTicks, MemoSayTacks, MemoSayTocks,
+    MemoAskTicks, MemoAskTacks, MemoAskTocks,
+    OpenMemo, memo_open, memo_close,
+} from './word.js'
+
+import { form_memo, form_tock } from "./well.js";
+import { vinx_tick, vinx_tack, vinx_tock} from "./vinx.js";
+import { vult } from './vult.js'
 
 import { Rock } from './rock.js'
 import { Tree, rkey } from './tree.js'
@@ -37,11 +41,15 @@ class Djin {
         ]
         let bangroll = roll(this.bang)
         let banghash = mash(bangroll)
+        dub('banghash', banghash)
         this.tree.grow(h2b(''), (rite,twig,snap) => {
-            rite.etch(rkey('best'), banghash)
-            rite.etch(rkey('tock', banghash), bangroll)
-            rite.etch(rkey('work', banghash), n2b(tuff(bangroll)))
-            rite.etch(rkey('fold', banghash, n2b(BigInt(0))), roll([snap, n2b(BigInt(0))]))
+            rite.etch_best(banghash)
+            rite.etch_tock(this.bang)
+            rite.etch_work(banghash, tuff(bangroll))
+            rite.etch_fold(banghash, 0, snap, 0)
+            rite.etch_know(banghash, t2b('DV'))
+            twig.etch( rkey('ment', banghash, h2b('07')),
+                       roll([h2b(''), n2b(BigInt(2)**BigInt(53))]) )
         })
     }
 
@@ -49,108 +57,165 @@ class Djin {
         this.rock.shut()
     }
 
-    async *spin(memo) {
-        // aver well-formed
-        // aver valid-in-context
-        // split up memo into units
-        // turn/reflect/yield K turns at a time
-        //   one unit memo can cause more than one turn
-
-        // let memos = as_units(memo)
-        // i = 0
-        // for memo in memos
-        //   let next = memo
-        //   while true:
-        //     let out = turn(memo)
-        //     if (out.err)
-        //       return out
-        //     else
-        //       next = out
-        //     if (i++ % K == 0)
-        //       yield
-
+    async *spin(memos :Memo) {
+        /*
+          let out = turn(memo)
+          yield
+          let back = turn(out)
+          yield
+          if back is 'unavailable'
+          return back
+          else
+          out = back
+          continue
+        */
     }
 
-    turn(memo :Memo) :Okay<Memo> {
-        try {
-            let copy = memo_open(memo)
-            let line = copy[0]
-            if (MemoType.AskTocks == line) {
-                // -> say/tocks | err
-                let memot = copy as unknown as MemoAskTocks // todo form_memo
-                let out = this._ask_tocks(memot)
-                let typed = [Buffer.from([out[0]]), out[1]]
-                return pass(typed)
+    turn(memo :Memo) :Memo {
+        if (!form_memo(memo)[0]) {
+            return memo_close([MemoType.Err, ['invalid', memo]])
+        }
+
+        let copy = memo_open(memo)
+        let line = copy[0]
+
+        if (MemoType.AskTocks == line) {
+            return memo_close(this._ask_tocks(copy as MemoAskTocks))
+        }
+        if (MemoType.AskTacks == line) {
+            return memo_close(this._ask_tacks(copy as MemoAskTacks))
+        }
+        if (MemoType.AskTicks == line) {
+            return memo_close(this._ask_ticks(copy as MemoAskTicks))
+        }
+
+        if (MemoType.SayTocks == line) {
+            return memo_close(this._say_tocks(copy as MemoSayTocks))
+        }
+        if (MemoType.SayTacks == line) {
+            return memo_close(this._say_tacks(copy as MemoSayTacks))
+        }
+        if (MemoType.SayTicks == line) {
+            return memo_close(this._say_ticks(copy as MemoSayTicks))
+        }
+
+        throw err(`unrecognized turn line: ${line}`)
+    }
+
+    _ask_tocks(memo :MemoAskTocks) :OpenMemo {
+        let [line, body] = memo
+        let tail = body as Mash
+
+        // get the next tock(s) after `tail` *in the best branch*
+        let best = this.rock.read_one(rkey('best'))
+        let snap;
+        this.rock.rite(r => { // TODO ergonomics / getters
+            let foldroll = r.find_max(rkey('fold', best), 29) // TODO no magic constant
+            aver(_=> blen(foldroll) > 0, `panic, empty fold for best`)
+            ;[snap, ] = unroll(foldroll)
+        })
+        // TODO batching:  nexts = [];  grab up to chunk size tocks
+        let next;
+        this.tree.look(snap, (rock,twig) => {
+            let pentroll = twig.read(rkey('pent', best, h2b('07')))
+            if (blen(pentroll) > 0) {
+                ;[ , next] = unroll(pentroll)
             }
-            if (MemoType.AskTacks == line) {
-                // -> say/tacks | err
-                toss(`todo djin read ask/tacks`)
-            }
-            if (MemoType.AskTicks == line) {
-                // -> say/ticks | err
-                toss(`todo djin read ask/ticks`)
-            }
-            if (MemoType.SayTocks == line) {
-                // -> ask/tocks    proceed
-                // -> ask/tacks    need tacks
-                // -> err
-                let memot = memo as unknown as MemoSayTocks // todo form_memo
-                let out = this._say_tocks(memot)
-                let typed = [Buffer.from([out[0]]), out[1]]
-                return pass(typed)
-            }
-            if (MemoType.SayTacks == line) {
-                // -> ask/tocks    proceed
-                // -> ask/tacks    proceed
-                // -> ask/ticks    need ticks
-                // return pass(this._say_tacks(memo)
-                toss(`todo turn say/tacks`)
-            }
-            if (MemoType.SayTicks == line) {
-                // -> say/ticks    accept/rebroadcast
-                // -> err
-                toss(`todo turn say/ticks`)
-            }
-            return fail(`unrecognized turn line: ${line}`)
-        } catch(e) {
-            toss(`engine panic: ${e.message}`)
+        })
+        if (next) {
+            let tockroll = this.rock.read_one(rkey('tock', next))
+            let tock = unroll(tockroll) as Tock
+            return [MemoType.SayTocks, [tock]]
+        } else {
+            throw err(`todo no next tock`)
         }
     }
 
-    // ['ask/tocks tailhash ]  ->  'say/tocks tocks
-    // ['ask/tocks Mash     ]  ->  'say/tocks Tock[]
-    _ask_tocks(memo :MemoAskTocks) :MemoSayTocks { // | MemoSayTacks  todo
-        // todo need tail in history
-        let [line, body] = memo;
-        let tail = body as Blob
-        let lead = []
-        let best = this.rock.read_one(rkey('best'))
-        let prev = best as unknown as Blob // mash
-        let banghash = mash(roll(this.bang))
-        do {
-            let blob = this.rock.read_one(rkey('tock', prev))
-            if (blob.length == 0) {
-                toss(`no such tock: ${prev}`)
-            } else {
-                let tock = unroll(blob) as Tock
-                lead.push(tock)
-                prev = tock[0] // tock.prev
-            }
-        } while( !bleq(prev, tail) && !bleq(prev, banghash) && !bleq(prev, h2b('00'.repeat(24))) )
-        return [MemoType.SayTocks, lead] as MemoSayTocks
+    _ask_tacks(memo :MemoAskTacks) :OpenMemo {
+        let [line, body] = memo
+        let [tockhash, idx] = body as [Mash, Blob]
+        let tackroll = this.rock.read_one(rkey('tack', tockhash, idx))
+        if (blen(tackroll) > 0) {
+            let tack = unroll(tackroll) as Tack
+            return [MemoType.SayTacks, [tack]]
+        } else {
+            throw err(`todo no such tack`)
+        }
     }
 
-    // 'say/tocks Tock[]  ->  'ask/tocks tock:Mash
-    //                    ->  'ask/tacks tock:Mash,i:num
-    _say_tocks(memo :MemoSayTocks) :(MemoAskTocks|MemoAskTacks) {
+    _ask_ticks(memo :MemoAskTicks) :OpenMemo {
         let [line, body] = memo
-        aver(_=>body.length == 1, `panic, djin memo is not split into units`)
+        let tickhashes = body as Mash[]
+        let ticks = []
+        this.rock.rite(r => { // todo readonly
+            tickhashes.forEach(tickhash => {
+                let tickroll = r.read(rkey('tick', tickhash))
+                if (blen(tickroll) > 0) {
+                    let tick = unroll(tickroll) as Tick
+                    ticks.push(tick)
+                }
+            })
+        })
+        return [MemoType.SayTicks, ticks]
+    }
+
+    _say_tocks(memo :MemoSayTocks) :OpenMemo {
+        let [line, body] = memo
         let tocks = body as Tock[]
-        // aver prev is possibly-valid
-        let thinmemo = vult_thin(this.tree, tocks[0])// as MemoAskTocks
-        let typed = thinmemo as (MemoAskTocks | MemoAskTacks)
-//        let fullmemo = vult_full(this.tree, tock)
-        return typed
+        aver(_=> tocks.length == 1, `_say_tocks memo not split into units`)
+
+        let tock = tocks[0]
+        let prevhash = tock[0]
+        let prevroll = this.rock.read_one(rkey('tock', prevhash))
+        if (blen(prevroll) == 0) {
+            return [MemoType.Err, ['unavailable', prevhash]]
+        }
+
+        // TODO vinx here
+
+        let tockroll = roll(tock)
+        let tockhash = mash(tockroll)
+        this.rock.etch_one(rkey('tock', tockhash), tockroll)
+
+        return vult(this.tree, tock)
+    }
+
+    _say_tacks(memo :MemoSayTacks) :OpenMemo {
+        let [line, body] = memo
+        let tacks = body as Tack[]
+        aver(_=> tacks.length == 1, `_say_tacks memo not split into units`)
+
+        // TODO vinx here
+
+        let tack = tacks[0]
+        let tock = tack[0]
+        let eye  = tack[1]
+        let tockhash = mash(roll(tock))
+        this.rock.etch_one(rkey('tack', tockhash, eye), roll(tack))
+
+        return vult(this.tree, tock)
+    }
+
+    _say_ticks(memo :MemoSayTicks) :OpenMemo {
+        let [line, body] = memo
+        let ticks = body as Tick[]
+        aver(_=> ticks.length <= 1024, `_say_ticks not split into chunks`)
+
+        // TODO vinx here
+
+        let outs = [] // rebroadcast any new ticks
+        this.rock.rite(r => {
+            ticks.forEach(tick => {
+                let tickhash = mash(roll(tick))
+                let have = r.read(rkey('tick', tickhash))
+                if (have.length == 0) {
+                    r.etch_tick(tick)
+                    outs.push(tick)
+                }
+            })
+        })
+
+        return [MemoType.SayTicks, outs]
     }
 
 }
