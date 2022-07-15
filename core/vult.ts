@@ -53,18 +53,19 @@ function vult(tree :Tree, tock :Tock) :OpenMemo {
         [foldkey, fold] = r.find_max(rkey('fold', tockhash), 29)
     })
     if (blen(fold) > 0) {
+        // TODO test coverage
         // it's in this tock, so next tack is last + 1
         dub('fold is in this tock')
-        ;[snap, fees] = unroll(fold)
-        tack_idx = foldkey[foldkey.length - 1] + 1
+        ;[snap, fees] = unroll(fold) // continue from partial fee total
+        tack_idx = n2b(bnum(foldkey[blen(foldkey) - 1]) + BigInt(1))
     } else {
         // it's in the prior tock, so next tack is this tock's tack 0
         dub('fold is in prior tock')
         tree.rock.rite(r => {
             [foldkey, fold] = r.find_max(rkey('fold', prevhash), 29)
         })
-        ;[snap, ] = unroll(fold)
-        fees = h2b('00')
+        ;[snap, ] = unroll(fold) // continue from this snap, but...
+        fees = h2b('00')         // the fees are reset, we are in new tock
         tack_idx = h2b('00')
     }
     dub('snap, fees', snap, fees)
@@ -79,8 +80,8 @@ function vult(tree :Tree, tock :Tock) :OpenMemo {
     let tack = unroll(tackblob)
     let eye  = tack[1] as Blob
     let ribs = tack[2] as Blob[]
-    let is_last_tack = (bnum(eye) == BigInt(ribs.length - 1))
-                    || (bleq(eye, h2b('00')) && ribs.length == 0)
+    let is_last_tack = (bnum(eye) == BigInt(ribs.length - 1))     // it's the last rib
+                    || (bleq(eye, h2b('00')) && ribs.length == 0) // or there are no ribs
     dub(`have this tack, checking if we have ticks`)
 
     // 3. get the ticks, request missing ones
@@ -102,44 +103,47 @@ function vult(tree :Tree, tock :Tock) :OpenMemo {
     }
 
     // 4. apply the ticks
-    let out
+    let out // for return value, b/c we have to commit db write before returning
     let feenum = bnum(fees)
     // exceptions starting with 'invalid' are intentional, and invalidate the tock
     // other exceptions are unintentional / panic, don't mark them invalid
+    // TODO this is the critical path, pull as much as possible outside of this db write lock
     try { tree.grow(snap, (rite,twig,nextsnap) => {
         ticks.forEach((tick,tick_idx) => {
             let tickhash = mash(roll(tick))
             dub(`applying tick`, tick)
-
             let moves = tick[0]
             let ments = tick[1]
-            let is_last_tick = false
-            let subsidy
+            let is_last_tick = false // computed in moves loop, used in ments loop
+            let subsidy              // computed in moves loop, used in ments loop
 
             moves.forEach(move => {
                 let [txin, idx, sig] = move
                 let idxnum = parseInt(b2h(idx), 16)
                 if (idxnum == 7) {
                     // This special case is for the "mint" tick, the point is to
-                    // isolate all special cases into one place to keep the spec small
+                    // isolate all special cases into one place to keep the spec small.
+                    // Vinx check ensures this tick has only 1 move and 1 ment
                     is_last_tick = is_last_tack && (tick_idx == ticks.length - 1)
                     need( is_last_tick, `invalid: move has idx 7, but it isn't the last tick`)
                     need( bleq(txin, prevhash), `invalid: move has idx 7, but txin is not prevhash`)
+                    // determine subsidy based on previous tock ment (1 / 2^21 of remaining)
                     let prev_tock_ment = twig.read(rkey('ment', prevhash, h2b('07')))
                     let [_, prev_left] = unroll(prev_tock_ment)
                     subsidy = bnum(prev_left as Blob) / (BigInt(2)**BigInt(21))
                     let left = bnum(prev_left as Blob) - subsidy
                     // the tockhash is a virtual UTXO that contains remaining subsidy
-                    // this ment is also used for fast ancestor check, per-branch
-                    // this pent is used for getting the next tock, per-branch
+                    // this ment can be used for fast ancestor check, per-branch
+                    // this pent can be used for getting the next tock, per-branch
                     twig.etch(rkey('pent', prevhash, h2b('07')), roll([tickhash, tockhash]))
                     twig.etch(rkey('ment', tockhash, h2b('07')), roll([h2b(''), n2b(left)]))
                 } else {
-                    let have = twig.read(rkey('ment', txin, idx))
+                    // regular case, not a "mint" tick, simple exists-and-unspent check
+                    let ment = twig.read(rkey('ment', txin, idx))
                     let pent = twig.read(rkey('pent', txin, idx))
-                    need(have.length > 0, `invalid: no such ment exists: ${txin} ${idx}`)
+                    need(ment.length > 0, `invalid: no such ment exists: ${txin} ${idx}`)
                     need(pent.length == 0, `invalid: ment already pent: ${txin} ${idx}`)
-                    let [code, cash] = unroll(have)
+                    let [code, cash] = unroll(ment)
                     feenum += bnum(cash as Blob)
                     twig.etch(rkey('pent', txin, idx), roll([tickhash, tockhash]))
                 }
@@ -152,9 +156,8 @@ function vult(tree :Tree, tock :Tock) :OpenMemo {
                 } else {
                     feenum -= bnum(cash)
                 }
-                let have = twig.read(rkey('ment', tickhash, n2b(BigInt(idx))))
-                need(have.length == 0, `invalid: this ment already exists`)
-                // TODO pyre?
+                let dupe = twig.read(rkey('ment', tickhash, n2b(BigInt(idx))))
+                need(dupe.length == 0, `invalid: this ment already exists`)
                 twig.etch(rkey('ment', tickhash, n2b(BigInt(idx))), roll([code, cash]))
             })
         })
@@ -171,7 +174,7 @@ function vult(tree :Tree, tock :Tock) :OpenMemo {
         } else {
             out = [MemoType.AskTacks, tockhash, tack_idx + 1]
         }
-    }) } catch (e) {
+    }) /* try tree.grow */ } catch (e) {
         dub('vult throw', e.message)
         if (e.message.startsWith('invalid')) {
             tree.rock.etch_one(rkey('know', tockhash), t2b('DN'))
