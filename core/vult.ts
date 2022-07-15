@@ -121,22 +121,16 @@ function vult(tree :Tree, tock :Tock, thin :boolean = false) :OpenMemo {
                 if (idxnum == 7) {
                     // This special case is for the "mint" tick, the point is to
                     // isolate all special cases into one place to keep the spec small
-                    dub('is_last_tack', is_last_tack)
-                    dub('tick idx, ticks length-1', tick_idx, ticks.length - 1)
-
                     is_last_tick = is_last_tack && (tick_idx == ticks.length - 1)
                     need( is_last_tick, `invalid: move has idx 7, but it isn't the last tick`)
                     need( bleq(txin, prevhash), `invalid: move has idx 7, but txin is not prevhash`)
-
-                    dub(`grabbing prev tock ment, prevhash ${b2h(prevhash)}`)
                     let prev_tock_ment = twig.read(rkey('ment', prevhash, h2b('07')))
                     aver(_=> prev_tock_ment.length > 0, `panic: no prev_tock_ment`)
-                    dub(`prev_tock_ment`, prev_tock_ment)
                     let [_, prev_left] = unroll(prev_tock_ment)
-                    dub(`unrolled prev_tock_ment`, unroll(prev_tock_ment))
                     subsidy = bnum(prev_left as Blob) / (BigInt(2)**BigInt(21))
                     let left = bnum(prev_left as Blob) - subsidy
                     // the tockhash is a virtual UTXO that contains remaining subsidy
+                    // this ment is also used for fast *per-branch* ancestor check
                     twig.etch(rkey('pent', prevhash, h2b('07')), roll([tickhash, tockhash]))
                     twig.etch(rkey('ment', tockhash, h2b('07')), roll([h2b(''), n2b(left)]))
                 } else {
