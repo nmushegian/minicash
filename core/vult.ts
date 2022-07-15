@@ -6,7 +6,7 @@ const dub = Debug('cash:vult')
 import {
     need, pass, fail, aver, err,
     Work, Snap, Fees, Know,
-    mash, tuff
+    mash, tuff,
     Blob, bleq, blen, bcat, bnum, extend,
     roll, unroll,
     h2b, b2h, n2b, b2t, t2b,
@@ -16,9 +16,7 @@ import {
 
 import { Tree, Twig, rkey } from './tree.js'
 
-export {
-    vult
-}
+export { vult }
 
 function vult(tree :Tree, tock :Tock, thin :boolean = false) :OpenMemo {
     dub(`vult tock`, tock)
@@ -59,7 +57,7 @@ function vult(tree :Tree, tock :Tock, thin :boolean = false) :OpenMemo {
     let foldkey, fold
     let tack_idx // the *next* tack index, the one we need to get
     // key length for find_max API is 29:  4 ('fold') + 24 (tockhash) + 1 (foldidx)
-    // prefix is ('fold' ++ tockhash)
+    // prefix is ('fold' ++ tockhash), we're looking for last idx
     tree.rock.rite(r => {
         [foldkey, fold] = r.find_max(rkey('fold', tockhash), 29)
     })
@@ -134,17 +132,12 @@ function vult(tree :Tree, tock :Tock, thin :boolean = false) :OpenMemo {
                     need( bleq(txin, prevhash), `invalid: move has idx 7, but txin is not prevhash`)
                     // todo set tock pent ?
                 } else {
-                    let conxblob = rite.read(rkey('tick', txin))
-                    aver(_=> conxblob.length > 0, `panic, no context for tick in vult`)
-                    let conx = unroll(conxblob)
-                    let conxments = conx[1]
-                    let consumed = conxments[idxnum]
-                    let [, cash] = consumed
-                    feenum += cash
                     let have = twig.read(rkey('ment', txin, idx))
-                    need(have.length > 0, `invalid: no such ment exists: ${txin} ${idx}`)
                     let pent = twig.read(rkey('pent', txin, idx))
+                    need(have.length > 0, `invalid: no such ment exists: ${txin} ${idx}`)
                     need(pent.length == 0, `invalid: ment already pent: ${txin} ${idx}`)
+                    let [code, cash] = unroll(have)
+                    feenum += bnum(cash as Blob)
                     twig.etch(rkey('pent', txin, idx), roll([tickhash, tockhash]))
                 }
             })
