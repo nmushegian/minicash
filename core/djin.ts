@@ -9,7 +9,7 @@ import {
     Blob, bleq, blen, extend,
     roll, unroll, rmap, islist,
     mash, tuff,
-    Tick, Tock,
+    Tick, Tack, Tock,
     Memo, MemoType, MemoErr,
     MemoSayTicks, MemoSayTacks, MemoSayTocks,
     MemoAskTicks, MemoAskTacks, MemoAskTocks,
@@ -103,6 +103,7 @@ class Djin {
         if (MemoType.SayTocks == line) {
             // -> ask/tocks    proceed
             // -> ask/tacks    need tacks
+            // -> ask/ticks    need ticks
             // -> err
             return pass(memo_close(this._say_tocks(copy as MemoSayTocks)))
         }
@@ -121,145 +122,71 @@ class Djin {
         return fail(`unrecognized turn line: ${line}`)
     }
 
-    _ask_ticks(memo :MemoAskTicks) :MemoSayTicks|MemoErr {
-        throw err(`todo _ask_ticks`)
-        /*
-        let tickhashes = memo[1]
-
-        let ticks = []
-        tickhashes.forEach(tickhash => {
-            let tick = unroll(this.rock.read_one(rkey('tick', tickhash)))
-            ticks.push(tick)
-        })
-
-        if (ticks.length == 0) {
-            return [MemoType.Err, ['invalid', memo_close(memo)]]
-        }
-        return [MemoType.SayTicks, ticks]
-        */
-    }
-
-    _say_ticks(memo :MemoSayTicks) :MemoSayTicks|MemoErr {
-        throw err(`todo _say_ticks`)
-        /*
-        const [line, body] = memo
-        aver(_=>islist(body), `panic, djin say/ticks memo body is not a list`)
-        aver(_=>body.length == 1, `panic, djin memo is not split into units`)
-
-        const tick = body[0] as Tick
-
-        let [moves, ments] = tick
-        let tock
-        let conx
-        aver(
-            _ => {
-                conx = moves
-                    .filter(move => {
-                        if (Number('0x' + b2h(move[1])) == 7) {
-                            tock = unroll(this.rock.read_one(rkey('tock', move[0]))) as Tock
-                            return false
-                        }
-                        return true
-                    })
-                    .map(move => unroll(this.rock.read_one(rkey('tick', move[0]))) as Tick)
-                // todo multiple block reward/subsidy transactions?
-                let res = vinx_tick(conx, tick, tock)
-                //console.error(res[2])
-                return res[0]
-            }
-            , `panic, tick must be valid-in-context`
-        )
-
-        debug(`say/ticks ${rmap(tick, b2h)} hash=${b2h(mash(roll(tick)))}`)
-        const tickhash = mash(roll(tick))
-        const key = rkey('tick', tickhash)
-        if (bleq(this.tree.rock.read_one(key), h2b(''))) {
-            this.tree.rock.etch_one(rkey('tick', tickhash), roll(tick))
-            return [MemoType.SayTicks, [tick]]
-        }
-
-        return [MemoType.Err, ['invalid', memo_close(memo)]]
-        */
-    }
-
-    _say_tacks(memo :MemoSayTacks) :MemoAskTocks|MemoAskTacks|MemoAskTicks|MemoErr {
-        throw err(`say_tacks`)
-        /*
-        debug('say/tacks')
-        let [line, tacks] = memo
-        aver(_ => tacks.length == 1, `only saying one tack at a time for now`)
-        let tack = tacks[0]
-        let [head, eye,,] = tack
-
-        aver(_ => {let res = vinx_tack(head, tack); return res[0]}, `panic, tack must be valid-in-context`)
-
-        let headhash = mash(roll(head))
-        this.rock.etch_one(rkey('tack', headhash, eye), roll(tack))
-
-        return this._say_tocks([MemoType.SayTocks, [head]])
-        */
+    _ask_tocks(memo :MemoAskTocks) :OpenMemo {
+        throw err(`ask_tocks`)
     }
 
     _ask_tacks(memo :MemoAskTacks) :MemoSayTacks {
         throw err(`todo ask_tacks`)
-        /*
-        let [line, tockhash] = memo
-
-        let tacks = []
-        for (let eye = 0; eye < 128; eye++) {
-            let tackroll = this.rock.read_one(rkey('tack', tockhash, n2b(BigInt(eye))))
-            if (!bleq(tackroll, t2b(''))) {
-                tacks.push(unroll(tackroll))
-            }
-        }
-        return [MemoType.SayTacks, tacks]
-        */
     }
 
-    // ['ask/tocks tailhash:Mash ]  ->  'say/tocks tocks:Tock[]
-    _ask_tocks(memo :MemoAskTocks) :OpenMemo {
-        throw err(`ask_tocks`)
-        /*
-        // todo need tail in history
-        let [line, body] = memo;
-        let tail = body as Blob
-        let lead = []
-        let best = this.rock.read_one(rkey('best'))
-        if (bleq(best, tail)) {
-            return [MemoType.Err, ['unavailable', best]]
-        }
-        let prev = best as unknown as Blob // mash
-        let banghash = mash(roll(this.bang))
-        do {
-            let blob = this.rock.read_one(rkey('tock', prev))
-            if (blob.length == 0) {
-                toss(`no such tock: ${prev}`)
-            } else {
-                let tock = unroll(blob) as Tock
-                lead.push(tock)
-                prev = tock[0] // tock.prev
-            }
-        } while( !bleq(prev, tail) && !bleq(prev, banghash) && !bleq(prev, h2b('00'.repeat(24))) )
-        return [MemoType.SayTocks, lead] as MemoSayTocks
-        */
+    _ask_ticks(memo :MemoAskTicks) :MemoSayTicks|MemoErr {
+        throw err(`todo _ask_ticks`)
     }
 
-    // 'say/tocks Tock[]  ->  'ask/tocks tock:Mash          (progress)
-    //                    ->  'ask/tacks tock:Mash,i:num    (missing tacks)
-    //                    ->  'ask/ticks tickhashes:Mash[]  (missing ticks)
     _say_tocks(memo :MemoSayTocks) :OpenMemo {
         let [line, body] = memo
         let tocks = body as Tock[]
+        aver(_=> tocks.length == 1, `_say_tocks memo not split into units`)
+
+        // vinx here
+
         let tock = tocks[0]
         let prevhash = tock[0]
-
-        // TODO aver / vinx thread write
         let prevroll = this.rock.read_one(rkey('tock', prevhash))
         if (blen(prevroll) == 0) {
             return [MemoType.Err, ['unavailable', prevhash]]
         }
 
         return vult(this.tree, tock)
+    }
+
+    _say_tacks(memo :MemoSayTacks) :OpenMemo {
+        let [line, body] = memo
+        let tacks = body as Tack[]
+        aver(_=> tacks.length == 1, `_say_tacks memo not split into units`)
+
+        // vinx here
+
+        let tack = tacks[0]
+        let tock = tack[0]
+        let eye  = tack[1]
+        let tockhash = mash(roll(tock))
+        this.rock.etch_one(rkey('tack', tockhash, eye), roll(tack))
+
+        return vult(this.tree, tock)
+    }
+
+    _say_ticks(memo :MemoSayTicks) :OpenMemo {
+        let [line, body] = memo
+        let ticks = body as Tick[]
+        aver(_=> ticks.length <= 1024, `_say_ticks not split into chunks`)
+
+        // vinx here
+
+        let outs = []
+        this.rock.rite(r => {
+            ticks.forEach(tick => {
+                let tickhash = mash(roll(tick))
+                let have = r.read(rkey('tick', tickhash))
+                if (have.length == 0) {
+                    r.etch(rkey('tick', tickhash), roll(tick))
+                    outs.push(tick)
+                }
+            })
+        })
+
+        return [MemoType.SayTicks, outs]
     }
 
 }

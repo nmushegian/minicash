@@ -7,6 +7,7 @@ import {
     Okay, pass, fail, aver, err,
     Work, Snap, Fees, Know, tuff,
     mash,
+    Blob,
     roll, unroll, bnum, blen, extend,
     h2b, b2h, n2b, b2t, bcat,
     Memo, memo,
@@ -54,6 +55,7 @@ function vult(tree :Tree, tock :Tock, thin :boolean = false) :OpenMemo {
         return true
     }, `panic: in vult, has no prev tock info`)
 
+
     tree.rock.rite(r => {
         // work is previous work plus `tuff(tockhash)`
         let prevwork = r.read(rkey('work', prevhash))
@@ -66,7 +68,6 @@ function vult(tree :Tree, tock :Tock, thin :boolean = false) :OpenMemo {
         let left = bnum(prevleft) / (BigInt(2)**BigInt(21))
         r.etch_left(time, left)
     })
-    // TODO, insert tockhash as ment?
 
 
     // now try to apply the "full" state
@@ -76,126 +77,112 @@ function vult(tree :Tree, tock :Tock, thin :boolean = false) :OpenMemo {
     // 3. get all the ticks for that tack
     //    if not available, request them
     // 4. apply them
-    //    if success, set fold, if last fold, set know=DV
-    //    if fail, set know=DN
+    //    if success, set fold
+    //        if last fold, set know=DV
+    //        else request next fold
+    //    else fail, set know=DN
+
 
     // 1. Get the last applied state (fold)
     // the last fold is either in this tock, or the prior one
-    // key length is 29:  4 ('fold') + 24 (tockhash) + 1 (foldidx)
-    // prefix is ('fold' ++ tockhash)
+
     let snap, fees
     let foldkey, fold
-    let next_tack
+    let tack_idx
+    // key length for find_max API is 29:  4 ('fold') + 24 (tockhash) + 1 (foldidx)
+    // prefix is ('fold' ++ tockhash)
     tree.rock.rite(r => {
         [foldkey, fold] = r.find_max(rkey('fold', tockhash), 29)
     })
-    if (blen(fold) != 0) {
+    if (blen(fold) > 0) {
+        // it's in this tock, so next tack is last + 1
         dub('fold is in this tock')
-        // it's in this tock
         ;[snap, fees] = unroll(fold)
-        next_tack = Buffer.from(foldkey)
-        next_tack[28] = next_tack[28] + 1
+        tack_idx = foldkey[foldkey.length - 1]
     } else {
+        // it's in the prior tock, so next tack is this tock's tack 0
         dub('fold is in prior tock')
-        // it's in the prior tock
         tree.rock.rite(r => {
             [foldkey, fold] = r.find_max(rkey('fold', prevhash), 29)
         })
         aver(_=> blen(fold) > 0, `panic: no fold in current or prior tock`)
         ;[snap, fees] = unroll(fold)
-        next_tack = bcat(tockhash, h2b('00'))
+        tack_idx = h2b('00')
     }
     dub('snap, fees', snap, fees)
-    dub('next_tack', next_tack)
+    dub('next_tack', tockhash, tack_idx)
 
+    // 2. Get the next tack to apply from db, or request it
+    let tackblob = tree.rock.read_one(rkey('tack', tockhash, Buffer.from([tack_idx])))
+    if (blen(tackblob) == 0) {
+        dub(`don't have this tack, requesting it`)
+        return [MemoType.AskTacks, [tockhash, Buffer.from([tack_idx])]]
+    }
+    let tack = unroll(tackblob)
+    dub(`have this tack, checking if we have ticks`)
 
+    // 3. get the ticks, request missing ones
+    let feet = tack[3] as Blob[]
+    let ticks = []
+    let miss = []
+    tree.rock.rite(r => { // todo readonly
+        feet.forEach(tickhash => {
+            let tickblob = r.read(rkey('tick', tickhash))
+            if (tickblob.length > 0) {
+                ticks.push(unroll(tickblob))
+            } else {
+                miss.push(tickhash)
+            }
+        })
+    })
+    if (miss.length > 0) {
+        return [MemoType.AskTicks, miss]
+    }
+
+    // 4. apply the ticks
+    let feenum = bnum(fees)
+    tree.grow(snap, (rite,twig,nextsnap) => {
+        ticks.forEach(tick => {
+            let tickhash = mash(roll(tick))
+            dub(`applying tick`, tick)
+            let moves = tick[0]
+            let ments = tick[1]
+
+            moves.forEach(move => {
+                // TODO fee already computed in vinx, we should keep it attached
+                let [txin, idx, sig] = move
+                let idxnum = parseInt(b2h(idx), 16)
+                if (idxnum == 7) {
+                    dub(`todo idxnum == 7`)
+                    // todo need last tick
+                    // todo need txin == prevhash
+                    // todo set pent
+                } else {
+                    let conxblob = rite.read(rkey('tick', txin))
+                    aver(_=> conxblob.length > 0, `panic, no context for tick in vult`)
+                    let conx = unroll(conxblob)
+                    let conxments = conx[1]
+                    let consumed = conxments[idxnum]
+                    let [, cash] = consumed
+                    feenum += cash
+                    // TODO check exists
+                    // TODO check not pent
+                    twig.etch(rkey('pent', txin, idx), roll([tickhash, tockhash]))
+                }
+            })
+
+            ments.forEach((ment,idx) => {
+                let [code, cash] = ment
+                feenum -= bnum(cash)
+                // TODO check not exists
+                // TODO pyre
+                twig.etch(rkey('ment', tickhash, n2b(BigInt(idx))), roll([code, cash]))
+            })
+        })
+
+        rite.etch(rkey('fold', tockhash, tack_idx), roll([nextsnap, n2b(feenum)]))
+        // TODO if it's the last tack, set know
+    })
     throw err(`todo vult`)
 }
 
-/*
-// vult_thin grows possibly-valid state tree
-//   (could also invalidate tock)
-function vult_thin(tree :Tree, tock :Tock) :OpenMemo {
-    // aver prev tock must exist
-    // aver well/vinx
-    let head = mash(roll(tock))
-    let prev_head = tock[0]
-    let prev_tock = unroll(tree.rock.read_one(rkey('tock', prev_head)))
-    let prev_work = tree.rock.read_one(rkey('work', prev_head))
-    let this_work = n2b(bnum(prev_work) + tuff(head))
-    let prev_fold = tree.rock.read_one(rkey('fold', prev_head, n2b(BigInt(0))))
-    aver(_=> prev_fold.length > 0, `prev fold must exist`)
-    let [prev_snap,,] = unroll(prev_fold)
-    tree.grow(prev_snap as Snap, (rite,twig,snap) => {
-        rite.etch(rkey('tock', head), roll(tock))
-        console.log('vult_thin oetched tock', head)
-        rite.etch(rkey('work', head), this_work)
-        rite.etch(rkey('fold', head, h2b('00')), roll([snap, h2b('00')])) // [snap, fees]
-        twig.etch(rkey('ment', head, h2b('07')), roll([head, h2b('00')])) // [code, cash]
-        // pent only set by vult_full, where we will know the foot tick
-        //twig.etch(rkey('pent', prev_head, h2b('07')), roll([head, foot])
-    })
-    return [MemoType.AskTocks, head]
-}
-*/
-
-    /*
-// vult_full grows definitely-valid state tree
-//   (could also invalidate tock)
-function vult_full(tree :Tree, tock :Tock) { // :Memo
-
-    let last = rock.read ... last applied tack
-    let tack = rock.read ... this tack
-    let ticks = rock.read ...
-    let [head,i,ribs,feet] = tack
-
-    let [prev_snap, prev_fees] = r.read([ 'fold', tockhash, i ])
-
-    let time = tock.time
-    let fees = 0
-    let valid
-    let next_snap = tree.grow(prev_snap, twig => {
-      try {
-        for tick in ticks {
-          for move in moves {
-            need twig.has ['ment' move.mark]   // move exists
-            need !twig.has ['pent' move.mark]  // not spent
-            need time < pyre                   // not expired
-            let [_code,cash] = twig.read(move.mark)
-            put pent                           // mark it spent
-            fees += cash
-          }
-          for ment in ments {
-            need !twig.has 'ment' ment         // not exists
-            put ment                           // put utxo
-            put pyre = time + 17y              // put expiry
-            fees -= ment.cash
-          }
-          valid = true
-        }
-      } catch err {
-        valid = false
-        throw err
-      }
-    })
-
-    if (!valid) {
-        rock.etch ['know head] 'DN  // definitely-not-valid
-        return memo( err / ... )
-    }
-
-    let fees = pfees + fees
-    rock.etch ['fold head i] [next fees]
-    rock.etch ['tack head i] tack
-    if last tack {
-        need fees == mint // net fee is just the subsidy
-        rock.etch ['know head] 'DV // definitely-valid
-        return memo( ask/tock ... )
-    } else {
-        return memo( ask/tack ... )
-    }
-
-    return fail(`todo vult_full`)
-
-}
-    */
