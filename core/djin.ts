@@ -102,7 +102,6 @@ class Djin {
         throw err(`unrecognized turn line: ${line}`)
     }
 
-    // TODO test coverage
     _ask_tocks(memo :MemoAskTocks) :OpenMemo {
         let [line, body] = memo
         let tail = body as Mash
@@ -116,24 +115,48 @@ class Djin {
             ;[snap, ] = unroll(foldroll)
         })
         // TODO batching:  nexts = [];  grab up to chunk size tocks
-        // TODO empty is not a panic, you might not have it
         let next;
         this.tree.look(snap, (rock,twig) => {
             let pentroll = twig.read(rkey('pent', best, h2b('07')))
-            aver(_=> blen(pentroll) > 0, `panic, empty pent for best`)
-            ;[ , next] = unroll(pentroll)
+            if (blen(pentroll) > 0) {
+                ;[ , next] = unroll(pentroll)
+            }
         })
-        let tockroll = this.rock.read_one(rkey('tock', next))
-        let tock = unroll(tockroll) as Tock
-        return [MemoType.SayTocks, [tock]]
+        if (next) {
+            let tockroll = this.rock.read_one(rkey('tock', next))
+            let tock = unroll(tockroll) as Tock
+            return [MemoType.SayTocks, [tock]]
+        } else {
+            throw err(`todo no next tock`)
+        }
     }
 
-    _ask_tacks(memo :MemoAskTacks) :MemoSayTacks {
-        throw err(`todo ask_tacks`)
+    _ask_tacks(memo :MemoAskTacks) :OpenMemo {
+        let [line, body] = memo
+        let [tockhash, idx] = body as [Mash, Blob]
+        let tackroll = this.rock.read_one(rkey('tack', tockhash, idx))
+        if (blen(tackroll) > 0) {
+            let tack = unroll(tackroll) as Tack
+            return [MemoType.SayTacks, [tack]]
+        } else {
+            throw err(`todo no such tack`)
+        }
     }
 
-    _ask_ticks(memo :MemoAskTicks) :MemoSayTicks|MemoErr {
-        throw err(`todo _ask_ticks`)
+    _ask_ticks(memo :MemoAskTicks) :OpenMemo {
+        let [line, body] = memo
+        let tickhashes = body as Mash[]
+        let ticks = []
+        this.rock.rite(r => { // todo readonly
+            tickhashes.forEach(tickhash => {
+                let tickroll = r.read(rkey('tick', tickhash))
+                if (blen(tickroll) > 0) {
+                    let tick = unroll(tickroll) as Tick
+                    ticks.push(tick)
+                }
+            })
+        })
+        return [MemoType.SayTicks, ticks]
     }
 
     _say_tocks(memo :MemoSayTocks) :OpenMemo {
