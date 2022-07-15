@@ -36,7 +36,6 @@ export {
 
 //  [(snap) 'ment', mark       -> ment // utxo put [code, cash]
 //  [(snap) 'pent', mark       -> pent // utxo use [tish, tosh] (by tick, in tock)
-//  [(snap) 'pyre', mark       -> time // utxo expires
 
 
 // A twig is a database transaction over Tree, similar to how
