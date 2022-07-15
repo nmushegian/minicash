@@ -51,40 +51,49 @@ function _checksig(tick :Tick, i :number, lock :Code) :boolean {
 // returns total fees if ok
 function vinx_tick(conx :Tick[], tick :Tick, tock? :Tock) :Okay<Fees> {
     try {
-        conx.forEach(x => form_tick(x as Roll))
-        form_tick(tick)
+        aver(_=> {
+            conx.forEach(x => okay(form_tick(x as Roll)))
+            okay(form_tick(tick))
+            if (tock) {
+                okay(form_tock(tock))
+            }
+            return true
+        }, `vinx_tick args not well-formed`)
 
         const moves = tick[0]
-        let ticash = BigInt(0)
+        const ments = tick[1]
+        let fees = BigInt(0)
+
         let ismint = false
         moves.forEach((move, moveidx) => {
             const [txin, indx, sign] = move
-            const indxnum = Number('0x'+b2h(indx))
+            const indxnum = parseInt(b2h(indx), 16)
             if (indxnum == 7) {
+                // TODO some can be `aver` based on well-formed check
+                need(moves.length == 1, `mint tick must have only 1 move`)
+                need(ments.length == 1, `mint tick must have only 1 ment`)
+                need(tock != undefined, 'panic: vinx_tick - indx 7 but tock undefined')
+                need(bleq(txin, mash(roll(tock))), 'bad prev tock hash')
                 ismint = true
-                const prev = txin
-                aver(_ => tock != undefined, 'panic: vinx_tick - indx 7 but tock undefined')
-                need(bleq(prev, mash(roll(tock))), 'bad prev tock hash')
                 return
             }
-            const intx = conx.find(x => mash(roll(x)).equals(txin)) // stupid
+            const intx = conx.find( x => bleq(txin, mash(roll(x))) )
             const iments  = intx[1]
             need(indxnum < iments.length, 'indx out of bounds')
-            const iment = intx[1][Number(indxnum)]
+            const iment = iments[indxnum]
             const [icode, icash] = iment
             need(_checksig(tick, moveidx, icode), 'bad sign')
-            ticash += BigInt('0x' + b2h(icash))
+            fees += bnum(icash)
         })
 
-        const ments = tick[1]
-        let tocash = BigInt(0)
         ments.forEach((ment, mentidx) => {
             const cash = ment[1]
-            tocash += BigInt('0x' + b2h(cash))
+            fees -= bnum(cash)
         })
 
-        need(ismint || ticash >= tocash, `non-mint tick fees must be >= 0`)
-        return pass(tocash - ticash)
+        need(ismint || fees >= 0, `non-mint tick fees must be >= 0`)
+        return pass(fees)
+
     } catch (e) {
         return fail(e.message)
     }
@@ -105,24 +114,16 @@ function vinx_tack(tock :Tock, tack :Tack) :Okay<void> {
 
         aver(_ => bleq(roll(head), roll(tock)), 'panic: vinx_tack precondition - head tock mismatch')
         aver(_ => ribs.length <= 128, 'panic: vinx_tack precondition - len(ribs) must be <= 128')
-        aver(_ => feet.length <= 2 ** 17, 'panic: vinx_tack precondition - feet.length must be <= 2^17')
+        aver(_ => feet.length <= 1024, 'panic: vinx_tack precondition - feet.length must be <= 1024')
 
         if (ribs.length == 0) {
             need(bnum(eye) == BigInt(0), `eye must be 0 if ribs empty`)
             need(feet.length < 512, `len(feet) must be <512 if ribs empty`)
             need(bleq(merk(feet), root), 'merkelization failed')
         } else { // ribs len > 0
-            let nchunks = Math.ceil(feet.length / 1024)
-            need(
-                ribs.length >= nchunks,
-                `len(ribs) must be ceil(len(feet)/1024) if ribs not empty`
-            )
-            const eyenum = Number('0x' + eye.toString('hex'))
-            for (let i = 0; i < nchunks; i++) {
-                let chunkstart = i * 1024
-                let chunk = feet.slice(chunkstart, chunkstart + 1024)
-                need(bleq(merk(chunk), ribs[i + eyenum]), `bad merkelization`)
-            }
+            const eyenum = parseInt(b2h(eye), 16)
+            let rib = merk(feet)
+            need(bleq(rib, ribs[eyenum]), `tack feet do not merk to specified rib`)
             need(bleq(merk(ribs), root), 'bad rib merkelization')
         }
         return pass(undefined)

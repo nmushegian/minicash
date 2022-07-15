@@ -1,24 +1,13 @@
 import {
-    aver,
+    Okay, okay, aver, need, pass, fail, err,
     b2h,
-    bleq,
-    Blob, bnum,
-    fail,
-    isblob,
-    islist,
-    isroll,
-    Memo,
-    MemoType,
-    need,
-    Okay,
-    okay,
-    OpenMemo,
-    pass,
+    Blob, bnum, bleq,
     Roll,
-    Tack,
-    Tick,
-    Tock,
-    memo_open
+    Mash,
+    isblob, islist, isroll,
+    Memo, MemoType, OpenMemo,
+    Tick, Tack, Tock,
+    memo_open, h2b
 } from './word.js'
 
 export {
@@ -45,14 +34,16 @@ function form_memo(x :Roll) :Okay<Memo> {
             return pass(x)
         }
         if (line == MemoType.AskTacks) {
-            let tackhash = body
-            need(isblob(tackhash), 'tack hash must be a blob')
-            need(tackhash.length == 24, 'tack hash must be len 24')
+            let [tockhash, idx] = body
+            need(isblob(tockhash), 'tock hash must be a blob')
+            need((tockhash as Mash).length == 24, 'tock hash must be len 24')
+            need(isblob(idx), `tack idx must be a blob`)
+            need((idx as Blob).length == 1, `tack idx must be len 1`)
             return pass(x)
         }
         if (line == MemoType.AskTicks) {
             let tickhashes = body
-            need(!isblob(tickhashes), 'tick hashes must be a list')
+            need(islist(tickhashes), 'tick hashes must be a list')
             tickhashes.forEach(t => {
                 need(isblob(t), 'tick hash must be a blob')
                 need(t.length == 24, 'tick hash must be len 24')
@@ -113,7 +104,10 @@ function form_tack(x :Roll) :Okay<Tack> {
         need(ribs.every(b=>b.length == 24), `ribs must be list of hashes`)
         need(feet.every(isblob), `feet must be a list of blobs`)
         need(feet.every(b=>b.length == 24), `feet must be list of hashes`)
-        need(feet.length <= 2**17, `feet must have len <= 2^17`)
+        need(feet.length <= 1024, `feet must have len <= 1024`)
+        let zero = h2b('00'.repeat(24))
+        need(ribs.every(rib => !bleq(zero, rib)), `rib must not be zero`)
+        need(feet.every(foot => !bleq(zero, foot)), `foot must not be zero`)
         return pass(x)
         // merkle root checked in vinx_tack
     } catch (e) {

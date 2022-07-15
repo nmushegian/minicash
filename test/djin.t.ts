@@ -1,45 +1,67 @@
-import {test} from 'tapzero'
+import Debug from 'debug'
+const dub = Debug('cash:djin')
 
-//import { tick } from '../core/cash.js'
-import {Djin} from '../core/djin.js'
+import { test } from 'tapzero'
+import { jams } from 'jams.js'
 
+import { Djin } from '../core/djin.js'
 
-import {h2b, mash, memo, MemoType, merk, okay, roll, Tick,} from '../core/word.js'
+import {
+    b2h, h2b, n2b, t2b, b2t,
+    okay, need,
+    bleq, bnum, extend,
+    roll, rmap,
+    mash, merk, addr,
+    MemoType, memo, memo_close, memo_open,
+    sign,
+    Tick, Tack, Tock
+} from '../core/word.js'
 
+import { readdirSync, readFileSync } from "fs";
 
-test('djin', t=>{ try {
-    let djin = new Djin('test/db', true)
-    let out
-    out = okay(djin.turn(memo(MemoType.AskTocks, mash(roll(djin.bang)))))
-    t.deepEqual(out, memo(MemoType.SayTocks, [djin.bang]))
+const flatten = x => {
+    if (isNaN(Number('0x'+x))) {
+        return t2b(x)
+    }
+    return h2b(x)
+}
 
-    let tick1 = [[
-        [] // no moves
-    ],[
-        [h2b('00'.repeat(20)), h2b('00'.repeat(7))] // 1 ment with miner reward
-    ]]
+const runcase = (dir, name) => {
+    if (!name.endsWith('.jams')) return
+    test(`${name}`, t => {
+        dub(`TESTING: ${dir + name}`)
+        let djin = new Djin('./test/db', true)
+        let path = dir + name
+        let file = readFileSync(path)
+        let data = jams(file.toString())
+        let prev
+        for (let cmd of data) {
+            let func = cmd[0]
+            need(func == 'send' || func == 'want', 'only doing send and want for now...')
+            if ('send' == func) {
+                let memo = rmap(cmd[1], h2b)
+                dub(`send ${rmap(memo, b2h)}`)
+                dub(memo_open(memo))
+                prev = djin.turn(memo)
+            }
+            if ('want' == func) {
+                dub(`want (actual=[${rmap(prev, b2h)}]) expected=[${cmd[1]}`)
+                dub(bleq(roll(rmap(cmd[1], flatten)), roll(prev)))
+                if (!bleq(roll(rmap(cmd[1], flatten)), roll(prev))) {
+                    dub(`actual = ${rmap(prev, b2t)}`)
+                    t.fail(`want fail expected=${cmd[1]} actual=${rmap(prev, b2h)}`)
+                    break
+                }
+            }
+        }
+        djin.kill()
+    })
+}
 
-    let tack1 = [
-        undefined, // head
-        [], // eyes
-        [merk([mash(roll(tick1 as Tick))])],
-        [tick1],
-    ]
+test('djin', t=>{
+    let dir = './test/case/djin/'
+    let cases = readdirSync(dir)
 
-    let tock1 = [
-        mash(roll(djin.bang)),
-        merk([mash(roll(tick1 as Tick))]),
-        h2b('00'.repeat(6) + '39'), // 57 in hex
-        h2b('ff'.repeat(7))
-    ]
+    cases.forEach(c => runcase(dir, c))
+})
 
-    tack1[0] = tock1
-
-    // give to djin
-    out = okay(djin.turn(memo(MemoType.SayTocks, [tock1])))
-    // djin asks for tack
-
-    t.deepEqual(out, memo(MemoType.AskTocks, mash(roll(tock1))))
-
-    djin.kill()
-} catch(e) { console.log(e); t.ok(false, e.message); }})

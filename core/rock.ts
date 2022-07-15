@@ -4,12 +4,16 @@ import { default as process } from 'node:process'
 
 import {
     aver, need, toss, err,
-    Blob, isblob, bleq, bcat,
-    b2t, t2b, h2b,
+    Blob, isblob, bleq, bcat, extend,
+    roll,
+    b2t, t2b, h2b, n2b,
+    Mash, mash,
+    Work, Time, Cash, Know, Snap, Fees,
+    Tick, Tock,
 } from './word.js'
 
 export {
-    Rock, Rite, RKey, rkey
+    Rock, Rite, rkey
 }
 
 type RKey = Blob
@@ -25,6 +29,36 @@ class Rite {
         this.dbi = dbi
         this.dbtx = dbtx
     }
+
+    etch_best(tockhash :Mash) {
+        this.etch(rkey('best'),  tockhash)
+    }
+    etch_tock(tock :Tock) {
+        let tockroll = roll(tock)
+        this.etch(rkey('tock', mash(tockroll)),  tockroll)
+    }
+    etch_tick(tick :Tick) {
+        let tickroll = roll(tick)
+        this.etch(rkey('tick', mash(tickroll)), tickroll)
+    }
+
+    etch_work(tockhash :Mash, totalwork :Work) {
+        this.etch(rkey('work', tockhash),  n2b(totalwork))
+    }
+    etch_left(time :bigint, left :bigint) {
+        // extend time to 7 bytes so we can just use the `time` field from tock to get it
+        let key = extend(n2b(time), 7)
+        let val = n2b(left)
+        this.etch(rkey('left', key),  val)
+    }
+    etch_know(tockhash :Mash, know :Know) {
+        this.etch(rkey('know', tockhash),  t2b(know))
+    }
+    etch_fold(tockhash :Mash, foldidx :number, snap :Snap, fees :Fees) {
+        this.etch(rkey('fold', tockhash, n2b(BigInt(foldidx))),
+                  roll([snap, n2b(fees)]))
+    }
+
     etch(key :Blob, val :Blob) {
         aver(_=>isblob(key), `rite.etch key not a blob: ${key}`)
         aver(_=>isblob(val), `rite.etch val not a blob: ${val} (key was ${key})`)

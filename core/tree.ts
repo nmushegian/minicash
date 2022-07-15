@@ -1,45 +1,8 @@
 // pure map abstraction for per-branch items
 
-// This level of abstraction deals with the user's view of the state at each snapshot.
-// In other words, when we switch branches due to reorg, it just "checks out"
-// the other state, rather than having to undo transactions.
-
-// This file implements a simple patricia trie to present a pure kvdb view of state.
-// This is pretty close to what we want in terms of time complexity, but using an
-// adaptive radix trie would make this substantially more space-efficient.
-
-// A twig is a database transaction over Tree, similar to how
-// rite is a database transaction over Rock. In both cases, they
-// are distinct concepts from a minicash transaction, called a tick.
-// A twig is distinct from a rite because it manages a "virtual" mutable view
-// of an underlying immutable map. Remember a tree is a layer of abstraction over a rock
-// for some parts of the databse. A twig uses a single rite, but a single
-// twig.grow(...) generates multiple rite.read(...) and rite.etch(...)
-// because it traverses and updates the trie used to represent the tree.
-
-// Recall these are the "rock" state, the parts that are content-addressed or
-// pseudo-content-addressed, it is insert-only and each key can only have one possible value
-// (with the exception of "best", which only changes when a new tock has higher total work).
-
-// Rock:
-//    ['tick', tickhash]         -> tick
-//    ['tack', tockhash, i]      -> tack
-//    ['tock', tockhash]         -> tock
-//    ['work', tockhash]         -> work  // cumulative work
-//    ['fold', tockhash, i]      -> fold  // [snap, fees]  partial utxo / fees
-//    ['know', tockhash]         -> know  // validity state
-//    ['best']                   -> tock
-
-// This leaves the "tree" state, the parts of the state that are defined with respect
-// to a particular snap.
-
-// Tree:
-//    [(snap) 'ment', mark]      -> ment  // utxo put [code, cash]
-//    [(snap) 'pent', mark]      -> pent  // utxo use [tish, tosh] (by tick, in tock)
-//    [(snap) 'pyre', mark]      -> time  // utxo expires
-
 import Debug from 'debug'
 const dub = Debug('cash:tree')
+
 
 import {
     Blob, bleq,
@@ -51,7 +14,7 @@ import {
     extend
 } from './word.js'
 
-import { Rock, Rite } from './rock.js'
+import { Rock, Rite, rkey } from './rock.js'
 
 export { Tree, Twig }
 
@@ -138,6 +101,7 @@ class Twig {
         this.rite.etch(t2b('aloc'), extend(n2b(bnum(next) + BigInt(n)), 8))
         return next
     }
+
 
     _lookup(snap :Snap, key :Blob, idx :number = 0) :Blob {
         dub('twig._lookup (snap idx key)', snap, idx, key)
