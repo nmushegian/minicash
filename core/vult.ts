@@ -19,8 +19,6 @@ import { Tree, Twig, rkey } from './tree.js'
 
 export {
     vult
-//    vult_thin,
-//    vult_full
 }
 
 function vult(tree :Tree, tock :Tock, thin :boolean = false) :OpenMemo {
@@ -29,8 +27,7 @@ function vult(tree :Tree, tock :Tock, thin :boolean = false) :OpenMemo {
     let [prevhash, root, time, fuzz] = tock
     dub(`tockhash`, tockhash)
 
-
-    // first check if we have already finished validating this tock
+    // check if we have already finished validating this tock
     let know = tree.rock.read_one(rkey('know', tockhash))
     if ('DV' == b2t(know)) {
         return [MemoType.AskTocks, tockhash]
@@ -44,18 +41,6 @@ function vult(tree :Tree, tock :Tock, thin :boolean = false) :OpenMemo {
     // first apply the "thin" state -- this might be redundant, but no values should change
     // - work, the total work
     // - left, a running counter of remaining subsidy
-    // (aver that the prev is present and its thin state was set)
-    aver(_=> {
-        let prevwork = tree.rock.read_one(rkey('work', prevhash))
-        if (blen(prevwork) == 0) return false
-        let time = bnum(tock[2])
-        let prevtime = time - BigInt(57)
-        let prevleft = tree.rock.read_one(rkey('left', extend(n2b(prevtime), 7)))
-        if (blen(prevleft) == 0) return false
-        return true
-    }, `panic: in vult, has no prev tock info`)
-
-
     tree.rock.rite(r => {
         // work is previous work plus `tuff(tockhash)`
         let prevwork = r.read(rkey('work', prevhash))
@@ -85,7 +70,6 @@ function vult(tree :Tree, tock :Tock, thin :boolean = false) :OpenMemo {
 
     // 1. Get the last applied state (fold)
     // the last fold is either in this tock, or the prior one
-
     let snap, fees
     let foldkey, fold
     let tack_idx
@@ -185,4 +169,3 @@ function vult(tree :Tree, tock :Tock, thin :boolean = false) :OpenMemo {
     })
     throw err(`todo vult`)
 }
-

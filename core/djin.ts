@@ -56,27 +56,19 @@ class Djin {
         this.rock.shut()
     }
 
-    async *spin(memo) {
-        // todo aver well-formed
-        // todo aver valid-in-context
-
-        // split up memo into units
-        // turn/reflect/yield K turns at a time
-        //   one unit memo can cause more than one turn
-
-        // let memos = as_units(memo)
-        // i = 0
-        // for memo in memos
-        //   let next = memo
-        //   while true:
-        //     let out = turn(memo)
-        //     if (out.err)
-        //       return out
-        //     else
-        //       next = out
-        //     if (i++ % K == 0)
-        //       yield
-
+    async *spin(memos :Memo[]) {
+        /*
+          for memo in memos
+            let out = turn(memo)
+            yield
+            let back = turn(out)
+            yield
+            if back is 'unavailable'
+              return back
+            else
+              out = back
+              continue
+        */
     }
 
     turn(memo :Memo) :Okay<Memo> {
@@ -88,34 +80,22 @@ class Djin {
         let line = copy[0]
 
         if (MemoType.AskTocks == line) {
-            // -> say/tocks | err
             return pass(memo_close(this._ask_tocks(copy as MemoAskTocks)))
         }
         if (MemoType.AskTacks == line) {
-            // -> say/tacks | err
             return pass(memo_close(this._ask_tacks(copy as MemoAskTacks)))
         }
         if (MemoType.AskTicks == line) {
-            // -> say/ticks | err
             return pass(memo_close(this._ask_ticks(copy as MemoAskTicks)))
         }
 
         if (MemoType.SayTocks == line) {
-            // -> ask/tocks    proceed
-            // -> ask/tacks    need tacks
-            // -> ask/ticks    need ticks
-            // -> err
             return pass(memo_close(this._say_tocks(copy as MemoSayTocks)))
         }
         if (MemoType.SayTacks == line) {
-            // -> ask/tocks    proceed
-            // -> ask/tacks    proceed
-            // -> ask/ticks    need ticks
             return pass(memo_close(this._say_tacks(copy as MemoSayTacks)))
         }
         if (MemoType.SayTicks == line) {
-            // -> say/ticks    accept/rebroadcast
-            // -> err
             return pass(memo_close(this._say_ticks(copy as MemoSayTicks)))
         }
 
@@ -174,7 +154,7 @@ class Djin {
 
         // vinx here
 
-        let outs = []
+        let outs = [] // rebroadcast any new ticks
         this.rock.rite(r => {
             ticks.forEach(tick => {
                 let tickhash = mash(roll(tick))
