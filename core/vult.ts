@@ -5,13 +5,12 @@ const dub = Debug('cash:vult')
 
 import {
     need, pass, fail, aver, err,
-    Work, Snap, Fees, Know, tuff,
-    mash,
+    Work, Snap, Fees, Know,
+    mash, tuff
     Blob, bleq, blen, bcat, bnum, extend,
     roll, unroll,
     h2b, b2h, n2b, b2t, t2b,
-    Memo, memo,
-    MemoType, OpenMemo,
+    Memo, memo, MemoType, OpenMemo,
     Tick, Tock, Tack,
 } from './word.js'
 
@@ -155,13 +154,14 @@ function vult(tree :Tree, tock :Tock, thin :boolean = false) :OpenMemo {
                 feenum -= bnum(cash)
                 let have = twig.read(rkey('ment', tickhash, n2b(BigInt(idx))))
                 need(have.length == 0, `invalid: this ment already exists`)
-                // TODO pyre
+                // TODO pyre?
                 twig.etch(rkey('ment', tickhash, n2b(BigInt(idx))), roll([code, cash]))
             })
         })
 
         rite.etch_fold(tockhash, bnum(tack_idx), nextsnap, feenum)
         if (is_last_tack) {
+            // TODO check mint tick amount is subsidy + fees
             rite.etch_know(tockhash ,'DV')
             let prev_best = rite.read(rkey('best'))
             let best_work = rite.read(rkey('work', prev_best))
