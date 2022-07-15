@@ -27,7 +27,7 @@ function vult(tree :Tree, tock :Tock) :OpenMemo {
     // check if we have already finished validating this tock
     let know = tree.rock.read_one(rkey('know', tockhash))
     if ('DV' == b2t(know))
-        return [MemoType.AskTocks, tockhash]
+        return [MemoType.AskTock, tockhash]
     if ('DN' == b2t(know))
         return [MemoType.Err, ['invalid', tockhash]]
     // haven't validated it before, proceed
@@ -75,7 +75,7 @@ function vult(tree :Tree, tock :Tock) :OpenMemo {
     let tackblob = tree.rock.read_one(rkey('tack', tockhash, Buffer.from([tack_idx])))
     if (blen(tackblob) == 0) {
         dub(`don't have this tack, requesting it`)
-        return [MemoType.AskTacks, [tockhash, Buffer.from([tack_idx])]]
+        return [MemoType.AskTack, [tockhash, Buffer.from([tack_idx])]]
     }
     let tack = unroll(tackblob)
     let eye  = tack[1] as Blob
@@ -170,9 +170,9 @@ function vult(tree :Tree, tock :Tock) :OpenMemo {
             if (work > bnum(best_work)) {
                 rite.etch_best(tockhash)
             }
-            out = [MemoType.AskTocks, tockhash]
+            out = [MemoType.AskTock, tockhash]
         } else {
-            out = [MemoType.AskTacks, tockhash, tack_idx + 1]
+            out = [MemoType.AskTack, tockhash, tack_idx + 1]
         }
     }) /* try tree.grow */ } catch (e) {
         dub('vult throw', e.message)
