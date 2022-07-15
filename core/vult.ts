@@ -38,10 +38,11 @@ function vult(tree :Tree, tock :Tock, thin :boolean = false) :OpenMemo {
     // first apply the header state -- this might be redundant, but no values should change
     // - work, the total work
     // - left, a running counter of remaining subsidy
+    let work // save for if we update `best`
     tree.rock.rite(r => {
         // work is previous work plus `tuff(tockhash)`
         let prevwork = r.read(rkey('work', prevhash))
-        let work = prevwork + tuff(tockhash)
+        work = prevwork + tuff(tockhash)
         r.etch_work(tockhash, work)
         // left is indexed by timestamp bc its the same regardless of branch
         let time = bnum(tock[2])
@@ -162,6 +163,11 @@ function vult(tree :Tree, tock :Tock, thin :boolean = false) :OpenMemo {
         rite.etch_fold(tockhash, bnum(tack_idx), nextsnap, feenum)
         if (is_last_tack) {
             rite.etch_know(tockhash ,'DV')
+            let prev_best = rite.read(rkey('best'))
+            let best_work = rite.read(rkey('work', prev_best))
+            if (work > bnum(best_work)) {
+                rite.etch_best(tockhash)
+            }
             out = [MemoType.AskTocks, tockhash]
         } else {
             out = [MemoType.AskTacks, tockhash, tack_idx + 1]
