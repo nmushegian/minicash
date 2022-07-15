@@ -42,7 +42,7 @@ class Djin {
         let bangroll = roll(this.bang)
         let banghash = mash(bangroll)
         dub('banghash', banghash)
-        this.tree.grow(h2b(''), (rite,twig,snap) => {
+        this.tree.grow(h2b('00'.repeat(8)), (rite,twig,snap) => {
             rite.etch_best(banghash)
             rite.etch_tock(this.bang)
             rite.etch_work(banghash, tuff(bangroll))
