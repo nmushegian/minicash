@@ -7,7 +7,7 @@ import { jams } from 'jams.js'
 import { Djin } from '../core/djin.js'
 
 import {
-    b2h, h2b, n2b, t2b,
+    b2h, h2b, n2b, t2b, b2t,
     okay, need,
     bleq, bnum, extend,
     roll, rmap,
@@ -40,16 +40,15 @@ const runcase = (dir, name) => {
             need(func == 'send' || func == 'want', 'only doing send and want for now...')
             if ('send' == func) {
                 let memo = rmap(cmd[1], h2b)
+                dub(`send ${rmap(memo, b2h)}`)
                 dub(memo_open(memo))
-                let [ok, val, err] = djin.turn(memo)
-                let out = memo_open(val)
-                prev = val
-                t.equal(ok, true, `${name} send ${rmap(cmd[1], b2h)}`)
+                prev = djin.turn(memo)
             }
             if ('want' == func) {
                 dub(`want (actual=[${rmap(prev, b2h)}]) expected=[${cmd[1]}`)
                 dub(bleq(roll(rmap(cmd[1], flatten)), roll(prev)))
                 if (!bleq(roll(rmap(cmd[1], flatten)), roll(prev))) {
+                    dub(`actual = ${rmap(prev, b2t)}`)
                     t.fail(`want fail expected=${cmd[1]} actual=${rmap(prev, b2h)}`)
                     break
                 }

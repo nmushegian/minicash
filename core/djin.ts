@@ -56,50 +56,49 @@ class Djin {
         this.rock.shut()
     }
 
-    async *spin(memos :Memo[]) {
+    async *spin(memos :Memo) {
         /*
-          for memo in memos
-            let out = turn(memo)
-            yield
-            let back = turn(out)
-            yield
-            if back is 'unavailable'
-              return back
-            else
-              out = back
-              continue
+          let out = turn(memo)
+          yield
+          let back = turn(out)
+          yield
+          if back is 'unavailable'
+          return back
+          else
+          out = back
+          continue
         */
     }
 
-    turn(memo :Memo) :Okay<Memo> {
+    turn(memo :Memo) :Memo {
         if (!form_memo(memo)[0]) {
-            return pass(memo_close([MemoType.Err, ['invalid', memo]]))
+            return memo_close([MemoType.Err, ['invalid', memo]])
         }
 
         let copy = memo_open(memo)
         let line = copy[0]
 
         if (MemoType.AskTocks == line) {
-            return pass(memo_close(this._ask_tocks(copy as MemoAskTocks)))
+            return memo_close(this._ask_tocks(copy as MemoAskTocks))
         }
         if (MemoType.AskTacks == line) {
-            return pass(memo_close(this._ask_tacks(copy as MemoAskTacks)))
+            return memo_close(this._ask_tacks(copy as MemoAskTacks))
         }
         if (MemoType.AskTicks == line) {
-            return pass(memo_close(this._ask_ticks(copy as MemoAskTicks)))
+            return memo_close(this._ask_ticks(copy as MemoAskTicks))
         }
 
         if (MemoType.SayTocks == line) {
-            return pass(memo_close(this._say_tocks(copy as MemoSayTocks)))
+            return memo_close(this._say_tocks(copy as MemoSayTocks))
         }
         if (MemoType.SayTacks == line) {
-            return pass(memo_close(this._say_tacks(copy as MemoSayTacks)))
+            return memo_close(this._say_tacks(copy as MemoSayTacks))
         }
         if (MemoType.SayTicks == line) {
-            return pass(memo_close(this._say_ticks(copy as MemoSayTicks)))
+            return memo_close(this._say_ticks(copy as MemoSayTicks))
         }
 
-        return fail(`unrecognized turn line: ${line}`)
+        throw err(`unrecognized turn line: ${line}`)
     }
 
     _ask_tocks(memo :MemoAskTocks) :OpenMemo {
@@ -119,14 +118,17 @@ class Djin {
         let tocks = body as Tock[]
         aver(_=> tocks.length == 1, `_say_tocks memo not split into units`)
 
-        // vinx here
-
         let tock = tocks[0]
         let prevhash = tock[0]
         let prevroll = this.rock.read_one(rkey('tock', prevhash))
         if (blen(prevroll) == 0) {
             return [MemoType.Err, ['unavailable', prevhash]]
         }
+
+        // TODO vinx here
+        let tockroll = roll(tock)
+        let tockhash = mash(tockroll)
+        this.rock.etch_one(rkey('tock', tockhash), tockroll)
 
         return vult(this.tree, tock)
     }
@@ -136,7 +138,7 @@ class Djin {
         let tacks = body as Tack[]
         aver(_=> tacks.length == 1, `_say_tacks memo not split into units`)
 
-        // vinx here
+        // TODO vinx here
 
         let tack = tacks[0]
         let tock = tack[0]
@@ -152,7 +154,7 @@ class Djin {
         let ticks = body as Tick[]
         aver(_=> ticks.length <= 1024, `_say_ticks not split into chunks`)
 
-        // vinx here
+        // TODO vinx here
 
         let outs = [] // rebroadcast any new ticks
         this.rock.rite(r => {

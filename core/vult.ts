@@ -4,12 +4,12 @@ import Debug from 'debug'
 const dub = Debug('cash:vult')
 
 import {
-    Okay, pass, fail, aver, err,
+    need, pass, fail, aver, err,
     Work, Snap, Fees, Know, tuff,
     mash,
-    Blob,
-    roll, unroll, bnum, blen, extend,
-    h2b, b2h, n2b, b2t, bcat,
+    Blob, bleq, blen, bcat, bnum, extend,
+    roll, unroll,
+    h2b, b2h, n2b, b2t, t2b,
     Memo, memo,
     MemoType, OpenMemo,
     Tick, Tock, Tack,
@@ -72,7 +72,7 @@ function vult(tree :Tree, tock :Tock, thin :boolean = false) :OpenMemo {
     // the last fold is either in this tock, or the prior one
     let snap, fees
     let foldkey, fold
-    let tack_idx
+    let tack_idx // the *next* tack index, the one we need to get
     // key length for find_max API is 29:  4 ('fold') + 24 (tockhash) + 1 (foldidx)
     // prefix is ('fold' ++ tockhash)
     tree.rock.rite(r => {
@@ -82,7 +82,7 @@ function vult(tree :Tree, tock :Tock, thin :boolean = false) :OpenMemo {
         // it's in this tock, so next tack is last + 1
         dub('fold is in this tock')
         ;[snap, fees] = unroll(fold)
-        tack_idx = foldkey[foldkey.length - 1]
+        tack_idx = foldkey[foldkey.length - 1] + 1
     } else {
         // it's in the prior tock, so next tack is this tock's tack 0
         dub('fold is in prior tock')
@@ -103,6 +103,10 @@ function vult(tree :Tree, tock :Tock, thin :boolean = false) :OpenMemo {
         return [MemoType.AskTacks, [tockhash, Buffer.from([tack_idx])]]
     }
     let tack = unroll(tackblob)
+    let eye  = tack[1] as Blob
+    let ribs = tack[2] as Blob[]
+    let is_last_tack = (bnum(eye) == BigInt(ribs.length - 1))
+                    || (bleq(eye, h2b('00')) && ribs.length == 0)
     dub(`have this tack, checking if we have ticks`)
 
     // 3. get the ticks, request missing ones
@@ -124,9 +128,10 @@ function vult(tree :Tree, tock :Tock, thin :boolean = false) :OpenMemo {
     }
 
     // 4. apply the ticks
+    let out
     let feenum = bnum(fees)
-    tree.grow(snap, (rite,twig,nextsnap) => {
-        ticks.forEach(tick => {
+    try { tree.grow(snap, (rite,twig,nextsnap) => {
+        ticks.forEach((tick,tick_idx) => {
             let tickhash = mash(roll(tick))
             dub(`applying tick`, tick)
             let moves = tick[0]
@@ -137,10 +142,12 @@ function vult(tree :Tree, tock :Tock, thin :boolean = false) :OpenMemo {
                 let [txin, idx, sig] = move
                 let idxnum = parseInt(b2h(idx), 16)
                 if (idxnum == 7) {
-                    dub(`todo idxnum == 7`)
-                    // todo need last tick
-                    // todo need txin == prevhash
-                    // todo set pent
+                    dub('is_last_tack', is_last_tack)
+                    dub('tick idx, ticks length-1', tick_idx, ticks.length - 1)
+                    need( is_last_tack && (tick_idx == ticks.length - 1),
+                        `invalid: move has idx 7, but it isn't the last tick`)
+                    need( bleq(txin, prevhash), `invalid: move has idx 7, but txin is not prevhash`)
+                    // todo set tock pent ?
                 } else {
                     let conxblob = rite.read(rkey('tick', txin))
                     aver(_=> conxblob.length > 0, `panic, no context for tick in vult`)
@@ -149,8 +156,10 @@ function vult(tree :Tree, tock :Tock, thin :boolean = false) :OpenMemo {
                     let consumed = conxments[idxnum]
                     let [, cash] = consumed
                     feenum += cash
-                    // TODO check exists
-                    // TODO check not pent
+                    let have = twig.read(rkey('ment', txin, idx))
+                    need(have.length > 0, `invalid: no such ment exists: ${txin} ${idx}`)
+                    let pent = twig.read(rkey('pent', txin, idx))
+                    need(pent.length == 0, `invalid: ment already pent: ${txin} ${idx}`)
                     twig.etch(rkey('pent', txin, idx), roll([tickhash, tockhash]))
                 }
             })
@@ -158,14 +167,30 @@ function vult(tree :Tree, tock :Tock, thin :boolean = false) :OpenMemo {
             ments.forEach((ment,idx) => {
                 let [code, cash] = ment
                 feenum -= bnum(cash)
-                // TODO check not exists
+                let have = twig.read(rkey('ment', tickhash, n2b(BigInt(idx))))
+                need(have.length == 0, `invalid: this ment already exists`)
                 // TODO pyre
                 twig.etch(rkey('ment', tickhash, n2b(BigInt(idx))), roll([code, cash]))
             })
         })
 
         rite.etch(rkey('fold', tockhash, tack_idx), roll([nextsnap, n2b(feenum)]))
-        // TODO if it's the last tack, set know
-    })
-    throw err(`todo vult`)
+        if (is_last_tack) {
+            rite.etch(rkey('know', tockhash), t2b('DV'))
+            out = [MemoType.AskTocks, tockhash]
+        } else {
+            out = [MemoType.AskTacks, tockhash, tack_idx + 1]
+        }
+    }) } catch (e) {
+        dub('vult throw', e.message)
+        if (e.message.startsWith('invalid')) {
+            tree.rock.etch_one(rkey('know', tockhash), t2b('DN'))
+            return [MemoType.Err, ['invalid', e.message]]
+        } else {
+            dub('vult rethrow', e.message)
+            throw e
+        }
+    }
+    dub('vult success')
+    return out
 }
