@@ -116,13 +116,16 @@ class Djin {
             ;[snap, ] = unroll(foldroll)
         })
         // TODO batching:  nexts = [];  grab up to chunk size tocks
+        // TODO empty is not a panic, you might not have it
         let next;
         this.tree.look(snap, (rock,twig) => {
             let pentroll = twig.read(rkey('pent', best, h2b('07')))
             aver(_=> blen(pentroll) > 0, `panic, empty pent for best`)
             ;[ , next] = unroll(pentroll)
         })
-        return [MemoType.SayTocks, [next]]
+        let tockroll = this.rock.read_one(rkey('tock', next))
+        let tock = unroll(tockroll) as Tock
+        return [MemoType.SayTocks, [tock]]
     }
 
     _ask_tacks(memo :MemoAskTacks) :MemoSayTacks {
