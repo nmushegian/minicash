@@ -9,7 +9,7 @@ import {
     b2t, t2b, h2b, n2b,
     Mash, mash,
     Work, Time, Cash, Know, Snap, Fees,
-    Tock,
+    Tick, Tock,
 } from './word.js'
 
 export {
@@ -37,6 +37,11 @@ class Rite {
         let tockroll = roll(tock)
         this.etch(rkey('tock', mash(tockroll)),  tockroll)
     }
+    etch_tick(tick :Tick) {
+        let tickroll = roll(tick)
+        this.etch(rkey('tick', mash(tickroll)), tickroll)
+    }
+
     etch_work(tockhash :Mash, totalwork :Work) {
         this.etch(rkey('work', tockhash),  n2b(totalwork))
     }

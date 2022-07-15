@@ -162,7 +162,7 @@ class Djin {
                 let tickhash = mash(roll(tick))
                 let have = r.read(rkey('tick', tickhash))
                 if (have.length == 0) {
-                    r.etch(rkey('tick', tickhash), roll(tick))
+                    r.etch_tick(tick)
                     outs.push(tick)
                 }
             })

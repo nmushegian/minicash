@@ -174,9 +174,9 @@ function vult(tree :Tree, tock :Tock, thin :boolean = false) :OpenMemo {
             })
         })
 
-        rite.etch(rkey('fold', tockhash, tack_idx), roll([nextsnap, n2b(feenum)]))
+        rite.etch_fold(tockhash, bnum(tack_idx), nextsnap, feenum)
         if (is_last_tack) {
-            rite.etch(rkey('know', tockhash), t2b('DV'))
+            rite.etch_know(tockhash ,'DV')
             out = [MemoType.AskTocks, tockhash]
         } else {
             out = [MemoType.AskTacks, tockhash, tack_idx + 1]
