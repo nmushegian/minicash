@@ -29,16 +29,13 @@ function vult(tree :Tree, tock :Tock, thin :boolean = false) :OpenMemo {
 
     // check if we have already finished validating this tock
     let know = tree.rock.read_one(rkey('know', tockhash))
-    if ('DV' == b2t(know)) {
+    if ('DV' == b2t(know))
         return [MemoType.AskTocks, tockhash]
-    }
-    if ('DN' == b2t(know)) {
+    if ('DN' == b2t(know))
         return [MemoType.Err, ['invalid', tockhash]]
-    }
     // haven't validated it before, proceed
 
-
-    // first apply the "thin" state -- this might be redundant, but no values should change
+    // first apply the header state -- this might be redundant, but no values should change
     // - work, the total work
     // - left, a running counter of remaining subsidy
     tree.rock.rite(r => {
@@ -54,19 +51,7 @@ function vult(tree :Tree, tock :Tock, thin :boolean = false) :OpenMemo {
         r.etch_left(time, left)
     })
 
-
-    // now try to apply the "full" state
-    // 1. get the last applied state (fold)
-    // 2. get the next tack to apply
-    //    if not available, request it
-    // 3. get all the ticks for that tack
-    //    if not available, request them
-    // 4. apply them
-    //    if success, set fold
-    //        if last fold, set know=DV
-    //        else request next fold
-    //    else fail, set know=DN
-
+    // Try to apply the body state
 
     // 1. Get the last applied state (fold)
     // the last fold is either in this tock, or the prior one
