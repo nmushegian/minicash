@@ -8,7 +8,7 @@ import {
     b2h, h2b, n2b, b2t, t2b,
     Blob, bleq, blen, extend,
     roll, unroll, rmap, islist,
-    mash, tuff,
+    Mash, mash, tuff,
     Tick, Tack, Tock,
     Memo, MemoType, MemoErr,
     MemoSayTicks, MemoSayTacks, MemoSayTocks,
@@ -102,8 +102,27 @@ class Djin {
         throw err(`unrecognized turn line: ${line}`)
     }
 
+    // TODO test coverage
     _ask_tocks(memo :MemoAskTocks) :OpenMemo {
-        throw err(`ask_tocks`)
+        let [line, body] = memo
+        let tail = body as Mash
+
+        // get the next tock(s) after `tail` *in the best branch*
+        let best = this.rock.read_one(rkey('best'))
+        let snap;
+        this.rock.rite(r => { // TODO ergonomics / getters
+            let foldroll = r.find_max(rkey('fold', best), 29) // TODO no magic constant
+            aver(_=> blen(foldroll) > 0, `panic, empty fold for best`)
+            ;[snap, ] = unroll(foldroll)
+        })
+        // TODO batching:  nexts = [];  grab up to chunk size tocks
+        let next;
+        this.tree.look(snap, (rock,twig) => {
+            let pentroll = twig.read(rkey('pent', best, h2b('07')))
+            aver(_=> blen(pentroll) > 0, `panic, empty pent for best`)
+            ;[ , next] = unroll(pentroll)
+        })
+        return [MemoType.SayTocks, [next]]
     }
 
     _ask_tacks(memo :MemoAskTacks) :MemoSayTacks {
