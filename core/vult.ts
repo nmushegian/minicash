@@ -18,7 +18,7 @@ import { Tree, Twig, rkey } from './tree.js'
 
 export { vult }
 
-function vult(tree :Tree, tock :Tock, thin :boolean = false) :OpenMemo {
+function vult(tree :Tree, tock :Tock) :OpenMemo {
     dub(`vult tock`, tock)
     let tockhash = mash(roll(tock))
     let [prevhash, root, time, fuzz] = tock
@@ -63,7 +63,6 @@ function vult(tree :Tree, tock :Tock, thin :boolean = false) :OpenMemo {
         tree.rock.rite(r => {
             [foldkey, fold] = r.find_max(rkey('fold', prevhash), 29)
         })
-        aver(_=> blen(fold) > 0, `panic: no fold in current or prior tock`)
         ;[snap, ] = unroll(fold)
         fees = h2b('00')
         tack_idx = h2b('00')
@@ -105,6 +104,8 @@ function vult(tree :Tree, tock :Tock, thin :boolean = false) :OpenMemo {
     // 4. apply the ticks
     let out
     let feenum = bnum(fees)
+    // exceptions starting with 'invalid' are intentional, and invalidate the tock
+    // other exceptions are unintentional / panic, don't mark them invalid
     try { tree.grow(snap, (rite,twig,nextsnap) => {
         ticks.forEach((tick,tick_idx) => {
             let tickhash = mash(roll(tick))
@@ -125,12 +126,12 @@ function vult(tree :Tree, tock :Tock, thin :boolean = false) :OpenMemo {
                     need( is_last_tick, `invalid: move has idx 7, but it isn't the last tick`)
                     need( bleq(txin, prevhash), `invalid: move has idx 7, but txin is not prevhash`)
                     let prev_tock_ment = twig.read(rkey('ment', prevhash, h2b('07')))
-                    aver(_=> prev_tock_ment.length > 0, `panic: no prev_tock_ment`)
                     let [_, prev_left] = unroll(prev_tock_ment)
                     subsidy = bnum(prev_left as Blob) / (BigInt(2)**BigInt(21))
                     let left = bnum(prev_left as Blob) - subsidy
                     // the tockhash is a virtual UTXO that contains remaining subsidy
-                    // this ment is also used for fast *per-branch* ancestor check
+                    // this ment is also used for fast ancestor check, per-branch
+                    // this pent is used for getting the next tock, per-branch
                     twig.etch(rkey('pent', prevhash, h2b('07')), roll([tickhash, tockhash]))
                     twig.etch(rkey('ment', tockhash, h2b('07')), roll([h2b(''), n2b(left)]))
                 } else {
