@@ -41,14 +41,15 @@ class Djin {
         ]
         let bangroll = roll(this.bang)
         let banghash = mash(bangroll)
-        console.log('banghash', banghash)
+        dub('banghash', banghash)
         this.tree.grow(h2b(''), (rite,twig,snap) => {
             rite.etch_best(banghash)
             rite.etch_tock(this.bang)
             rite.etch_work(banghash, tuff(bangroll))
             rite.etch_fold(banghash, 0, snap, 0)
-            rite.etch_left(BigInt(0), BigInt(2)**BigInt(53))
             rite.etch_know(banghash, t2b('DV'))
+            twig.etch( rkey('ment', banghash, h2b('07')),
+                       roll([h2b(''), n2b(BigInt(2)**BigInt(53))]) )
         })
     }
 
@@ -126,6 +127,7 @@ class Djin {
         }
 
         // TODO vinx here
+
         let tockroll = roll(tock)
         let tockhash = mash(tockroll)
         this.rock.etch_one(rkey('tock', tockhash), tockroll)

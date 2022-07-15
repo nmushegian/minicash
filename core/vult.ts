@@ -32,21 +32,12 @@ function vult(tree :Tree, tock :Tock, thin :boolean = false) :OpenMemo {
         return [MemoType.Err, ['invalid', tockhash]]
     // haven't validated it before, proceed
 
-    // first apply the header state -- this might be redundant, but no values should change
-    // - work, the total work
-    // - left, a running counter of remaining subsidy
+    // First apply the header state (might be redundant write, but won't change)
     let work // save for if we update `best`
     tree.rock.rite(r => {
-        // work is previous work plus `tuff(tockhash)`
         let prevwork = r.read(rkey('work', prevhash))
         work = prevwork + tuff(tockhash)
         r.etch_work(tockhash, work)
-        // left is indexed by timestamp bc its the same regardless of branch
-        let time = bnum(tock[2])
-        let prevtime = time - BigInt(57)
-        let prevleft = r.read(rkey('left', extend(n2b(prevtime), 7)))
-        let left = bnum(prevleft) / (BigInt(2)**BigInt(21))
-        r.etch_left(time, left)
     })
 
     // Try to apply the body state
@@ -73,7 +64,8 @@ function vult(tree :Tree, tock :Tock, thin :boolean = false) :OpenMemo {
             [foldkey, fold] = r.find_max(rkey('fold', prevhash), 29)
         })
         aver(_=> blen(fold) > 0, `panic: no fold in current or prior tock`)
-        ;[snap, fees] = unroll(fold)
+        ;[snap, ] = unroll(fold)
+        fees = h2b('00')
         tack_idx = h2b('00')
     }
     dub('snap, fees', snap, fees)
@@ -117,20 +109,36 @@ function vult(tree :Tree, tock :Tock, thin :boolean = false) :OpenMemo {
         ticks.forEach((tick,tick_idx) => {
             let tickhash = mash(roll(tick))
             dub(`applying tick`, tick)
+
             let moves = tick[0]
             let ments = tick[1]
+            let is_last_tick = false
+            let subsidy
 
             moves.forEach(move => {
-                // TODO fee already computed in vinx, we should keep it attached
                 let [txin, idx, sig] = move
                 let idxnum = parseInt(b2h(idx), 16)
                 if (idxnum == 7) {
+                    // This special case is for the "mint" tick, the point is to
+                    // isolate all special cases into one place to keep the spec small
                     dub('is_last_tack', is_last_tack)
                     dub('tick idx, ticks length-1', tick_idx, ticks.length - 1)
-                    need( is_last_tack && (tick_idx == ticks.length - 1),
-                        `invalid: move has idx 7, but it isn't the last tick`)
+
+                    is_last_tick = is_last_tack && (tick_idx == ticks.length - 1)
+                    need( is_last_tick, `invalid: move has idx 7, but it isn't the last tick`)
                     need( bleq(txin, prevhash), `invalid: move has idx 7, but txin is not prevhash`)
-                    // todo set tock pent ?
+
+                    dub(`grabbing prev tock ment, prevhash ${b2h(prevhash)}`)
+                    let prev_tock_ment = twig.read(rkey('ment', prevhash, h2b('07')))
+                    aver(_=> prev_tock_ment.length > 0, `panic: no prev_tock_ment`)
+                    dub(`prev_tock_ment`, prev_tock_ment)
+                    let [_, prev_left] = unroll(prev_tock_ment)
+                    dub(`unrolled prev_tock_ment`, unroll(prev_tock_ment))
+                    subsidy = bnum(prev_left as Blob) / (BigInt(2)**BigInt(21))
+                    let left = bnum(prev_left as Blob) - subsidy
+                    // the tockhash is a virtual UTXO that contains remaining subsidy
+                    twig.etch(rkey('pent', prevhash, h2b('07')), roll([tickhash, tockhash]))
+                    twig.etch(rkey('ment', tockhash, h2b('07')), roll([h2b(''), n2b(left)]))
                 } else {
                     let have = twig.read(rkey('ment', txin, idx))
                     let pent = twig.read(rkey('pent', txin, idx))
@@ -144,7 +152,11 @@ function vult(tree :Tree, tock :Tock, thin :boolean = false) :OpenMemo {
 
             ments.forEach((ment,idx) => {
                 let [code, cash] = ment
-                feenum -= bnum(cash)
+                if (is_last_tick) {
+                    need(bnum(cash) == subsidy + feenum, `invalid: mint tick has bad amount`)
+                } else {
+                    feenum -= bnum(cash)
+                }
                 let have = twig.read(rkey('ment', tickhash, n2b(BigInt(idx))))
                 need(have.length == 0, `invalid: this ment already exists`)
                 // TODO pyre?
@@ -154,7 +166,6 @@ function vult(tree :Tree, tock :Tock, thin :boolean = false) :OpenMemo {
 
         rite.etch_fold(tockhash, bnum(tack_idx), nextsnap, feenum)
         if (is_last_tack) {
-            // TODO check mint tick amount is subsidy + fees
             rite.etch_know(tockhash ,'DV')
             let prev_best = rite.read(rkey('best'))
             let best_work = rite.read(rkey('work', prev_best))
