@@ -123,7 +123,7 @@ class Twig {
                 return this._lookup(nextsnap, key, idx + 1)
             }
         } else {
-            throw err(`panic: unrecognized tree node type`)
+            throw err(`panic: unrecognized tree node type ${b2h(blob)}`)
         }
     }
 
