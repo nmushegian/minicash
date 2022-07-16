@@ -71,13 +71,16 @@ class Twig {
     rite // the underlying rock dbtx
     diff // we don't push writes to db until end of tx, keep them cached
     snap // the snap this twig was initialized with respect to
-    constructor(rite :Rite, snap :Snap) {
+    _keysize // sanity check, remove later
+    constructor(rite :Rite, snap :Snap, _keysize :number = 29) {
         dub('twig init with snap', snap)
         this.rite = rite
         this.diff = new Map()
         this.snap = snap
+        this._keysize = _keysize
     }
     read(key :Blob) :Blob {
+        aver(_=> key.length == this._keysize, `panic: twig.read bad key size`)
         dub('twig.read key', key)
         if (this.diff.has(b2h(key))) {
             dub('cached in diff')
@@ -88,6 +91,7 @@ class Twig {
         }
     }
     etch(key :Blob, val :Blob) {
+        aver(_=> key.length == this._keysize, `panic: twig.etch bad key size`)
         if (this.diff.has(b2h(key))) {
             //console.log('key', b2h(key))
             dub('new val', b2h(val))
@@ -105,6 +109,7 @@ class Twig {
 
     _lookup(snap :Snap, key :Blob, idx :number = 0) :Blob {
         dub('twig._lookup (snap idx key)', snap, idx, key)
+        aver(_=> key.length == this._keysize, `panic: twig._lookup bad key size`)
         // get item from rock
         let blob = this.rite.read(snap)
         aver(_=> blob.length > 0, `panic: no value for snap key ${snap}`)
@@ -138,6 +143,7 @@ class Twig {
 
     _insert(snap :Snap, key :Blob, val :Blob, idx :number = 0) :Snap {
         dub(`inserting ${b2h(key)} idx ${idx} : ${b2h(val)}`)
+        aver(_=> key.length == this._keysize, `panic: twig._lookup bad key size`)
         dub(`looking up snap`, snap)
         let blob = this.rite.read(snap)
         aver(_=> blob.length > 0, `panic: no value for snap key ${snap}`)
