@@ -108,15 +108,17 @@ class Djin {
 
         // get the next tock after `tail` *in the best branch*
         let best = this.rock.read_one(rkey('best'))
-        let snap;
+        let snap, foldkey, fold;
         this.rock.rite(r => { // TODO ergonomics / getters
-            let foldroll = r.find_max(rkey('fold', best), 29) // TODO no magic constant
-            aver(_=> blen(foldroll) > 0, `panic, empty fold for best`)
-            ;[snap, ] = unroll(foldroll)
+            let fold = r.find_max(rkey('fold', best), 29) // TODO no magic constant
+            ;[foldkey, fold] = fold
+            ;[snap,] = unroll(fold)
         })
         let next;
         this.tree.look(snap, (rock,twig) => {
-            let pentroll = twig.read(rkey('pent', best, h2b('07')))
+            console.log("GETTING PENT AT SNAP", b2h(snap), b2h(tail))
+            let pentroll = twig.read(rkey('pent', tail, h2b('07')))
+            console.log("PENTROLL", pentroll)
             if (blen(pentroll) > 0) {
                 ;[ , next] = unroll(pentroll)
             }
@@ -126,7 +128,7 @@ class Djin {
             let tock = unroll(tockroll) as Tock
             return [MemoType.SayTock, tock]
         } else {
-            throw err(`todo no next tock`)
+            throw err(`todo no next tock at hash ${b2h(tail)}, snap ${b2h(snap)}`)
         }
     }
 

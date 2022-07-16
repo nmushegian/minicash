@@ -9,10 +9,13 @@ import * as welltest from './well.t.js'
 import * as wordtest from './word.t.js'
 
 djintest
+/*
 rocktest
 treetest
 vinxtest
 welltest
 wordtest
+
+ */
 
 

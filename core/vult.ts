@@ -69,6 +69,7 @@ function vult(tree :Tree, tock :Tock) :OpenMemo {
         fees = h2b('00')         // the fees are reset, we are in new tock
         tack_idx = h2b('00')
     }
+    aver(_ => blen(fold) > 0, `vult: prev fold not found`)
     dub('snap, fees', snap, fees)
     dub('next_tack', tockhash, tack_idx)
 
@@ -136,6 +137,7 @@ function vult(tree :Tree, tock :Tock) :OpenMemo {
                     // the tockhash is a virtual UTXO that contains remaining subsidy
                     // this ment can be used for fast ancestor check, per-branch
                     // this pent can be used for getting the next tock, per-branch
+                    console.log("ETCHING PENT", b2h(prevhash), "AT SNAP", b2h(nextsnap), "key=", b2h(rkey('pent', prevhash, h2b('07'))), "tackidx", tack_idx)
                     twig.etch(rkey('pent', prevhash, h2b('07')), roll([tickhash, tockhash]))
                     twig.etch(rkey('ment', tockhash, h2b('07')), roll([h2b(''), n2b(left), h2b('')]))
                 } else {
@@ -143,7 +145,7 @@ function vult(tree :Tree, tock :Tock) :OpenMemo {
                     let ment = twig.read(rkey('ment', txin, idx))
                     let pent = twig.read(rkey('pent', txin, idx))
                     need(ment.length > 0, `invalid: no such ment exists: ${txin} ${idx}`)
-                    need(pent.length == 0, `invalid: ment already pent: ${txin} ${idx}`)
+                    need(pent.length == 0, `invalid: ment already pent: ${b2h(txin)} ${b2h(idx)}`)
                     let [code, cash, pyre] = unroll(ment)
                     need(bnum(time) < bnum(pyre as Blob), `invalid: expired ment ${txin} ${idx}`)
                     feenum += bnum(cash as Blob)
@@ -165,8 +167,11 @@ function vult(tree :Tree, tock :Tock) :OpenMemo {
             })
         })
 
+        console.log(rite.find_max(rkey('fold', prevhash), 29), b2h(snap), b2h(nextsnap))
         rite.etch_fold(tockhash, bnum(tack_idx), nextsnap, feenum)
+        console.log(rite.find_max(rkey('fold', prevhash), 29))
         if (is_last_tack) {
+            console.log("SETTING DV")
             rite.etch_know(tockhash ,'DV')
             let prev_best = rite.read(rkey('best'))
             let best_work = rite.read(rkey('work', prev_best))
