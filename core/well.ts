@@ -27,13 +27,13 @@ function form_memo(x :Roll) :Okay<Memo> {
         need(isroll(memo[1]), 'memo body must be a roll')
 
         let [line, body] = memo_open(memo)
-        if (line == MemoType.AskTocks) {
+        if (line == MemoType.AskTock) {
             let tockhash = body
             need(isblob(tockhash), 'tock hash must be a blob')
             need(tockhash.length == 24, 'tock hash must be len 24')
             return pass(x)
         }
-        if (line == MemoType.AskTacks) {
+        if (line == MemoType.AskTack) {
             let [tockhash, idx] = body
             need(isblob(tockhash), 'tock hash must be a blob')
             need((tockhash as Mash).length == 24, 'tock hash must be len 24')
@@ -50,12 +50,12 @@ function form_memo(x :Roll) :Okay<Memo> {
             })
             return pass(x)
         }
-        if (line == MemoType.SayTocks) {
-            let tocks = body.map(t => okay(form_tock(t))) as Tock[]
+        if (line == MemoType.SayTock) {
+            okay(form_tock(body as Roll))
             return pass(x)
         }
-        if (line == MemoType.SayTacks) {
-            let tacks = body.map(t => okay(form_tack(t))) as Tack[]
+        if (line == MemoType.SayTack) {
+            okay(form_tack(body as Roll))
             return pass(x)
         }
         if (line == MemoType.SayTicks) {
