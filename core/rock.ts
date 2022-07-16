@@ -63,11 +63,15 @@ class Rite {
         aver(_=>isblob(key), `rite.etch key not a blob: ${key}`)
         aver(_=>isblob(val), `rite.etch val not a blob: ${val} (key was ${key})`)
         aver(_=> {
-            if (key.toString().startsWith('best')) {
+            let tkey = b2t(key)
+            if (tkey == 'best' || tkey == 'aloc') {
                 return true
             }
             let prev = this.dbtx.getBinary(this.dbi, key)
             if (prev && prev.length > 0 && !bleq(prev, val)) {
+                console.log('dup key', key)
+                console.log('old val', prev)
+                console.log('new val', val)
                 return false
             }
             return true // todo usage
@@ -163,12 +167,12 @@ class Rock {
     env
     dbi
     constructor(path, reset=false) {
-        this.env = new lmdb.Env()
         if (reset) {
             rmSync(path, {force:true, recursive:true})
             mkdirSync(path)
         }
         console.log('opening', path)
+        this.env = new lmdb.Env()
         this.env.open({ path })
         this.dbi = this.env.openDbi({
             name: "testdb",
@@ -206,6 +210,7 @@ class Rock {
         } catch (e) {
             //rite._seal()
             dbtx.abort()
+            console.log('WARN / rite throw', e)
             throw e
         }
     }

@@ -20,8 +20,8 @@ import { form_memo, form_tock } from "./well.js";
 import { vinx_tick, vinx_tack, vinx_tock} from "./vinx.js";
 import { vult } from './vult.js'
 
-import { Rock } from './rock.js'
-import { Tree, rkey } from './tree.js'
+import { Rock, rkey } from './rock.js'
+import { Tree } from './tree.js'
 
 export { Djin }
 
@@ -32,7 +32,7 @@ class Djin {
 
     constructor(path :string, reset=false) {
         this.rock = new Rock(path, reset)
-        this.tree = new Tree(this.rock)
+        this.tree = new Tree(this.rock, reset)
         this.bang = [
             h2b('00'.repeat(24)),
             h2b('00'.repeat(24)),
@@ -42,7 +42,7 @@ class Djin {
         let bangroll = roll(this.bang)
         let banghash = mash(bangroll)
         dub('banghash', banghash)
-        this.tree.grow(h2b(''), (rite,twig,snap) => {
+        this.tree.grow(h2b('00'.repeat(8)), (rite,twig,snap) => {
             rite.etch_best(banghash)
             rite.etch_tock(this.bang)
             rite.etch_work(banghash, tuff(bangroll))
