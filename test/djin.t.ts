@@ -17,6 +17,10 @@ import {
     Tick, Tack, Tock
 } from '../core/word.js'
 
+import {
+    mold_tick, mold_tock
+} from '../core/cash.js'
+
 import { readdirSync, readFileSync } from "fs";
 
 const runcase = (dir, name, t) => {
@@ -60,6 +64,30 @@ test('djin', t=>{
     }))
 })
 
-test.only('canon', t=> {
+test('canon', t=> {
     runcase('./test/case/djin/', 'canon.jams', t)
+})
+
+let trace = []
+function send(memo) {
+    trace.push(["send", memo])
+}
+
+test.only('generate canon', t=>{
+    let djin = new Djin('./test/db', true)
+    dub('bang tock', djin.bang)
+
+    let tick1 = mold_tick()
+        .move_tock(djin.bang)
+        .ment(h2b('cc'.repeat(20)), BigInt(2**42))
+        .mold()
+    let tock1 = mold_tock()
+        .prev( mash(roll(djin.bang)) )
+        .root( merk([mash(roll(tick1))]) )
+        .time( extend(n2b(BigInt(57)), 7) )
+        .fuzz( h2b('4c1f020b99fdd3'))
+        .mold()
+
+    let out = djin.turn(memo_close([MemoType.SayTock, tock1]))
+    console.log(out)
 })
