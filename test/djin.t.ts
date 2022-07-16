@@ -8,7 +8,7 @@ import { Djin } from '../core/djin.js'
 
 import {
     b2h, h2b, n2b, t2b, b2t,
-    okay, need,
+    okay, need, err,
     bleq, bnum, extend,
     roll, rmap,
     mash, merk, addr,
@@ -19,13 +19,6 @@ import {
 
 import { readdirSync, readFileSync } from "fs";
 
-const flatten = x => {
-    if (isNaN(Number('0x'+x))) {
-        return t2b(x)
-    }
-    return h2b(x)
-}
-
 const runcase = (dir, name) => {
     if (!name.endsWith('.jams')) return
     test(`${name}`, t => {
@@ -34,25 +27,19 @@ const runcase = (dir, name) => {
         let path = dir + name
         let file = readFileSync(path)
         let data = jams(file.toString())
-        let prev
+        let out
         for (let cmd of data) {
-            let func = cmd[0]
-            need(func == 'send' || func == 'want', 'only doing send and want for now...')
+            let [func, memohex] = cmd
+            let memo = rmap(memohex, h2b)
             if ('send' == func) {
-                let memo = rmap(cmd[1], h2b)
-                dub(`send ${rmap(memo, b2h)}`)
-                dub(memo_open(memo))
-                prev = djin.turn(memo)
+                out = djin.turn(memo)
+                continue
             }
             if ('want' == func) {
-                dub(`want (actual=[${rmap(prev, b2h)}]) expected=[${cmd[1]}`)
-                dub(bleq(roll(rmap(cmd[1], flatten)), roll(prev)))
-                if (!bleq(roll(rmap(cmd[1], flatten)), roll(prev))) {
-                    dub(`actual = ${rmap(prev, b2t)}`)
-                    t.fail(`want fail expected=${cmd[1]} actual=${rmap(prev, b2h)}`)
-                    break
-                }
+                t.deepEqual(memo, out)
+                continue
             }
+            throw err(`unrecognized test command`)
         }
         djin.kill()
     })

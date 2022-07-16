@@ -29,7 +29,7 @@ function vult(tree :Tree, tock :Tock) :OpenMemo {
     if ('DV' == b2t(know))
         return [MemoType.AskTock, tockhash]
     if ('DN' == b2t(know))
-        return [MemoType.Err, ['invalid', tockhash]]
+        return [MemoType.Err, [t2b('invalid'), tockhash]]
     // haven't validated it before, proceed
 
     // First apply the header state (might be redundant write, but won't change)

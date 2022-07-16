@@ -73,11 +73,6 @@ function memo_open(m :Memo) :OpenMemo {
 }
 
 function memo_close(m :OpenMemo) :Memo {
-    let line = m[0]
-    if (MemoType.Err == line) {
-        let merr = m as MemoErr
-        return [Buffer.from([merr[0]]), [t2b(merr[1][0]), merr[1][1]]]
-    }
     return [Buffer.from([m[0]]), m[1]] as Memo
 }
 
@@ -254,13 +249,7 @@ type MemoSayTack
 type MemoSayTicks
   =  [MemoType.SayTicks, Tick[]]       // ticks you requested
 type MemoErr
-  =  [MemoType.Err, [Why, Roll]]       // typed reason, untyped subreason / info
-
-type Why
-  = 'malformed'   // well
-  | 'unavailable' // vinx
-  | 'invalid'     // vinx/vult
-  | 'unspendable' // vult
+  =  [MemoType.Err, Roll]              // typed reason, untyped subreason
 
 type Blob32 = Blob;
 type Blob20 = Blob;

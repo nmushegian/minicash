@@ -73,7 +73,7 @@ class Djin {
 
     turn(memo :Memo) :Memo {
         if (!form_memo(memo)[0]) {
-            return memo_close([MemoType.Err, ['invalid', memo]])
+            return memo_close([MemoType.Err, [t2b('invalid'), memo]])
         }
 
         let copy = memo_open(memo)
@@ -165,7 +165,7 @@ class Djin {
         let prevroll = this.rock.read_one(rkey('tock', prevhash))
 
         if (blen(prevroll) == 0) {
-            return [MemoType.Err, ['unavailable', prevhash]]
+            return [MemoType.Err, [t2b('unavailable'), prevhash]]
         }
 
         // TODO vinx here
