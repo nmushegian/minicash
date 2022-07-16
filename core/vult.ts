@@ -136,14 +136,15 @@ function vult(tree :Tree, tock :Tock) :OpenMemo {
                     // this ment can be used for fast ancestor check, per-branch
                     // this pent can be used for getting the next tock, per-branch
                     twig.etch(rkey('pent', prevhash, h2b('07')), roll([tickhash, tockhash]))
-                    twig.etch(rkey('ment', tockhash, h2b('07')), roll([h2b(''), n2b(left)]))
+                    twig.etch(rkey('ment', tockhash, h2b('07')), roll([h2b(''), n2b(left), h2b('')]))
                 } else {
                     // regular case, not a "mint" tick, simple exists-and-unspent check
                     let ment = twig.read(rkey('ment', txin, idx))
                     let pent = twig.read(rkey('pent', txin, idx))
                     need(ment.length > 0, `invalid: no such ment exists: ${txin} ${idx}`)
                     need(pent.length == 0, `invalid: ment already pent: ${txin} ${idx}`)
-                    let [code, cash] = unroll(ment)
+                    let [code, cash, pyre] = unroll(ment)
+                    need(bnum(time) < bnum(pyre as Blob), `invalid: expired ment ${txin} ${idx}`)
                     feenum += bnum(cash as Blob)
                     twig.etch(rkey('pent', txin, idx), roll([tickhash, tockhash]))
                 }
@@ -158,7 +159,8 @@ function vult(tree :Tree, tock :Tock) :OpenMemo {
                 }
                 let dupe = twig.read(rkey('ment', tickhash, n2b(BigInt(idx))))
                 need(dupe.length == 0, `invalid: this ment already exists`)
-                twig.etch(rkey('ment', tickhash, n2b(BigInt(idx))), roll([code, cash]))
+                let pyre = n2b(bnum(time) + BigInt(17 * 365.25 * 24 * 60 * 60))
+                twig.etch(rkey('ment', tickhash, n2b(BigInt(idx))), roll([code, cash, pyre]))
             })
         })
 
