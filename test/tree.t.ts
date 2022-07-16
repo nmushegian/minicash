@@ -220,3 +220,34 @@ test('tree3', t=>{
     rock.shut()
 
 })
+
+test('tree4', t=> {
+    let rock = new Rock('test/db', true)
+    let tree = new Tree(rock, true)
+
+    let snap0 = h2b('00'.repeat(8))
+
+    let snap1 = tree.grow(snap0, (rock,twig,snap)=> {
+        twig.etch(h2b('11'.repeat(tree.keysize)), h2b('10'))
+    })
+
+    let snap2A = tree.grow(snap1, (rock,twig,snap)=> {
+        twig.etch(h2b('22'.repeat(tree.keysize)), h2b('2a'))
+    })
+
+    let snap2B = tree.grow(snap1, (rock,twig,snap)=> {
+        twig.etch(h2b('22'.repeat(tree.keysize)), h2b('2b'))
+    })
+
+    tree.look(snap2A, (rock,twig) => {
+        let val = twig.read(h2b('22'.repeat(tree.keysize)))
+        t.deepEqual(val, h2b('2a'))
+    })
+
+    tree.look(snap2B, (rock,twig) => {
+        let val = twig.read(h2b('22'.repeat(tree.keysize)))
+        t.deepEqual(val, h2b('2b'))
+    })
+
+    rock.shut()
+})
