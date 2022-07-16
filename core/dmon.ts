@@ -39,13 +39,13 @@ class Dmon {
     // resolves when self-sync is done and peer-sync has started
     async sync(tail = h2b('')) {
         // try to sync with yourself first
-        let yarn = this.djin.turn(memo(MemoType.AskTocks, tail))
+        let yarn = this.djin.turn(memo(MemoType.AskTock, tail))
         // todo need yarn is not err type
         let head
         for await (head of this.djin.spin(yarn)) {}
         // get the best possibly-valid tocks from peers, then make a
         // request for the thing you need on each branch
-        this.plug.emit(memo(MemoType.AskTocks, head), async yarn => {
+        this.plug.emit(memo(MemoType.AskTock, head), async yarn => {
             let miss
             for await (miss of this.djin.spin(yarn)) {}
             if (miss) {

@@ -59,12 +59,12 @@ test('form_tack', t=> {
     let [ok, val, err] :any[] = form_tack([tock, eye, ribs, feet])
     t.equal(ok, true, `form_tack ${err}`)
 
-    let m = memo(MemoType.SayTacks, [tack])
+    let m = memo(MemoType.SayTack, tack)
     ;[ok, val, err] = form_memo(m)
     t.equal(ok, true, 'memo is well-formed')
     if (!ok) console.error(err.message)
 
-    m[1][0][1] = h2b('0000') // eye
+    m[1][1] = h2b('0000') // eye
     ;[ok, val, err] = form_memo(m)
     t.equal(ok, false, 'should fail')
     if (!ok) {

@@ -11,8 +11,8 @@ import {
     Mash, mash, tuff,
     Tick, Tack, Tock,
     Memo, MemoType, MemoErr,
-    MemoSayTicks, MemoSayTacks, MemoSayTocks,
-    MemoAskTicks, MemoAskTacks, MemoAskTocks,
+    MemoSayTicks, MemoSayTack, MemoSayTock,
+    MemoAskTicks, MemoAskTack, MemoAskTock,
     OpenMemo, memo_open, memo_close,
 } from './word.js'
 
@@ -79,21 +79,21 @@ class Djin {
         let copy = memo_open(memo)
         let line = copy[0]
 
-        if (MemoType.AskTocks == line) {
-            return memo_close(this._ask_tocks(copy as MemoAskTocks))
+        if (MemoType.AskTock == line) {
+            return memo_close(this._ask_tock(copy as MemoAskTock))
         }
-        if (MemoType.AskTacks == line) {
-            return memo_close(this._ask_tacks(copy as MemoAskTacks))
+        if (MemoType.AskTack == line) {
+            return memo_close(this._ask_tack(copy as MemoAskTack))
         }
         if (MemoType.AskTicks == line) {
             return memo_close(this._ask_ticks(copy as MemoAskTicks))
         }
 
-        if (MemoType.SayTocks == line) {
-            return memo_close(this._say_tocks(copy as MemoSayTocks))
+        if (MemoType.SayTock == line) {
+            return memo_close(this._say_tock(copy as MemoSayTock))
         }
-        if (MemoType.SayTacks == line) {
-            return memo_close(this._say_tacks(copy as MemoSayTacks))
+        if (MemoType.SayTack == line) {
+            return memo_close(this._say_tack(copy as MemoSayTack))
         }
         if (MemoType.SayTicks == line) {
             return memo_close(this._say_ticks(copy as MemoSayTicks))
@@ -102,11 +102,11 @@ class Djin {
         throw err(`unrecognized turn line: ${line}`)
     }
 
-    _ask_tocks(memo :MemoAskTocks) :OpenMemo {
+    _ask_tock(memo :MemoAskTock) :OpenMemo {
         let [line, body] = memo
         let tail = body as Mash
 
-        // get the next tock(s) after `tail` *in the best branch*
+        // get the next tock after `tail` *in the best branch*
         let best = this.rock.read_one(rkey('best'))
         let snap;
         this.rock.rite(r => { // TODO ergonomics / getters
@@ -114,7 +114,6 @@ class Djin {
             aver(_=> blen(foldroll) > 0, `panic, empty fold for best`)
             ;[snap, ] = unroll(foldroll)
         })
-        // TODO batching:  nexts = [];  grab up to chunk size tocks
         let next;
         this.tree.look(snap, (rock,twig) => {
             let pentroll = twig.read(rkey('pent', best, h2b('07')))
@@ -125,19 +124,19 @@ class Djin {
         if (next) {
             let tockroll = this.rock.read_one(rkey('tock', next))
             let tock = unroll(tockroll) as Tock
-            return [MemoType.SayTocks, [tock]]
+            return [MemoType.SayTock, tock]
         } else {
             throw err(`todo no next tock`)
         }
     }
 
-    _ask_tacks(memo :MemoAskTacks) :OpenMemo {
+    _ask_tack(memo :MemoAskTack) :OpenMemo {
         let [line, body] = memo
         let [tockhash, idx] = body as [Mash, Blob]
         let tackroll = this.rock.read_one(rkey('tack', tockhash, idx))
         if (blen(tackroll) > 0) {
             let tack = unroll(tackroll) as Tack
-            return [MemoType.SayTacks, [tack]]
+            return [MemoType.SayTack, tack]
         } else {
             throw err(`todo no such tack`)
         }
@@ -159,14 +158,12 @@ class Djin {
         return [MemoType.SayTicks, ticks]
     }
 
-    _say_tocks(memo :MemoSayTocks) :OpenMemo {
+    _say_tock(memo :MemoSayTock) :OpenMemo {
         let [line, body] = memo
-        let tocks = body as Tock[]
-        aver(_=> tocks.length == 1, `_say_tocks memo not split into units`)
-
-        let tock = tocks[0]
+        let tock = body as Tock
         let prevhash = tock[0]
         let prevroll = this.rock.read_one(rkey('tock', prevhash))
+
         if (blen(prevroll) == 0) {
             return [MemoType.Err, ['unavailable', prevhash]]
         }
@@ -180,14 +177,12 @@ class Djin {
         return vult(this.tree, tock)
     }
 
-    _say_tacks(memo :MemoSayTacks) :OpenMemo {
+    _say_tack(memo :MemoSayTack) :OpenMemo {
         let [line, body] = memo
-        let tacks = body as Tack[]
-        aver(_=> tacks.length == 1, `_say_tacks memo not split into units`)
+        let tack = body as Tack
 
         // TODO vinx here
 
-        let tack = tacks[0]
         let tock = tack[0]
         let eye  = tack[1]
         let tockhash = mash(roll(tock))

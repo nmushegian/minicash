@@ -19,8 +19,8 @@ export type {
     Snap, Fees, Work,
     Peer, Mail, Memo,
     OpenMemo, MemoErr,
-    MemoAskTicks, MemoAskTacks, MemoAskTocks,
-    MemoSayTicks, MemoSayTacks, MemoSayTocks,
+    MemoAskTicks, MemoAskTack, MemoAskTock,
+    MemoSayTicks, MemoSayTack, MemoSayTock,
     Mode,
     Hexs
 }
@@ -210,11 +210,11 @@ type Memo = [
 ]
 
 type OpenMemo
-  = MemoAskTocks
-  | MemoAskTacks
+  = MemoAskTock
+  | MemoAskTack
   | MemoAskTicks
-  | MemoSayTocks
-  | MemoSayTacks
+  | MemoSayTock
+  | MemoSayTack
   | MemoSayTicks
   | MemoErr
 
@@ -231,30 +231,30 @@ type OpenMemo
 // Your well-formed check should check the *actual concrete byte values*, do not use your
 // type system until after you check your form.
 enum MemoType {  // mnemonic
-    AskTocks = 0xa0,  // Ask t0cks
-    AskTacks = 0xaa,  // Ask tAcks
+    AskTock  = 0xa0,  // Ask t0ck
+    AskTack  = 0xaa,  // Ask tAck
     AskTicks = 0xa1,  // Ask t1cks
-    SayTocks = 0xc0,  //~Say t0cks
-    SayTacks = 0xca,  //~Say tAcks
+    SayTock  = 0xc0,  //~Say t0ck
+    SayTack  = 0xca,  //~Say tAck
     SayTicks = 0xc1,  //~Say t1cks
     Err      = 0xee,  // Err
 }
 
-type MemoAskTocks
-  =  [MemoType.AskTocks, Mash]          // get tocks from this tock forward to best
-type MemoAskTacks
-  =  [MemoType.AskTacks, [Mash, Blob] ] // get tack for [tockhash,idx]
+type MemoAskTock
+  =  [MemoType.AskTock, Mash]          // get next tock after this one, in best chain
+type MemoAskTack
+  =  [MemoType.AskTack, [Mash, Blob] ] // get tack for [tockhash,idx]
 type MemoAskTicks
-  =  [MemoType.AskTicks, Mash[]]        // tickhashes you want ticks for
+  =  [MemoType.AskTicks, Mash[]]       // tickhashes you want ticks for
 
-type MemoSayTocks
-  =  [MemoType.SayTocks, Tock[]]        // chain of tocks, from requested to best
-type MemoSayTacks
-  =  [MemoType.SayTacks, Tack[]]        // tacks you requested
+type MemoSayTock
+  =  [MemoType.SayTock, Tock]          // tock you requested
+type MemoSayTack
+  =  [MemoType.SayTack, Tack]          // tack you requested
 type MemoSayTicks
-  =  [MemoType.SayTicks, Tick[]]        // ticks you requested
+  =  [MemoType.SayTicks, Tick[]]       // ticks you requested
 type MemoErr
-  =  [MemoType.Err, [Why, Roll]]        // typed reason, untyped subreason / info
+  =  [MemoType.Err, [Why, Roll]]       // typed reason, untyped subreason / info
 
 type Why
   = 'malformed'   // well
