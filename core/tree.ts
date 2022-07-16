@@ -73,7 +73,6 @@ class Twig {
     snap // the snap this twig was initialized with respect to
     _keysize // sanity check, remove later
     constructor(rite :Rite, snap :Snap, _keysize :number = 29) {
-        dub('twig init with snap', snap)
         this.rite = rite
         this.diff = new Map()
         this.snap = snap
@@ -81,21 +80,15 @@ class Twig {
     }
     read(key :Blob) :Blob {
         aver(_=> key.length == this._keysize, `panic: twig.read bad key size`)
-        dub('twig.read key', key)
         if (this.diff.has(b2h(key))) {
-            dub('cached in diff')
             return this.diff.get(b2h(key))
         } else {
-            dub('not cached, looking up')
             return this._lookup(this.snap, key)
         }
     }
     etch(key :Blob, val :Blob) {
         aver(_=> key.length == this._keysize, `panic: twig.etch bad key size`)
         if (this.diff.has(b2h(key))) {
-            //console.log('key', b2h(key))
-            dub('new val', b2h(val))
-            dub('old val', b2h(this.diff.get(b2h(key))))
             toss(`panic, modifying value already in tree: ${b2h(key)}`)
         }
         this.diff.set(b2h(key), val)
@@ -106,17 +99,13 @@ class Twig {
         return next
     }
 
-
     _lookup(snap :Snap, key :Blob, idx :number = 0) :Blob {
-        dub('twig._lookup (snap idx key)', snap, idx, key)
         aver(_=> key.length == this._keysize, `panic: twig._lookup bad key size`)
         // get item from rock
         let blob = this.rite.read(snap)
         aver(_=> blob.length > 0, `panic: no value for snap key ${snap}`)
         let item = unroll(blob)
-        dub('look/ item exists and unrolled')
         if (isleaf(item)) {
-            dub('look/ its a leaf')
             let leaf = item as Leaf
             let leafkey = leaf[1]
             if (bleq(key, leafkey)) {
@@ -125,11 +114,8 @@ class Twig {
                 return h2b('') // emptyblob initialized
             }
         } else if (islimb(item)) {
-            dub('look/ its a limb')
             let limb = item as Limb
-            dub(show_limb(limb))
             let nextbyte = key[idx]
-            dub('nextbyte', nextbyte.toString(16))
             let nextsnap = limb[1][nextbyte]
             if (nextsnap.length == 0) {
                 return h2b('') // emptyblob initialized
@@ -142,23 +128,17 @@ class Twig {
     }
 
     _insert(snap :Snap, key :Blob, val :Blob, idx :number = 0) :Snap {
-        dub(`inserting ${b2h(key)} idx ${idx} : ${b2h(val)}`)
         aver(_=> key.length == this._keysize, `panic: twig._lookup bad key size`)
-        dub(`looking up snap`, snap)
         let blob = this.rite.read(snap)
         aver(_=> blob.length > 0, `panic: no value for snap key ${snap}`)
         let item = unroll(blob)
         if (isleaf(item)) {
             let oldleaf = item as Leaf
-            dub(`it's a leaf`)
             let oldkey = oldleaf[1]
             aver(_=> !bleq(oldkey, key), `inserting duplicate key`)
             let oldbyte = oldkey[idx]
             let newbyte = key[idx]
-            dub('oldbyte', oldbyte.toString(16))
-            dub('newbyte', newbyte.toString(16))
             if (oldbyte == newbyte) {
-                dub('same bytes, dive')
                 let subsnap = this._insert(snap, key, val, idx + 1)
                 let newlimb = make_limb((new Array(256).fill(h2b(''))))
                 newlimb[1][oldbyte] = subsnap
@@ -166,30 +146,18 @@ class Twig {
                 this.rite.etch(limbnode, roll(newlimb))
                 return limbnode
             } else {
-                dub('distinct bytes, splitting')
                 let newleaf = make_leaf(key, val)
                 let leafnode = this._aloc()
-                dub('inserting new leaf', leafnode, newleaf)
                 this.rite.etch(leafnode, roll(newleaf))
-
                 let newlimb = make_limb((new Array(256)).fill(h2b('')))
                 newlimb[1][oldbyte] = snap
                 newlimb[1][newbyte] = leafnode
                 let limbnode = this._aloc()
-                dub('inserting new limb')
                 this.rite.etch(limbnode, roll(newlimb))
-
-                dub('old leaf', snap, rmap(oldleaf, b2h))
-                dub('new leaf', leafnode, rmap(newleaf, b2h))
-                dub('new limb', limbnode, show_limb(newlimb))
-
                 return limbnode
             }
-
         } else if (islimb(item)) {
-            dub(`it's a limb`)
             let limb = item as Limb
-            dub(show_limb(limb))
             let subs = limb[1]
             let byte = key[idx]
             let next = subs[byte]
@@ -198,14 +166,12 @@ class Twig {
                 let newleaf = make_leaf(key, val)
                 let leafnode = this._aloc()
                 this.rite.etch(leafnode, roll(newleaf))
-
                 let copysubs = []
                 subs.forEach(x => copysubs.push(x))
                 copysubs[byte] = leafnode
                 let newlimb = make_limb(copysubs)
                 let limbnode = this._aloc()
                 this.rite.etch(limbnode, roll(newlimb))
-
                 return limbnode
             } else {
                 // one or more keys with this next byte -- insert into subtree
@@ -217,7 +183,6 @@ class Twig {
                 let newlimb = make_limb(copysubs)
                 let limbnode = this._aloc()
                 this.rite.etch(limbnode, roll(newlimb))
-
                 return limbnode
             }
         } else {
@@ -245,7 +210,6 @@ class Tree {
         }
     }
     look(snap :Snap, look :((Rock,Twig) =>void)) {
-        dub(`tree.look snap`, snap)
         this.rock.rite(rite => {
             let twig = new Twig(rite, snap)
             look(this.rock, twig)
@@ -269,7 +233,6 @@ class Tree {
                 root = twig._insert(root, h2b(k), v)
             }
             let lastnode = rite.read(root)
-            dub('re-rooting with given snap', b2h(root), b2h(next))
             rite.etch(next, lastnode)
         })
         return next
