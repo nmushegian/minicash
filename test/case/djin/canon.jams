@@ -1,0 +1,8 @@
+[
+
+[ note "tock 1 defined with last 7 bytes of eth block which landed on minicash bang timestamp" ]
+[ send [ c0 [
+]] ]
+[ want [] ]
+
+]
