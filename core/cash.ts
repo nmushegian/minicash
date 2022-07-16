@@ -7,6 +7,7 @@ import {
     bnum,
     roll, mash, extend,
     Tick, Tock,
+    Move, Ment,
     Code, Cash,
     Sign, Seck,
     b2h, h2b, n2b,
@@ -43,6 +44,8 @@ class TickMold {
             xtra ? xtra : h2b('00'.repeat(65))
         ] )
         return this
+    }
+    move(ment_or_tick :Ment|Tick, idx? :number) {
     }
     ment(code :Code, cash :Cash|bigint|number) {
         if (typeof(cash) == 'number') {

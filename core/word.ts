@@ -264,7 +264,10 @@ export function bnum(b :Blob) :Bnum {
     return BigInt("0x" + b.toString('hex'))
 }
 
-export function n2b(bn :Bnum) :Blob {
-    need(bn !== undefined, `bnum arg must be defined`)
-    return h2b(bn.toString(16))
+export function n2b(n :Bnum|number) :Blob {
+    need(n !== undefined, `bnum arg must be defined`)
+    if (typeof(n) == 'number') {
+        n = BigInt(n)
+    }
+    return h2b(n.toString(16))
 }

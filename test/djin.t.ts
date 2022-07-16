@@ -10,9 +10,9 @@ import {
     b2h, h2b, n2b, t2b, b2t,
     okay, need, err,
     bleq, bnum, extend,
-    roll, rmap,
+    Roll, roll, rmap,
     mash, merk, addr,
-    MemoType, memo, memo_close, memo_open,
+    MemoType, OpenMemo, memo_close, memo_open,
     sign,
     Tick, Tack, Tock
 } from '../core/word.js'
@@ -68,14 +68,21 @@ test('canon', t=> {
     runcase('./test/case/djin/', 'canon.jams', t)
 })
 
-let trace = []
-function send(memo) {
-    trace.push(["send", memo])
-}
 
-test.only('generate canon', t=>{
+test.only('write canon', t=>{
     let djin = new Djin('./test/db', true)
-    dub('bang tock', djin.bang)
+    let trace = []
+    function send(line :MemoType, body :any) {
+        let memo = memo_close([line, body])
+        trace.push(['send', memo])
+        let last = djin.turn(memo)
+        trace.push(['want', last])
+    }
+    function want(line :MemoType, body :any) {
+        let memo = memo_close([line, body])
+        let [_, prev] = trace[trace.length - 1]
+        t.deepEqual(memo, prev)
+    }
 
     let tick1 = mold_tick()
         .move_tock(djin.bang)
@@ -88,6 +95,12 @@ test.only('generate canon', t=>{
         .fuzz( h2b('4c1f020b99fdd3'))
         .mold()
 
-    let out = djin.turn(memo_close([MemoType.SayTock, tock1]))
-    console.log(out)
+    let SO = MemoType.SayTock
+    let AO = MemoType.AskTock
+    let SA = MemoType.SayTack
+    let AA = MemoType.AskTack
+    send(SO, tock1)
+    want(SA, [mash(roll(tock1)), n2b(0)])
+
+    dub(JSON.stringify(rmap(trace, b2h), null, 2))
 })
