@@ -185,7 +185,14 @@ const runcase = (dir, name, full=false) => {
             if ('send' == func) {
                 let memo = rmap(cmd[1], h2b)
                 dbgmemo(memo_open(memo))
-                let val = djin.turn(memo)
+                let val
+                try {
+                    val = djin.turn(memo)
+                } catch (e) {
+                    console.error(e)
+                    t.fail(e.message)
+                    break
+                }
                 let out = memo_open(val)
                 prev = val
                 t.ok(true, `${name} send ${rmap(cmd[1], b2h)}`)
