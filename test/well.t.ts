@@ -64,7 +64,7 @@ test('form_tack', t=> {
     t.equal(ok, true, 'memo is well-formed')
     if (!ok) console.error(err.message)
 
-    m[1][0][1] = h2b('0000') // eye
+    m[1][1] = h2b('0000') // eye
     ;[ok, val, err] = form_memo(m)
     t.equal(ok, false, 'should fail')
     if (!ok) {
