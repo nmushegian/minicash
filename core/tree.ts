@@ -23,9 +23,9 @@ export { Tree, Twig }
 
 // The first type node is called a Leaf. This node type means there is only
 // one value with the given suffix from that point forward. The entire key
-// is copied because otherwise you end up with many duplicates that differ by
-// just one byte, it ends up saving space.
-// TODO: don't use RLP here, just slice a buffer
+// is copied so that you can use a single leaf node for all branches,
+// because otherwise you end up with many duplicates that differ by one byte,
+// so it actually saves space to put the whole key.
 type Leaf = [
     Blob // tag (leaf == 00)
   , Blob // key
@@ -41,12 +41,12 @@ function make_leaf(key :Blob, val :Blob) :Leaf {
 // The second is called a limb. This node represents that there are multiple
 // distinct keys whose prefix is equal to current search prefix, but different
 // from that point forward.
-// In this implementation the branching factor is 256. As a hack to save some space
-// the length of `subtrees` is only as long as needed for the largest value (TODO).
+// In this implementation the branching factor is 256.
 // Note that this representation doesn't have a way to represent "no next byte",
 // this still works because we know that all tree keys have the same length, so
 // you will never have a key that is a prefix of another key.
-// TODO: don't use RLP here, just slice a buffer
+// (TODO: As an easy hack to save some space the length of `subtrees` could be
+// only as long as needed for the largest value.)
 type Limb = [
     Blob   // tag (leaf == 01)
   , Snap[] // subtrees
@@ -57,7 +57,7 @@ function islimb(item :Roll) :boolean {
 function make_limb(subs :Snap[]) :Limb {
     return [h2b('01'), subs]
 }
-function show_limb(limb :Limb) {
+function show_limb(limb :Limb) { // debugging
     let obj = {}
     for (let [k,v] of Object.entries(limb[1])) {
         if (v.length != 0) {
@@ -71,7 +71,7 @@ class Twig {
     rite // the underlying rock dbtx
     diff // we don't push writes to db until end of tx, keep them cached
     snap // the snap this twig was initialized with respect to
-    _keysize // sanity check, remove later
+    _keysize // aver / sanity check, can remove later
     constructor(rite :Rite, snap :Snap, _keysize :number = 29) {
         this.rite = rite
         this.diff = new Map()
