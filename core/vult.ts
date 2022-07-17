@@ -37,7 +37,7 @@ function vult(tree :Tree, tock :Tock) :OpenMemo {
     let work // save for if we update `best`
     tree.rock.rite(r => {
         let prevwork = r.read(rkey('work', prevhash))
-        work = prevwork + tuff(tockhash)
+        work = bnum(prevwork) + tuff(tockhash)
         r.etch_work(tockhash, work)
     })
 

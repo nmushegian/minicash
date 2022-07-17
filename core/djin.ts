@@ -116,9 +116,7 @@ class Djin {
         })
         let next;
         this.tree.look(snap, (rock,twig) => {
-            console.log("GETTING PENT AT SNAP", b2h(snap), b2h(tail))
             let pentroll = twig.read(rkey('pent', tail, h2b('07')))
-            console.log("PENTROLL", pentroll)
             if (blen(pentroll) > 0) {
                 ;[ , next] = unroll(pentroll)
             }
