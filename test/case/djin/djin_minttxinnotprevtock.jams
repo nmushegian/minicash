@@ -1,4 +1,5 @@
 [
+  [ note "first tock just mint" ]
   [ send [ c0
     [ f60510a769d62eaf8535dc58f8dcccb1404415023e2196f1
       5360b8e3710edf2a8a0099075a43496452e5877e1c045e3d
@@ -37,6 +38,7 @@
       00000000000000 ]
   ]]
   [ want [ a0 553a368aabc15d6ad656cc446fdd7cbab5cd0000f6e0dd9a ]]
+  [ note "second tock: mint tx has txin that is not previous tockhash (should be 553a368aabc15d6ad656cc446fdd7cbab5cd0000f6e0dd9a)" ]
   [ send [ c0 
     [ 553a368aabc15d6ad656cc446fdd7cbab5cd0000f6e0dd9a
       2f02b876f5f0d736fca8881bc962e3eabc45baf66edfad66
