@@ -79,24 +79,27 @@ class Twig {
         this._keysize = _keysize
     }
 
+    // Note that the db key is `idx ++ hash` instead of `hash ++ idx` like we
+    // usually write a utxo. That's because in our simplified prefix tree this
+    // is substantially more efficient, because otherwise the entire key
+    // is turned into limbs. This is an optimization / implementation detail.
     etch_ment(hash :Mash, idx :Byte, code :Code, cash :Cash, pyre :Time) {
-        this.etch( rkey('ment', hash, idx),
+        this.etch( rkey('ment', idx, hash),
                    roll([ code, cash, pyre ]) )
     }
     read_ment(hash :Mash, idx :Byte) :null|[Code, Cash, Time] {
-        let blob = this.read(rkey('ment', hash, idx))
+        let blob = this.read(rkey('ment', idx, hash))
         if (blen(blob) == 0) {
             return null
         }
         return unroll(blob) as [Code, Cash, Time]
     }
-
     etch_pent(hash :Mash, idx :Byte, tish :Mash, tosh :Mash) {
-        this.etch( rkey('pent', hash, idx),
+        this.etch( rkey('pent', idx, hash),
                    roll([ tish, tosh ]) )
     }
     read_pent(hash :Mash, idx :Byte) :null|[Mash, Mash] {
-        let blob = this.read(rkey('pent', hash, idx))
+        let blob = this.read(rkey('pent', idx, hash))
         if (blen(blob) == 0) {
             return null
         }
