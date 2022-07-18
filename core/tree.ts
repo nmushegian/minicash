@@ -91,6 +91,18 @@ class Twig {
         return unroll(blob) as [Code, Cash, Time]
     }
 
+    etch_pent(hash :Mash, idx :Byte, tish :Mash, tosh :Mash) {
+        this.etch( rkey('pent', hash, idx),
+                   roll([ tish, tosh ]) )
+    }
+    read_pent(hash :Mash, idx :Byte) :null|[Mash, Mash] {
+        let blob = this.read(rkey('pent', hash, idx))
+        if (blen(blob) == 0) {
+            return null
+        }
+        return unroll(blob) as [Mash, Mash]
+    }
+
     read(key :Blob) :Blob {
         aver(_=> key.length == this._keysize, `panic: twig.read bad key size`)
         if (this.diff.has(b2h(key))) {
