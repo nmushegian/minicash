@@ -48,8 +48,8 @@ class Djin {
             rite.etch_work(banghash, tuff(bangroll))
             rite.etch_fold(banghash, 0, snap, 0)
             rite.etch_know(banghash, t2b('DV'))
-            twig.etch( rkey('ment', banghash, h2b('07')),
-                       roll([h2b(''), n2b(BigInt(2)**BigInt(53))]) )
+            twig.etch_ment(banghash, h2b('07'),
+                           h2b(''), n2b(BigInt(2) ** BigInt(53)), h2b(''))
         })
     }
 
@@ -116,9 +116,9 @@ class Djin {
         })
         let next;
         this.tree.look(snap, (rock,twig) => {
-            let pentroll = twig.read(rkey('pent', tail, h2b('07')))
-            if (blen(pentroll) > 0) {
-                ;[ , next] = unroll(pentroll)
+            let pent = twig.read_pent(tail, h2b('07'))
+            if (pent) {
+                ;[ ,next] = pent
             }
         })
         if (next) {
