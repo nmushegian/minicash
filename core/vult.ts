@@ -139,14 +139,16 @@ function vult(tree :Tree, tock :Tock) :OpenMemo {
                     // this pent can be used for getting the next tock, per-branch
                     //console.log("ETCHING PENT", b2h(prevhash), "AT SNAP", b2h(nextsnap), "key=", b2h(rkey('pent', prevhash, h2b('07'))), "tackidx", tack_idx)
                     twig.etch(rkey('pent', prevhash, h2b('07')), roll([tickhash, tockhash]))
-                    twig.etch(rkey('ment', tockhash, h2b('07')), roll([h2b(''), n2b(left), h2b('')]))
+                    twig.etch_ment(tockhash, h2b('07'), h2b(''), n2b(left), h2b(''))
+                    //twig.etch(rkey('ment', tockhash, h2b('07')), roll([h2b(''), n2b(left), h2b('')]))
                 } else {
                     // regular case, not a "mint" tick, simple exists-and-unspent check
-                    let ment = twig.read(rkey('ment', txin, idx))
+//                    let ment = twig.read(rkey('ment', txin, idx))
+                    let ment = twig.read_ment(txin, idx)
                     let pent = twig.read(rkey('pent', txin, idx))
-                    need(ment.length > 0, `invalid: no such ment exists: ${txin} ${idx}`)
+                    need(ment, `invalid: no such ment exists: ${txin} ${idx}`)
                     need(pent.length == 0, `invalid: ment already pent: ${b2h(txin)} ${b2h(idx)}`)
-                    let [code, cash, pyre] = unroll(ment)
+                    let [code, cash, pyre] = ment
                     need(bnum(time) < bnum(pyre as Blob), `invalid: expired ment ${txin} ${idx}`)
                     feenum += bnum(cash as Blob)
                     twig.etch(rkey('pent', txin, idx), roll([tickhash, tockhash]))

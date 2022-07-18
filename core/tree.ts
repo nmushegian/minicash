@@ -5,13 +5,13 @@ const dub = Debug('cash:tree')
 
 
 import {
-    Blob, bleq,
+    Blob, bleq, blen, extend,
     Roll, roll, unroll, rmap,
     Snap,
     bnum,
     b2h, h2b, t2b, n2b,
     aver, need, toss, err,
-    extend
+    Byte, Mash, Code, Cash, Time, // typed etch/read
 } from './word.js'
 
 import { Rock, Rite, rkey } from './rock.js'
@@ -78,6 +78,19 @@ class Twig {
         this.snap = snap
         this._keysize = _keysize
     }
+
+    etch_ment(hash :Mash, idx :Byte, code :Code, cash :Cash, pyre :Time) {
+        this.etch( rkey('ment', hash, idx),
+                   roll([ code, cash, pyre ]) )
+    }
+    read_ment(hash :Mash, idx :Byte) :null|[Code, Cash, Time] {
+        let blob = this.read(rkey('ment', hash, idx))
+        if (blen(blob) == 0) {
+            return null
+        }
+        return unroll(blob) as [Code, Cash, Time]
+    }
+
     read(key :Blob) :Blob {
         aver(_=> key.length == this._keysize, `panic: twig.read bad key size`)
         if (this.diff.has(b2h(key))) {
