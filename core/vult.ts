@@ -6,7 +6,7 @@ const dub = Debug('cash:vult')
 import {
     need, pass, fail, aver, err,
     Work, Snap, Fees, Know,
-    mash, tuff,
+    Mash, mash, tuff,
     Blob, bleq, blen, bcat, bnum, extend,
     roll, unroll,
     h2b, b2h, n2b, b2t, t2b,
@@ -130,30 +130,26 @@ function vult(tree :Tree, tock :Tock) :OpenMemo {
                     need( is_last_tick, `invalid: move has idx 7, but it isn't the last tick`)
                     need( bleq(txin, prevhash), `invalid: move has idx 7, but txin is not prevhash`)
                     // determine subsidy based on previous tock ment (1 / 2^21 of remaining)
-                    let prev_tock_ment = twig.read(rkey('ment', prevhash, h2b('07')))
-                    let [_, prev_left] = unroll(prev_tock_ment)
+                    let prev_tock_ment = twig.read_ment(prevhash, h2b('07'))
+                    aver(_=> prev_tock_ment, `panic: no previous tock ment`)
+                    let [_, prev_left] = prev_tock_ment as [Mash, Mash]
                     subsidy = bnum(prev_left as Blob) / (BigInt(2)**BigInt(21))
                     let left = bnum(prev_left as Blob) - subsidy
                     // the tockhash is a virtual UTXO that contains remaining subsidy
                     // this ment can be used for fast ancestor check, per-branch
                     // this pent can be used for getting the next tock, per-branch
-                    //console.log("ETCHING PENT", b2h(prevhash), "AT SNAP", b2h(nextsnap), "key=", b2h(rkey('pent', prevhash, h2b('07'))), "tackidx", tack_idx)
                     twig.etch_pent(prevhash, h2b('07'), tickhash, tockhash)
-//                    twig.etch(rkey('pent', prevhash, h2b('07')), roll([tickhash, tockhash]))
                     twig.etch_ment(tockhash, h2b('07'), h2b(''), n2b(left), h2b(''))
-                    //twig.etch(rkey('ment', tockhash, h2b('07')), roll([h2b(''), n2b(left), h2b('')]))
                 } else {
                     // regular case, not a "mint" tick, simple exists-and-unspent check
-//                    let ment = twig.read(rkey('ment', txin, idx))
                     let ment = twig.read_ment(txin, idx)
-//                    let pent = twig.read(rkey('pent', txin, idx))
                     let pent = twig.read_pent(txin, idx)
                     need(ment, `invalid: no such ment exists: ${txin} ${idx}`)
                     need(!pent, `invalid: ment already pent: ${b2h(txin)} ${b2h(idx)}`)
                     let [code, cash, pyre] = ment
                     need(bnum(time) < bnum(pyre as Blob), `invalid: expired ment ${txin} ${idx}`)
                     feenum += bnum(cash as Blob)
-                    twig.etch(rkey('pent', txin, idx), roll([tickhash, tockhash]))
+                    twig.etch_pent(txin, idx, tickhash, tockhash)
                 }
             })
 
@@ -164,18 +160,15 @@ function vult(tree :Tree, tock :Tock) :OpenMemo {
                 } else {
                     feenum -= bnum(cash)
                 }
-                let dupe = twig.read(rkey('ment', tickhash, n2b(BigInt(idx))))
-                need(dupe.length == 0, `invalid: this ment already exists`)
+                let dupe = twig.read_ment(tickhash, n2b(BigInt(idx)))
+                need(!dupe, `invalid: this ment already exists`)
                 let pyre = n2b(bnum(time) + BigInt(17 * 365.25 * 24 * 60 * 60))
-                twig.etch(rkey('ment', tickhash, n2b(BigInt(idx))), roll([code, cash, pyre]))
+                twig.etch_ment(tickhash, n2b(BigInt(idx)), code, cash, pyre)
             })
         })
 
-        //console.log(rite.find_max(rkey('fold', prevhash), 29), b2h(snap), b2h(nextsnap))
         rite.etch_fold(tockhash, bnum(tack_idx), nextsnap, feenum)
-        //console.log(rite.find_max(rkey('fold', prevhash), 29))
         if (is_last_tack) {
-            //console.log("SETTING DV")
             rite.etch_know(tockhash ,'DV')
             let prev_best = rite.read(rkey('best'))
             let best_work = rite.read(rkey('work', prev_best))
