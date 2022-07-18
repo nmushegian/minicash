@@ -48,10 +48,8 @@ class Djin {
             rite.etch_work(banghash, tuff(bangroll))
             rite.etch_fold(banghash, 0, snap, 0)
             rite.etch_know(banghash, t2b('DV'))
-//            twig.etch_ment(banghash, h2b('07'),
-//                           h2b('00'), n2b(BigInt(2)**BigInt(53)), n2b(BigInt(0)))
-            twig.etch( rkey('ment', h2b('07'), banghash),
-                       roll([h2b(''), n2b(BigInt(2)**BigInt(53))]) )
+            twig.etch_ment(banghash, h2b('07'),
+                           h2b(''), n2b(BigInt(2) ** BigInt(53)), h2b(''))
         })
     }
 
