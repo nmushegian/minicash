@@ -1,4 +1,6 @@
 [
+  [ note "fully vult a tock" ]
+  [ note "tock0 just mints some cash" ]
   [ send [ c0
     [ f60510a769d62eaf8535dc58f8dcccb1404415023e2196f1
        5360b8e3710edf2a8a0099075a43496452e5877e1c045e3d
@@ -37,6 +39,7 @@
        00000000000000 ]
   ]]
   [ want [ a0 553a368aabc15d6ad656cc446fdd7cbab5cd0000f6e0dd9a ]]
+  [ note "leave tock1 possibly-valid" ]
   [ send [ c0
     [ 553a368aabc15d6ad656cc446fdd7cbab5cd0000f6e0dd9a
        ffffffffffffffffffffffffffffffffffffffffffffffff

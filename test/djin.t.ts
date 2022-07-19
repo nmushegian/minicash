@@ -223,4 +223,4 @@ test('djin jams', t=>{
     cases.forEach(c => runcase(dir, c))
 })
 
-//runcase('./test/case/djin/', 'djin_realtx_dubspenddifftock_DVsibling.jams')
+//runcase('./test/case/djin/', 'djin_realtx_pvnotbest.jams')
