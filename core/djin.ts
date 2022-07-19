@@ -6,7 +6,7 @@ const dub = Debug('cash:djin')
 import {
     Okay, pass, fail, toss, aver, need, err,
     b2h, h2b, n2b, b2t, t2b,
-    Blob, bleq, blen, extend,
+    Blob, bleq, blen, bnum, extend,
     roll, unroll, rmap, islist,
     Mash, mash, tuff,
     Tick, Tack, Tock,
@@ -163,15 +163,19 @@ class Djin {
         let tock = body as Tock
         let prevhash = tock[0]
         let prevroll = this.rock.read_one(rkey('tock', prevhash))
+        let tockroll = roll(tock)
+        let tockhash = mash(tockroll)
 
         if (blen(prevroll) == 0) {
             return [MemoType.Err, [t2b('unavailable'), prevhash]]
         }
 
-        // TODO vinx here
+        let prev = unroll(prevroll) as Tock
+        let [ok, ] = vinx_tock(prev, tock)
+        if (!ok) {
+            return [MemoType.Err, [t2b('invalid'), tockhash]]
+        }
 
-        let tockroll = roll(tock)
-        let tockhash = mash(tockroll)
         this.rock.etch_one(rkey('tock', tockhash), tockroll)
 
         return vult(this.tree, tock)
@@ -180,12 +184,14 @@ class Djin {
     _say_tack(memo :MemoSayTack) :OpenMemo {
         let [line, body] = memo
         let tack = body as Tack
-
-        // TODO vinx here
-
-        let tock = tack[0]
-        let eye  = tack[1]
+        let [tock, eye, ribs, feet] = tack
         let tockhash = mash(roll(tock))
+
+        let [ok, ] = vinx_tack(tock, tack)
+        if (!ok) {
+            return [MemoType.Err, [t2b('invalid'), [tockhash, eye]]]
+        }
+
         this.rock.etch_one(rkey('tack', tockhash, eye), roll(tack))
 
         return vult(this.tree, tock)
@@ -196,7 +202,48 @@ class Djin {
         let ticks = body as Tick[]
         aver(_=> ticks.length <= 1024, `_say_ticks not split into chunks`)
 
-        // TODO vinx here
+        // vinx_tick check
+        // TODO refactor for clarity
+        let miss
+        try { // wrap in try b/c we throw to abort dbtx
+            this.rock.rite(r => { // todo readonly
+                ticks.forEach(tick => {
+                    let [moves, ments] = tick
+                    let conx = []
+                    moves.forEach(move => {
+                        let [txin, idx, sig] = move
+                        console.log('move', txin, idx, sig)
+                        if (bnum(idx) == BigInt(7)) {
+                            return // "continue" moves forEach
+                        }
+                        let conxroll = r.read(rkey('tick', txin))
+                        if (blen(conxroll) == 0) {
+                            miss = txin
+                            throw err('unavailable')
+                        }
+                        let conxtick = unroll(conxroll) as Tick
+                        conx.push(conxtick)
+                    })
+                    if (conx.length == 0) { // mint tick, TODO refactor for clarity
+                        return // "continue" ticks forEach
+                    }
+                    let [ok, ] = vinx_tick(conx, tick)
+                    if (!ok) {
+                        miss = tick
+                        throw err('invalid')
+                    }
+                })
+            })
+        } catch (e) {
+            if (e.message.startsWith('unavailable')) {
+                return [MemoType.Err, [t2b('unavailable'), miss]]
+            }
+            if (e.message.startsWith('invalid')) {
+                return [MemoType.Err, [t2b('invalid'), miss]]
+            }
+            throw e
+        }
+        // end vinx_tick check
 
         let outs = [] // rebroadcast any new ticks
         this.rock.rite(r => {
