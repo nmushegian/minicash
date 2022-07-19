@@ -200,11 +200,14 @@ const runcase = (dir, name, full=false) => {
             }
             if ('want' == func) {
                 debug(`want (actual=[${rmap(prev, b2h)}]) expected=[${cmd[1]}`)
-                debug(bleq(roll(rmap(cmd[1], flatten)), roll(prev)))
                 if (!bleq(roll(rmap(cmd[1], flatten)), roll(prev))) {
                     t.fail(`want fail expected=${cmd[1]} actual=${rmap(prev, b2h)}`)
                     break
                 }
+                continue
+            }
+            if ('note' == func) {
+                debug(b2t(cmd[1]))
                 continue
             }
             throw err(`unrecognized test command ${func}`)
@@ -220,4 +223,4 @@ test('djin jams', t=>{
     cases.forEach(c => runcase(dir, c))
 })
 
-//runcase('./test/case/djin/', 'djin_realtx_dubspenddifftock_DVsibling.jams')
+//runcase('./test/case/djin/', 'djin_realtx_pvnotbest.jams')
