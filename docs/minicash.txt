@@ -1,0 +1,136 @@
+Minicash
+
+A peer-to-peer electronic cash system with a tiny and finalized specification
+
+----
+
+Minicash is a proof-of-concept system, similar to Bitcoin, but much simpler.
+
+The most important concept is the power of a finalized specification.
+That means that no individual or entity can change what the definition of minicash is.
+If there is a fork of the chain with different rules, that system is something else, not minicash.
+
+In practice, a finalized system must be very simple. It needs to be so simple that almost everyone
+using it, and not just developers, can realistically memorize the entire thing.
+
+One good case study to understand spec finality is JSON. Even if W3C, which hosts the JSON spec,
+decided one day they wanted to change what JSON means, it would be ontologically impossible.
+There are way too many implementations of JSON parsers. Nobody who uses JSON in practice would
+accept a few individuals deciding they want to change the definition. They would just be ignored,
+and a persistent effort to redefine JSON would be viewed as an attack on common sense.
+JSON is JSON. If you want to propose a new format, you should name it something different, otherwise
+everyone will just think you are confused and don't know what you're talking about.
+
+----
+
+The choice of constants in minicash is ultimately arbitrary, and not up for discussion.
+
+----
+
+The definition of minicash depends on 3 external definitions:
+
+* RLP, for encoding
+* keccak256, for hashing
+* secp256k1, for signing
+
+---
+
+A minicash transaction is called a `tick`. A tick is an RLP-encoded list with 2 items:
+
+    tick = [moves, ments]
+
+The first is a list of inputs, called `move`s, and the second is a list of outputs, called `ment`s.
+A minicash tick can have at most 7 moves and 7 ments.
+
+A move is an RLP-encoded list with 3 items:
+
+    move = [txin, indx, sign]
+
+* A `txin` is an input tick hash, defined as the last 24 bytes of the hash of the RLP-encoded tick
+whose output is being spent.
+* An `indx` is the output index, this identifies which output of the tick identified by `txin` is being spent.
+* A `sign` is a signature. The definition of a signature check is given in the next section.
+
+
+A ment is an RLP-encoded list with 2 items:
+
+    ment = [code, cash]
+
+* A `code` is the last 20 bytes of the hash of a public key. See the signature check section for more details.
+* A `cash` is a 7-byte value indicating how much cash is in this ment.
+
+
+There is a special case for the "mint tick", which is the tick that contains the miner reward.
+
+* The mint tick must be the last tick in the tock.
+* The mint tick must have only 1 move.
+* * The move's `txin` refers to the prior *tock* hash, not a tick hash being spent.
+* * The move's `indx` must be 7. Note that regular ticks can only have an index from 0 to 6.
+* * The move's `sign` can be any 65-byte value, it does not need to be a valid signature.
+* The mint tick must have only 1 ment.
+* * The ment's `code` is a regular code, this is the miner's payout address.
+* * The ment's `cash` must equal total fees (cash in - cash out for each tick), plus the subsidy. See the "supply" section for details about subsidy distribution.
+
+
+---
+
+The minicash signature verification algorithm is defined by the following pseudocode.
+It is equivalent to `SIGHASH_ALL | ANYONECANPAY` checksig flags in Bitcoin.
+
+```
+# tick is the entire tick containing move whose signature is being checked
+# idx is the index of move whose signature we are checking
+# lock is the pubkeyhash (`code`) contained in output being spent
+fn checksig(tick, idx, lock):
+    [moves, ments] = tick   # get moves and ments from the tick
+    move = moves[idx]       # get the move for which we are checking sign
+    sign = moves[2]         # save the signature, we are going to mask it
+    move[2] = emptyblob     # replace the signature with an empty buffer
+    mask = rlp.encode( [
+        blob("minicash movement")   # a "domain separator", ascii encoded
+        [ move ]                    # a list containing the one masked move
+        ments                       # all ments from this tick
+    ] )
+    pubk = secp256k1.ecrecover(mask, sign) # ecrecover pubkey for this mask/sign
+    code = chop(keccak256(pubk), 20)       # the last 20 bytes of the pubkey's hash
+    return code == lock  # if the recovered pubkey's hash matches the lock, success
+```
+
+A minicash tick is called "valid-in-context" if it is well-formed
+and if the signature check passes for all inputs (unless it is the special mint tick,
+in which case the signature can be any 65-byte data).
+Note that this depends on the "context" being available -- if the context is not known,
+the tick cannot be validated.
+
+---
+
+A minicash block header is called a `tock`. A tick is an RLP-encoded list with 4 items:
+
+    tock = [prev, root, time, fuzz]
+
+* prev is the previous tock hash, the last 24 bytes of the keccak256 of the RLP-encoded previous tock
+* root is the merkle root of ticks in this tock -- see merkelization section for details
+* time is a 7-byte value containing the number of seconds that have passed since UTC _____
+* fuzz is a 7-byte value containing any data, it is the 'nonce' miners adjust to peform proof-of-work
+
+---
+
+A tock is defined as the block header, but we informally say a tock "has" the list of
+ticks which define the merkle root.
+
+A tock is valid if:
+
+* It has at most 2^17 ticks
+* Every tick is valid-in-context for a set of ticks that is in this tock, or an ancestor
+* Every move spends a ment that exists, and was not moved up to that point
+* The last tick in the tock is the mint tick, whose ment contains the total fees for that tock, plus the subsidy (see "supply" section for details on subsidy schedule).
+* The `time` value is exactly 57 seconds larger than previous tock.
+  (See discussion about tocktime for what this does and doesn't mean.)
+
+---
+
+The *marginal* work of a tock is defined as:
+
+The *cumulative* work for a tock is defined as the marginal work plus the previous tock's cumulative work.
+
+The correct minicash system state is defined by the *valid* tock with the most cumualtive work.
