@@ -54,43 +54,10 @@ const flatten = x => {
     return h2b(x)
 }
 
-/*
 test('djin', t=>{ try {
-    let djin = new Djin('test/db', true)
     let out
-    out = okay(djin.turn(memo(MemoType.AskTocks, mash(roll(djin.bang)))))
-    t.deepEqual(out, memo_close([MemoType.Err, ['unavailable', mash(roll(djin.bang))]]))
 
-    let tick1 = [[
-        [] // no moves
-    ],[
-        [h2b('00'.repeat(20)), h2b('00'.repeat(7))] // 1 ment with miner reward
-    ]]
-
-    let tack1 = [
-        undefined, // head
-        [], // eyes
-        [merk([mash(roll(tick1 as Tick))])],
-        [tick1],
-    ]
-
-    let tock1 = [
-        mash(roll(djin.bang)),
-        merk([mash(roll(tick1 as Tick))]),
-        h2b('00'.repeat(6) + '39'), // 57 in hex
-        h2b('ff'.repeat(7))
-    ]
-
-    tack1[0] = tock1
-
-    // give to djin
-    out = okay(djin.turn(memo(MemoType.SayTocks, [tock1])))
-    // djin asks for tack
-
-    t.deepEqual(out, memo(MemoType.AskTocks, mash(roll(tock1))))
-    djin.kill()
-
-    djin = new Djin('./test/db', true, true)
+    let djin = new Djin('./test/db', true)
     let seck = Buffer.from(keys.ali, 'hex')
     let keypair = ec.keyFromPrivate(seck)
     let pubkey = Buffer.from(keypair.getPublic().encodeCompressed())
@@ -106,10 +73,12 @@ test('djin', t=>{ try {
         extend(n2b(BigInt(57)), 7),
         h2b('00'.repeat(7))], h2b('00'), [], [mash(roll(prevmint))]
     ] as Tack
-    okay(djin.turn(memo_close([MemoType.SayTicks, [prevmint]])))
-    okay(djin.turn(memo_close([MemoType.SayTacks, [prevtack]])))
+    djin.turn(memo_close([MemoType.SayTock, prevtack[0]]))
+    djin.turn(memo_close([MemoType.SayTack, prevtack]))
+    djin.turn(memo_close([MemoType.SayTicks, [prevmint]]))
+    djin.turn(memo_close([MemoType.SayTock, prevtack[0]]))
 
-    let ticks = maketicks(mash(roll(prevmint)), bnum(h2b('100000000')), 3075)
+    let ticks = maketicks(mash(roll(prevmint)), bnum(h2b('100000000')), 1027)
     let mint = [
         [[mash(roll(prevtack[0])), h2b('07'), h2b('00'.repeat(65))]],
         [[h2b('11'.repeat(20)), h2b('000000fffff800')]]
@@ -120,8 +89,6 @@ test('djin', t=>{ try {
     let ribs = [
         merk(feet.slice(0, 1024)),
         merk(feet.slice(1024, 2048)),
-        merk(feet.slice(2048, 3072)),
-        merk(feet.slice(3072, 4096))
     ]
     let bigtock = [
         mash(roll(prevtack[0])),
@@ -133,41 +100,44 @@ test('djin', t=>{ try {
         bigtock,
         h2b('00'),
         ribs,
-        feet.slice(0, 2048)
+        feet.slice(0, 1024)
     ] as Tack
     let secondbigtack = [
         bigtock,
-        h2b('02'),
+        h2b('01'),
         ribs,
-        feet.slice(2048, 4096)
+        feet.slice(1024, 2048)
     ] as Tack
-    out = okay(djin.turn(memo_close([MemoType.SayTacks, [firstbigtack]])))
-    need(memo_open(out)[0] != MemoType.Err, 'say/tacks big chunks chunk0,1 returned error')
-    out = okay(djin.turn(memo_close([MemoType.SayTacks, [secondbigtack]])))
-    need(memo_open(out)[0] != MemoType.Err, 'say/tacks big chunks chunk2,3 returned error')
-    ticks.forEach(t => {
-        out = okay(djin.turn(memo_close([MemoType.SayTicks, [t]])))
-        need(memo_open(out)[0] != MemoType.Err, `say/ticks big chunks error ${rmap(t, b2h)}`)
-    })
-    out = okay(djin.turn(memo_close([MemoType.SayTocks, [bigtock]])))
-    need(memo_open(out)[0] != MemoType.Err, `say/tocks big chunks error ${rmap(bigtock, b2h)}`)
-    let expected = memo_close([MemoType.AskTocks, mash(roll(bigtock))])
-    t.ok(
-        bleq(roll(out), roll(expected)),
-        `vulted a whole tock w/ big chunks act: ${rmap(out, b2h)} exp: ${rmap(expected, b2h)}`
-    )
+
+    out = djin.turn(memo_close([MemoType.SayTock, bigtock]))
+    t.equal(memo_open(out)[0], MemoType.AskTack, `say/tocks big tack0 (init tock turn)`)
+    out = djin.turn(memo_close([MemoType.SayTack, firstbigtack]))
+    t.equal(memo_open(out)[0], MemoType.AskTicks, `say/tacks big tack0`)
+    t.ok(true, `first tack`)
+    out = djin.turn(memo_close([MemoType.SayTicks, ticks.slice(0, 1024)]))
+    t.equal(memo_open(out)[0], MemoType.SayTicks, `say/ticks big ticks0`)
+
+    out = djin.turn(memo_close([MemoType.SayTock, bigtock]))
+    t.equal(memo_open(out)[0], MemoType.AskTack, `say/tocks big tack1 (init tock turn)`)
+    out = djin.turn(memo_close([MemoType.SayTack, secondbigtack]))
+    t.equal(memo_open(out)[0], MemoType.AskTicks, `say/tacks big tack1`)
+    t.ok(true, `second tack ${rmap(out, b2h)}`)
+    out = djin.turn(memo_close([MemoType.SayTicks, ticks.slice(1024, 2048)]))
+    t.equal(memo_open(out)[0], MemoType.SayTicks, `say/ticks big ticks1`)
+
+    out = djin.turn(memo_close([MemoType.SayTock, bigtock]))
+    t.equal(memo_open(out)[0], MemoType.AskTock, `say/tocks big final vult`)
+
     t.ok(true, `first chunksize: ${firstbigtack[3].length}, second: ${secondbigtack[3].length}`)
 
-    out = okay(djin.turn(memo_close([MemoType.AskTacks, mash(roll(bigtock))])))
-    expected = memo_close([MemoType.SayTacks, [firstbigtack, secondbigtack]])
+    out = djin.turn(memo_close([MemoType.AskTack, [mash(roll(bigtock)), h2b('01')]]))
+    let expected = memo_close([MemoType.SayTack, secondbigtack])
     t.ok(
         bleq(roll(out), roll(expected)),
-        `ask/tacks big chunks ${out[0][0]} ${expected[0][0]}`
+        `ask/tacks big ${out[0][0]} ${expected[0][0]}`
     )
     djin.kill()
 } catch(e) { console.log(e); t.ok(false, e.message); }})
-
- */
 
 const runcase = (dir, name, full=false) => {
     if (!name.endsWith('.jams')) return
