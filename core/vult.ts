@@ -11,7 +11,7 @@ import {
     roll, unroll,
     h2b, b2h, n2b, b2t, t2b,
     Memo, memo, MemoType, OpenMemo,
-    Tick, Tock, Tack,
+    Tick, Tock, Tack, memo_close, rmap, MemoAskTack,
 } from './word.js'
 
 import { Tree, Twig } from './tree.js'
@@ -58,7 +58,7 @@ function vult(tree :Tree, tock :Tock) :OpenMemo {
         // it's in this tock, so next tack is last + 1
         dub('fold is in this tock')
         ;[snap, fees] = unroll(fold) // continue from partial fee total
-        tack_idx = n2b(bnum(foldkey[blen(foldkey) - 1]) + BigInt(1))
+        tack_idx = n2b(bnum(foldkey.slice(blen(foldkey) - 1)) + BigInt(1))
     } else {
         // it's in the prior tock, so next tack is this tock's tack 0
         dub('fold is in prior tock')
@@ -74,7 +74,7 @@ function vult(tree :Tree, tock :Tock) :OpenMemo {
     dub('next_tack', tockhash, tack_idx)
 
     // 2. Get the next tack to apply from db, or request it
-    let tackblob = tree.rock.read_one(rkey('tack', tockhash, Buffer.from([tack_idx])))
+    let tackblob = tree.rock.read_one(rkey('tack', tockhash, tack_idx))
     if (blen(tackblob) == 0) {
         dub(`don't have this tack, requesting it`)
         return [MemoType.AskTack, [tockhash, Buffer.from([tack_idx])]]
@@ -101,11 +101,12 @@ function vult(tree :Tree, tock :Tock) :OpenMemo {
         })
     })
     if (miss.length > 0) {
+        dub(`missing ticks, requesting them`)
         return [MemoType.AskTicks, miss]
     }
 
     // 4. apply the ticks
-    let out // for return value, b/c we have to commit db write before returning
+    let out : OpenMemo // for return value, b/c we have to commit db write before returning
     let feenum = bnum(fees)
     // exceptions starting with 'invalid' are intentional, and invalidate the tock
     // other exceptions are unintentional / panic, don't mark them invalid
@@ -113,7 +114,7 @@ function vult(tree :Tree, tock :Tock) :OpenMemo {
     try { tree.grow(snap, (rite,twig,nextsnap) => {
         ticks.forEach((tick,tick_idx) => {
             let tickhash = mash(roll(tick))
-            dub(`applying tick`, tick)
+            dub(`applying tick ${rmap(tick, b2h)}`)
             let moves = tick[0]
             let ments = tick[1]
             let is_last_tick = false // computed in moves loop, used in ments loop
@@ -145,7 +146,7 @@ function vult(tree :Tree, tock :Tock) :OpenMemo {
                     let ment = twig.read_ment(txin, idx)
                     let pent = twig.read_pent(txin, idx)
                     need(ment, `invalid: no such ment exists: ${txin} ${idx}`)
-                    need(!pent, `invalid: ment already pent: ${b2h(txin)} ${b2h(idx)}`)
+                    need(pent == null, `invalid: ment already pent: ${b2h(txin)} ${b2h(idx)}`)
                     let [code, cash, pyre] = ment
                     need(bnum(time) < bnum(pyre as Blob), `invalid: expired ment ${txin} ${idx}`)
                     feenum += bnum(cash as Blob)
@@ -177,7 +178,7 @@ function vult(tree :Tree, tock :Tock) :OpenMemo {
             }
             out = [MemoType.AskTock, tockhash]
         } else {
-            out = [MemoType.AskTack, tockhash, tack_idx + 1]
+            out = [MemoType.AskTack, [tockhash, n2b(bnum(tack_idx) + BigInt(1))]]
         }
     }) /* try tree.grow */ } catch (e) {
         dub('vult throw', e.message)
@@ -189,6 +190,6 @@ function vult(tree :Tree, tock :Tock) :OpenMemo {
             throw e
         }
     }
-    dub('vult success')
+    dub(`vult success ${b2h(tockhash)}`)
     return out
 }

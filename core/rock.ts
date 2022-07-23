@@ -9,7 +9,7 @@ import {
     b2t, t2b, h2b, n2b,
     Mash, mash,
     Work, Time, Cash, Know, Snap, Fees,
-    Tick, Tock,
+    Tick, Tock, b2h,
 } from './word.js'
 
 export {
@@ -173,7 +173,7 @@ class Rock {
         }
         console.log('opening', path)
         this.env = new lmdb.Env()
-        this.env.open({ path })
+        this.env.open({ path, mapSize: 2 ** 34 })
         this.dbi = this.env.openDbi({
             name: "testdb",
             keyIsBuffer: true,
