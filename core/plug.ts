@@ -20,11 +20,13 @@ class Plug {
     when( what:( (memo:Memo,back:((memo:Memo)=>void) )=>void) ) {
         this.socks.on('connection', sock => {
             sock.on(mail => {
-                let [_, memo] = mail // peer enforced in other transport types
+                // peer enforced in other transport types
+                // form_memo happens in dmon-managed threads
+                let [_, memo] = mail
                 what(memo, outs => {
                     for (let out of outs) {
                         let [oline, obody] = out as Memo;
-                        // respond, or disconnect
+                        // respond, or depending on error type, backoff/disconnect
                         sock.send([this.pubk, out])
                     }
                 })

@@ -14,7 +14,7 @@ export type {
     Sign, Pubk, Seck,
     Mash, Code, Cash,
     Tick, Tock, Tack,
-    Move, Ment,
+    Move, Ment, Mark,
     Know, Time,
     Snap, Fees, Work,
     Peer, Mail, Memo,
@@ -129,7 +129,7 @@ type Move = [
 // In the protocol spec they are separate items because it makes
 // no difference to the encoding and it is easier to specify.
 // These are the actual objects containing cash.
-//type Mark = Blob25
+type Mark = Blob25
 
 type Ment = [
     Code,  // pkeyhash
@@ -252,8 +252,9 @@ type MemoErr
   =  [MemoType.Err, Roll]              // typed reason, untyped subreason
 
 type Blob32 = Blob;
-type Blob20 = Blob;
+type Blob25 = Blob;
 type Blob24 = Blob;
+type Blob20 = Blob;
 type Blob8  = Blob;
 type Blob7  = Blob;
 type Blob1  = Blob;

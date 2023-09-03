@@ -1,16 +1,24 @@
+// simple block producer
+
+// One principle of minicash is that client developers should
+// cooperate on full nodes, and compete on pool nodes.
+// You want to make sure that all clients can efficiently process valid blocks you produce,
+// but you have no incentive to help other pools actually produce them.
+// You should not expect this pool code to produce full-sized blocks competitively.
+
+export { Pool }
+
 import {
     Djin
 } from './djin.js'
 
 import {
-    Plug
-} from './plug.js'
-
-import {
-    Tick, Tock,
+    err,
+    Tick, Tock, Tack,
+    Mark, Fuzz,
     Mash, Snap,
     mash, roll,
-    memo,
+    MemoType, memo_close,
     Hexs,
     h2b
 } from './word.js'
@@ -18,42 +26,42 @@ import {
 
 class Pool {
     djin :Djin
-    plug :Plug
 
-    bowl :Tick[]           // mempool
+    bowl :Tick[] // vinx'd
+    sunk :Tick[] // tock candidate's ticks
+    bush :{string:Tick} // candidate utxo set,  Mark -> contained in Tick
+    peak :{number:Tock} // best candidate tocks for given index in sink
+    part :{number:Tack} // tacks for given cycle
 
-    // each of these should be in per-candidate map, aka use a pure Tree
-    sink :Tick[]           // tock template
-    sunk :{string:boolean} // ticks in this sink back index
-    root :Mash   // active merk root
-    snap :Snap   // active UTXO set handle
-
-    best :Tock   // best pow for this cycle
-    roots :Map<Hexs,[Snap,number]>   // root -> [snap, fill.idx]  reverse index
-
-    constructor(djin, plug) {
+    constructor(djin) {
         this.djin = djin
-        this.plug = plug
     }
 
-    pool() {
-        this.plug.when((memo, back) => {
-            // ask/jobs
-            //   let job = [best.tock, fill.length]
-            // say/work
-            //   update best
-            // say/ticks ticks
-            //   this.snap = this.djin.tree.grow_twig(this.snap, twig => {
-            //      deque tick from bowl
-            //      let ok = vult_tick(twig, tick)
-            //      if (ok)
-            //         this.sink.push(tick)
-            //   })
-            //   root = remerk(this.sink)
-            //   roots[root] = this.snap
-            // say/tock tock
-            //   this.djin.turn(tock)
-        })
+    sink(ticks :Tick[]) {
+        let out = this.djin.turn(memo_close([MemoType.SayTicks, ticks]))
+        // filter ticks w/ unavailable conx
+        // now all ticks are vinx'd and in rock
+        this.bowl.push(...ticks)
+    }
+
+    cycl() {
+        // reset bush
+        // while have time:
+        //   deque from bowl
+        //   check for mark conflict in bush
+        //   update ment/pent in bush
+        //   if filled up a tack, prep it
+        //   update candidate
+        // vult best tock, return it for broadcast
+    }
+
+    jobs() :Tock {
+        // grab latest candidate tock
+        throw err(`todo pool.jobs`)
+    }
+
+    // update best work for a candidate
+    yell(job :Tock, better :Tock) {
     }
 
 }
